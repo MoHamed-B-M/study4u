@@ -1,28 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
-class Course {
+part 'models.g.dart';
+
+@HiveType(typeId: 0)
+class Course extends HiveObject {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String code;
+  @HiveField(2)
   final String name;
-  final IconData icon;
-  final Color color;
+  @HiveField(3)
+  final String room;
+  @HiveField(4)
+  final String startTime;
+  @HiveField(5)
+  final String endTime;
+  @HiveField(6)
+  final int colorValue;
 
   Course({
     required this.id,
     required this.code,
     required this.name,
-    required this.icon,
-    required this.color,
+    required this.room,
+    required this.startTime,
+    required this.endTime,
+    required this.colorValue,
   });
+
+  Color get color => Color(colorValue);
 }
 
-enum TaskUrgency { urgent, normal }
+@HiveType(typeId: 1)
+enum TaskUrgency {
+  @HiveField(0)
+  urgent,
+  @HiveField(1)
+  normal
+}
 
-class StudyTask {
+@HiveType(typeId: 2)
+class StudyTask extends HiveObject {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String title;
+  @HiveField(2)
   final DateTime dueDate;
+  @HiveField(3)
   final TaskUrgency urgency;
+  @HiveField(4)
   bool isCompleted;
 
   StudyTask({
@@ -34,56 +63,49 @@ class StudyTask {
   });
 }
 
-enum AttendanceStatus { present, absent, late, upcoming }
+@HiveType(typeId: 3)
+enum AttendanceStatus {
+  @HiveField(0)
+  present,
+  @HiveField(1)
+  absent,
+  @HiveField(2)
+  late,
+  @HiveField(3)
+  upcoming
+}
 
-class ScheduleItem {
+@HiveType(typeId: 4)
+class AttendanceRecord extends HiveObject {
+  @HiveField(0)
   final String id;
-  final String title;
-  final String subtitle;
-  final String timeRange;
-  final String room;
+  @HiveField(1)
+  final String courseId;
+  @HiveField(2)
+  final DateTime date;
+  @HiveField(3)
   final AttendanceStatus status;
-  final Color? color;
 
-  ScheduleItem({
+  AttendanceRecord({
     required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.timeRange,
-    required this.room,
-    this.status = AttendanceStatus.upcoming,
-    this.color,
+    required this.courseId,
+    required this.date,
+    required this.status,
   });
 }
 
-class AttendanceStats {
-  final int present;
-  final int absent;
-  final int late;
-  final double percentage;
+@HiveType(typeId: 5)
+class PomodoroSettings extends HiveObject {
+  @HiveField(0)
+  final int focusDuration;
+  @HiveField(1)
+  final int shortBreakDuration;
+  @HiveField(2)
+  final int longBreakDuration;
 
-  AttendanceStats({
-    required this.present,
-    required this.absent,
-    required this.late,
-    required this.percentage,
-  });
-}
-
-class SubjectPerformance {
-  final String name;
-  final double percentage;
-  final String grade;
-  final String lastUpdated;
-  final Color color;
-  final IconData icon;
-
-  SubjectPerformance({
-    required this.name,
-    required this.percentage,
-    required this.grade,
-    required this.lastUpdated,
-    required this.color,
-    required this.icon,
+  PomodoroSettings({
+    this.focusDuration = 25,
+    this.shortBreakDuration = 5,
+    this.longBreakDuration = 15,
   });
 }

@@ -2,109 +2,96 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/app_card.dart';
-import '../../shared/providers/mock_data.dart';
+import '../../shared/providers/logic_providers.dart';
 import '../../shared/models/models.dart';
-import 'package:intl/intl.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning, Tareq! 🌅';
+    if (hour < 17) return 'Good Afternoon, Tareq! ☀️';
+    return 'Good Evening, Tareq! 🌙';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final courses = ref.watch(mockCoursesProvider);
-    final tasks = ref.watch(mockTasksProvider);
+    final courses = ref.watch(courseListProvider);
+    final tasks = ref.watch(taskManagerProvider);
+    
+    // Logic for "Up Next" - simple simulation for now
+    final upNextCourse = courses.isNotEmpty ? courses.first : null;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: CircleAvatar(
-            backgroundColor: AppTheme.surfaceVariant,
-            backgroundImage: const NetworkImage('https://i.pravatar.cc/150?u=tareq'),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120.0,
+            floating: false,
+            pinned: true,
+            backgroundColor: AppTheme.background,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              title: FadeInDown(
+                child: Text(
+                  'stdy4u',
+                  style: GoogleFonts.outfit(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
+              const SizedBox(width: 8),
+            ],
           ),
-        ),
-        title: Text(
-          'stdy4u',
-          style: GoogleFonts.outfit(
-            color: AppTheme.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  FadeInLeft(
+                    child: Text(
+                      _getGreeting(),
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  FadeInLeft(
+                    delay: const Duration(milliseconds: 200),
+                    child: Text(
+                      'You have ${tasks.where((t) => !t.isCompleted).length} pending tasks for today.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (upNextCourse != null)
+                    _buildUpNextCard(context, upNextCourse),
+                  const SizedBox(height: 32),
+                  _buildSectionHeader(context, 'Current Courses', 'View all'),
+                  const SizedBox(height: 16),
+                  _buildCoursesList(courses),
+                  const SizedBox(height: 32),
+                  _buildSectionHeader(context, 'Due Tasks', null),
+                  const SizedBox(height: 16),
+                  _buildTasksList(ref, tasks),
+                  const SizedBox(height: 120),
+                ],
+              ),
+            ),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 24),
-            FadeInDown(
-              duration: const Duration(milliseconds: 500),
-              child: Text(
-                'Hello, Tareq! 👋',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            FadeInDown(
-              duration: const Duration(milliseconds: 600),
-              child: Text(
-                'Ready for your Electrical Circuit lab today?',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            FadeInUp(
-              duration: const Duration(milliseconds: 700),
-              child: _buildUpNextCard(context),
-            ),
-            const SizedBox(height: 32),
-            _buildSectionHeader(context, 'All Courses', 'View all'),
-            const SizedBox(height: 16),
-            ...List.generate(courses.length, (index) {
-              return FadeInRight(
-                duration: Duration(milliseconds: 400 + (index * 100)),
-                child: _buildCourseCard(context, courses[index]),
-              );
-            }),
-            const SizedBox(height: 32),
-            _buildSectionHeader(context, 'Due Tasks', null),
-            const SizedBox(height: 16),
-            ...List.generate(tasks.length, (index) {
-              return FadeInUp(
-                duration: Duration(milliseconds: 500 + (index * 100)),
-                child: _buildTaskCard(context, tasks[index]),
-              );
-            }),
-            const SizedBox(height: 100), // Space for FAB
-          ],
-        ),
-      ),
-      floatingActionButton: FadeInUp(
-        duration: const Duration(milliseconds: 800),
-        child: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: AppTheme.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: const Icon(Icons.add, size: 32),
-        ),
-      ),
+      floatingActionButton: _buildFAB(context),
     );
   }
 
@@ -112,234 +99,164 @@ class HomeScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        Text(title, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 20)),
         if (action != null)
           TextButton(
             onPressed: () {},
-            child: Text(
-              action,
-              style: GoogleFonts.plusJakartaSans(
-                color: AppTheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text(action, style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
           ),
       ],
     );
   }
 
-  Widget _buildUpNextCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearRouteGradient(
-          colors: [Color(0xFF006D36), Color(0xFF004D26)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppTheme.radiusXXL),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primary.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+  Widget _buildUpNextCard(BuildContext context, Course course) {
+    return FadeInUp(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppTheme.primary, Color(0xFF2DD4BF)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'UP NEXT',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              const Icon(Icons.bolt, color: Colors.white, size: 24),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Electrical Circuit Design 1 L',
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
+          borderRadius: BorderRadius.circular(AppTheme.radiusXXL),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'EEE182.4 • Lab Room 402',
-            style: GoogleFonts.plusJakartaSans(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              const Icon(Icons.access_time, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                '11:30 AM – 1:30 PM',
-                style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCourseCard(BuildContext context, Course course) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: course.color.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(course.icon, color: course.color),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    course.code,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    course.name,
-                    style: GoogleFonts.plusJakartaSans(
-                      color: AppTheme.onSurface.withOpacity(0.6),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: AppTheme.onSurface.withOpacity(0.3)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTaskCard(BuildContext context, StudyTask task) {
-    final isUrgent = task.urgency == TaskUrgency.urgent;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: AppCard(
-        padding: const EdgeInsets.all(20),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isUrgent ? const Color(0xFF006D36) : AppTheme.outlineVariant,
-                  width: 2,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(20)),
+                  child: const Text('UP NEXT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
                 ),
-              ),
+                const Icon(Icons.bolt, color: Colors.white),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          task.title,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isUrgent ? const Color(0xFFFFDAD6) : const Color(0xFFDEE8FF),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          isUrgent ? 'URGENT' : 'NORMAL',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: isUrgent ? const Color(0xFF93000A) : const Color(0xFF111C2D),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${DateFormat('EEEE, hh:mm a').format(task.dueDate).replaceAll(DateFormat('EEEE').format(task.dueDate), task.dueDate.day == DateTime.now().day ? 'Today' : 'Tomorrow')}',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: isUrgent ? Colors.red : AppTheme.onSurface.withOpacity(0.6),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 20),
+            Text(course.name, style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('${course.code} • ${course.room}', style: const TextStyle(color: Colors.white70)),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.access_time, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text('${course.startTime} - ${course.endTime}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
             ),
           ],
         ),
       ),
     );
   }
-}
 
-// LinearRouteGradient doesn't exist, I meant LinearGradient
-class LinearRouteGradient extends LinearGradient {
-  const LinearRouteGradient({
-    required super.colors,
-    super.begin = Alignment.centerLeft,
-    super.end = Alignment.centerRight,
-    super.stops,
-    super.tileMode = TileMode.clamp,
-    super.transform,
-  });
+  Widget _buildCoursesList(List<Course> courses) {
+    if (courses.isEmpty) return const Text('No courses added yet.');
+    return SizedBox(
+      height: 140,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: courses.length,
+        itemBuilder: (context, index) {
+          final course = courses[index];
+          return FadeInRight(
+            delay: Duration(milliseconds: 100 * index),
+            child: Container(
+              width: 160,
+              margin: const EdgeInsets.only(right: 16),
+              child: AppCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: course.color.withOpacity(0.1), shape: BoxShape.circle),
+                      child: Icon(Icons.book, color: course.color),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(course.code, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(course.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTasksList(WidgetRef ref, List<StudyTask> tasks) {
+    if (tasks.isEmpty) return const Text('Hooray! No pending tasks.');
+    return Column(
+      children: List.generate(tasks.length, (index) {
+        final task = tasks[index];
+        return FadeInUp(
+          delay: Duration(milliseconds: 100 * index),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: AppCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => ref.read(taskManagerProvider.notifier).toggleTask(task.id),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: task.isCompleted ? AppTheme.primary : Colors.transparent,
+                        border: Border.all(color: task.isCompleted ? AppTheme.primary : AppTheme.textPrimary.withOpacity(0.2), width: 2),
+                      ),
+                      child: task.isCompleted ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(task.title, style: TextStyle(fontWeight: FontWeight.w600, decoration: task.isCompleted ? TextDecoration.lineThrough : null)),
+                        const SizedBox(height: 4),
+                        Text(DateFormat('MMM dd, hh:mm a').format(task.dueDate), style: TextStyle(fontSize: 12, color: task.urgency == TaskUrgency.urgent ? AppTheme.error : null)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: task.urgency == TaskUrgency.urgent ? AppTheme.error.withOpacity(0.1) : AppTheme.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                    child: Text(task.urgency == TaskUrgency.urgent ? 'URGENT' : 'NORMAL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: task.urgency == TaskUrgency.urgent ? AppTheme.error : AppTheme.primary)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildFAB(BuildContext context) {
+    return FadeInUp(
+      child: FloatingActionButton.extended(
+        onPressed: () {},
+        backgroundColor: AppTheme.textPrimary,
+        label: const Text('Add Task', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        icon: const Icon(Icons.add, color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+    );
+  }
 }
