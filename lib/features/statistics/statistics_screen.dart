@@ -413,12 +413,12 @@ class StatisticsScreen extends ConsumerWidget {
                 gridData: const FlGridData(show: false),
                 titlesData: FlTitlesData(
                   show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(show: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(show: false)),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(show: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      show: true,
+                      showTitles: true,
                       reservedSize: 30,
                       interval: 1,
                       getTitlesWidget: (value, meta) {
