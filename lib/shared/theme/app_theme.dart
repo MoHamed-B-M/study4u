@@ -109,14 +109,12 @@ class AppTheme {
         color: onSurface,
       ),
     ),
-    cardTheme: CardThemeData(
-      color: AppColors.surfaceContainer,           // or whatever color you're using
-      elevation: 2,
+    cardTheme: CardTheme(
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28),   // matches your expressive design
+        borderRadius: BorderRadius.circular(radiusXL),
       ),
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.all(0),
+      color: surfaceContainerLowest,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
