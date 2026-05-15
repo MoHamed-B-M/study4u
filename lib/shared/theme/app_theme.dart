@@ -7,27 +7,27 @@ class AppTheme {
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color primaryContainer = Color(0xFF4ADE80);
   static const Color onPrimaryContainer = Color(0xFF005E2D);
-  
+
   static const Color secondary = Color(0xFF006B5F);
   static const Color onSecondary = Color(0xFFFFFFFF);
   static const Color secondaryContainer = Color(0xFF62FAE3);
   static const Color onSecondaryContainer = Color(0xFF007165);
-  
+
   static const Color tertiary = Color(0xFF795900);
   static const Color onTertiary = Color(0xFFFFFFFF);
   static const Color tertiaryContainer = Color(0xFFF6BB1F);
   static const Color onTertiaryContainer = Color(0xFF684C00);
-  
+
   static const Color background = Color(0xFFF9F9FF);
   static const Color onBackground = Color(0xFF111C2D);
   static const Color surface = Color(0xFFF9F9FF);
   static const Color onSurface = Color(0xFF111C2D);
   static const Color surfaceVariant = Color(0xFFD8E3FB);
   static const Color onSurfaceVariant = Color(0xFF3D4A3E);
-  
+
   static const Color outline = Color(0xFF6D7B6D);
   static const Color outlineVariant = Color(0xFFBCCABB);
-  
+
   static const Color error = Color(0xFFBA1A1A);
   static const Color onError = Color(0xFFFFFFFF);
   static const Color errorContainer = Color(0xFFFFDAD6);
@@ -109,12 +109,14 @@ class AppTheme {
         color: onSurface,
       ),
     ),
-    cardTheme: CardTheme(
-      elevation: 0,
+    cardTheme: CardThemeData(
+      color: AppColors.surfaceContainer,           // or whatever color you're using
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radiusXL),
+        borderRadius: BorderRadius.circular(28),   // matches your expressive design
       ),
-      color: surfaceContainerLowest,
+      clipBehavior: Clip.antiAlias,
+      margin: const EdgeInsets.all(0),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
