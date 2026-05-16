@@ -22,6 +22,21 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  void _markAttendance(String courseId, AttendanceStatus status) {
+    HapticFeedback.mediumImpact();
+    final day = _selectedDay ?? DateTime.now();
+    final id = '${courseId}_${day.year}${day.month.toString().padLeft(2, '0')}${day.day.toString().padLeft(2, '0')}';
+    ref.read(attendanceRepositoryProvider).markAttendance(
+      AttendanceRecordEntity(
+        id: id,
+        courseId: courseId,
+        date: day,
+        status: status,
+      ),
+    );
+    ref.read(dataRefreshProvider.notifier).state++;
+  }
+
   @override
   Widget build(BuildContext context) {
     final analytics = ref.watch(attendanceAnalyticsResultProvider);
@@ -62,7 +77,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
               style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             progressColor: analytics.isBelowThreshold ? AppTheme.error : Theme.of(context).colorScheme.primary,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             circularStrokeCap: CircularStrokeCap.round,
             animation: true,
           ),
@@ -151,7 +166,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Color(course.colorValue).withOpacity(0.1),
+                      color: Color(course.colorValue).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.school, color: Color(course.colorValue)),
@@ -170,11 +185,12 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
                       ],
                     ),
                   ),
-                  Row(
+                  const SizedBox(width: 8),
+                  Column(
                     children: [
-                      _buildStatusIcon(course.id, AttendanceStatus.present, Icons.check_circle, Theme.of(context).colorScheme.primary),
-                      const SizedBox(width: 8),
-                      _buildStatusIcon(course.id, AttendanceStatus.absent, Icons.cancel, AppTheme.error),
+                      _buildActionChip('Present', Icons.check_circle, Theme.of(context).colorScheme.primary, () => _markAttendance(course.id, AttendanceStatus.present)),
+                      const SizedBox(height: 6),
+                      _buildActionChip('Late', Icons.access_time, AppTheme.tertiary, () => _markAttendance(course.id, AttendanceStatus.late)),
                     ],
                   ),
                 ],
@@ -186,24 +202,25 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
     );
   }
 
-  Widget _buildStatusIcon(String courseId, AttendanceStatus status, IconData icon, Color color) {
+  Widget _buildActionChip(String label, IconData icon, Color color, VoidCallback onTap) {
     return InkWell(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        ref.read(attendanceRepositoryProvider).markAttendance(
-          AttendanceRecordEntity(
-            id: '${courseId}_${DateTime.now().year}${DateTime.now().month}${DateTime.now().day}',
-            courseId: courseId,
-            date: _selectedDay ?? DateTime.now(),
-            status: status,
-          ),
-        );
-        ref.read(dataRefreshProvider.notifier).state++;
-      },
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
-        child: Icon(icon, color: color, size: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 14),
+            const SizedBox(width: 4),
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+          ],
+        ),
       ),
     );
   }

@@ -18,9 +18,9 @@ class AppTheme {
   static const double radiusPill = 9999.0;
   static const double standardPadding = 24.0;
 
-  static ThemeData lightTheme(Color seed, {bool dynamicColor = true}) {
-    final scheme = dynamicColor
-        ? ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light)
+  static ThemeData lightTheme(Color seed, {bool dynamicColor = true, ColorScheme? dynamicScheme}) {
+    final scheme = dynamicColor && dynamicScheme != null
+        ? dynamicScheme
         : ColorScheme.fromSeed(
             seedColor: seed,
             brightness: Brightness.light,
@@ -49,9 +49,9 @@ class AppTheme {
     );
   }
 
-  static ThemeData darkTheme(Color seed, {bool dynamicColor = true}) {
-    final scheme = dynamicColor
-        ? ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark)
+  static ThemeData darkTheme(Color seed, {bool dynamicColor = true, ColorScheme? dynamicScheme}) {
+    final scheme = dynamicColor && dynamicScheme != null
+        ? dynamicScheme
         : ColorScheme.fromSeed(
             seedColor: seed,
             brightness: Brightness.dark,

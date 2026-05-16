@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/local_storage.dart';
 import '../../data/models/app_settings.dart';
 import '../../data/repositories/settings_repo_impl.dart';
-import 'app_theme.dart';
 
 final settingsRepositoryProvider = Provider((ref) => SettingsRepositoryImpl());
 
@@ -21,15 +20,6 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
     default:
       return ThemeMode.system;
   }
-});
-
-final themeDataProvider = Provider<ThemeData>((ref) {
-  final s = ref.watch(settingsProvider);
-  final isDark = ref.watch(themeModeProvider) == ThemeMode.dark ||
-      (ref.watch(themeModeProvider) == ThemeMode.system &&
-          WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
-  final color = Color(s.primaryColorValue);
-  return isDark ? AppTheme.darkTheme(color, dynamicColor: s.useDynamicColor) : AppTheme.lightTheme(color, dynamicColor: s.useDynamicColor);
 });
 
 class SettingsNotifier extends StateNotifier<AppSettings> {
