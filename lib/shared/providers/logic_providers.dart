@@ -16,14 +16,16 @@ final cgpaCalculatorProvider = Provider((ref) => CgpaCalculatorUseCase());
 final attendanceAnalyticsProvider = Provider((ref) => AttendanceAnalyticsUseCase());
 final scheduleOptimizerProvider = Provider((ref) => ScheduleOptimizerUseCase());
 
+final dataRefreshProvider = StateProvider<int>((ref) => 0);
+
 final courseListProvider = Provider<List<CourseEntity>>((ref) {
-  final repo = ref.watch(courseRepositoryProvider);
-  return repo.getCourses();
+  ref.watch(dataRefreshProvider);
+  return ref.watch(courseRepositoryProvider).getCourses();
 });
 
 final taskListProvider = Provider<List<TaskEntity>>((ref) {
-  final repo = ref.watch(taskRepositoryProvider);
-  return repo.getTasks();
+  ref.watch(dataRefreshProvider);
+  return ref.watch(taskRepositoryProvider).getTasks();
 });
 
 final pendingTaskCountProvider = Provider<int>((ref) {
@@ -32,8 +34,8 @@ final pendingTaskCountProvider = Provider<int>((ref) {
 });
 
 final attendanceRecordsProvider = Provider<List<AttendanceRecordEntity>>((ref) {
-  final repo = ref.watch(attendanceRepositoryProvider);
-  return repo.getRecords();
+  ref.watch(dataRefreshProvider);
+  return ref.watch(attendanceRepositoryProvider).getRecords();
 });
 
 final attendanceAnalyticsResultProvider = Provider<AttendanceAnalyticsResult>((ref) {
