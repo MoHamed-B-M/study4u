@@ -198,6 +198,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
             status: status,
           ),
         );
+        ref.read(dataRefreshProvider.notifier).state++;
       },
       child: Container(
         padding: const EdgeInsets.all(8),

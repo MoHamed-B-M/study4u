@@ -36,6 +36,8 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             _buildThemeSection(context, ref, settings),
             const SizedBox(height: 24),
+            _buildDynamicColorSection(context, ref, settings),
+            const SizedBox(height: 24),
             _buildColorSection(context, ref, settings),
             const SizedBox(height: 24),
             _buildNotificationSection(context, ref, settings),
@@ -90,6 +92,34 @@ class SettingsScreen extends ConsumerWidget {
             onChanged: (v) {
               HapticFeedback.selectionClick();
               ref.read(settingsProvider.notifier).setThemeMode(v!);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDynamicColorSection(BuildContext context, WidgetRef ref, AppSettings settings) {
+    return AppCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Material You', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(
+            'Use dynamic color from your device wallpaper',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          SwitchListTile(
+            title: const Text('Dynamic Colors'),
+            subtitle: const Text('Match your system theme'),
+            value: settings.useDynamicColor,
+            activeColor: Theme.of(context).colorScheme.primary,
+            contentPadding: EdgeInsets.zero,
+            onChanged: (v) {
+              HapticFeedback.selectionClick();
+              ref.read(settingsProvider.notifier).setUseDynamicColor(v);
             },
           ),
         ],

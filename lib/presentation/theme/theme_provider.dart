@@ -12,8 +12,8 @@ final settingsProvider = StateNotifierProvider<SettingsNotifier, AppSettings>((r
 });
 
 final themeModeProvider = Provider<ThemeMode>((ref) {
-  final settings = ref.watch(settingsProvider);
-  switch (settings.themeMode) {
+  final s = ref.watch(settingsProvider);
+  switch (s.themeMode) {
     case 'dark':
       return ThemeMode.dark;
     case 'light':
@@ -24,76 +24,50 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 });
 
 final themeDataProvider = Provider<ThemeData>((ref) {
-  final settings = ref.watch(settingsProvider);
+  final s = ref.watch(settingsProvider);
   final isDark = ref.watch(themeModeProvider) == ThemeMode.dark ||
       (ref.watch(themeModeProvider) == ThemeMode.system &&
           WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
-  final color = Color(settings.primaryColorValue);
-  return isDark ? AppTheme.darkTheme(color) : AppTheme.lightTheme(color);
+  final color = Color(s.primaryColorValue);
+  return isDark ? AppTheme.darkTheme(color, dynamicColor: s.useDynamicColor) : AppTheme.lightTheme(color, dynamicColor: s.useDynamicColor);
 });
 
 class SettingsNotifier extends StateNotifier<AppSettings> {
   SettingsNotifier() : super(LocalStorage.appSettingsBox.get('default') ?? AppSettings());
 
-  void setThemeMode(String mode) {
-    final updated = AppSettings(
+  AppSettings _copy({
+    int? primaryColorValue,
+    String? themeMode,
+    bool? notificationEnabled,
+    String? userName,
+    bool? onboardingComplete,
+    bool? useDynamicColor,
+  }) {
+    return AppSettings(
       id: state.id,
-      primaryColorValue: state.primaryColorValue,
-      themeMode: mode,
-      notificationEnabled: state.notificationEnabled,
-      userName: state.userName,
+      primaryColorValue: primaryColorValue ?? state.primaryColorValue,
+      themeMode: themeMode ?? state.themeMode,
+      notificationEnabled: notificationEnabled ?? state.notificationEnabled,
+      userName: userName ?? state.userName,
+      onboardingComplete: onboardingComplete ?? state.onboardingComplete,
+      useDynamicColor: useDynamicColor ?? state.useDynamicColor,
     );
+  }
+
+  void _saveAndUpdate(AppSettings updated) {
     LocalStorage.appSettingsBox.put('default', updated);
     state = updated;
   }
 
-  void setPrimaryColor(int value) {
-    final updated = AppSettings(
-      id: state.id,
-      primaryColorValue: value,
-      themeMode: state.themeMode,
-      notificationEnabled: state.notificationEnabled,
-      userName: state.userName,
-    );
-    LocalStorage.appSettingsBox.put('default', updated);
-    state = updated;
-  }
+  void setThemeMode(String mode) => _saveAndUpdate(_copy(themeMode: mode));
 
-  void setNotificationEnabled(bool enabled) {
-    final updated = AppSettings(
-      id: state.id,
-      primaryColorValue: state.primaryColorValue,
-      themeMode: state.themeMode,
-      notificationEnabled: enabled,
-      userName: state.userName,
-    );
-    LocalStorage.appSettingsBox.put('default', updated);
-    state = updated;
-  }
+  void setPrimaryColor(int value) => _saveAndUpdate(_copy(primaryColorValue: value));
 
-  void setUserName(String name) {
-    final updated = AppSettings(
-      id: state.id,
-      primaryColorValue: state.primaryColorValue,
-      themeMode: state.themeMode,
-      notificationEnabled: state.notificationEnabled,
-      userName: name,
-      onboardingComplete: state.onboardingComplete,
-    );
-    LocalStorage.appSettingsBox.put('default', updated);
-    state = updated;
-  }
+  void setNotificationEnabled(bool enabled) => _saveAndUpdate(_copy(notificationEnabled: enabled));
 
-  void setOnboardingComplete(bool value) {
-    final updated = AppSettings(
-      id: state.id,
-      primaryColorValue: state.primaryColorValue,
-      themeMode: state.themeMode,
-      notificationEnabled: state.notificationEnabled,
-      userName: state.userName,
-      onboardingComplete: value,
-    );
-    LocalStorage.appSettingsBox.put('default', updated);
-    state = updated;
-  }
+  void setUserName(String name) => _saveAndUpdate(_copy(userName: name));
+
+  void setOnboardingComplete(bool value) => _saveAndUpdate(_copy(onboardingComplete: value));
+
+  void setUseDynamicColor(bool value) => _saveAndUpdate(_copy(useDynamicColor: value));
 }

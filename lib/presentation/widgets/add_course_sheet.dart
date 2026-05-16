@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
-import '../../core/constants/app_constants.dart';
 import '../../domain/entities/course.dart';
 import '../../shared/providers/logic_providers.dart';
 import '../theme/app_theme.dart';
@@ -88,6 +87,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
     );
 
     ref.read(courseRepositoryProvider).addCourse(course);
+    ref.read(dataRefreshProvider.notifier).state++;
     Navigator.of(context).pop();
   }
 
