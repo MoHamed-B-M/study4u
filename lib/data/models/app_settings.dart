@@ -14,6 +14,8 @@ class AppSettings extends HiveObject {
   final bool notificationEnabled;
   @HiveField(4)
   final String userName;
+  @HiveField(5)
+  final bool onboardingComplete;
 
   AppSettings({
     this.id = 'default',
@@ -21,5 +23,6 @@ class AppSettings extends HiveObject {
     this.themeMode = 'system',
     this.notificationEnabled = true,
     this.userName = '',
+    this.onboardingComplete = false,
   });
 }

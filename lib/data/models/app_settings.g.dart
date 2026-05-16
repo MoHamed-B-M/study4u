@@ -22,13 +22,14 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       themeMode: fields[2] as String,
       notificationEnabled: fields[3] as bool,
       userName: fields[4] as String,
+      onboardingComplete: fields[5] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(3)
       ..write(obj.notificationEnabled)
       ..writeByte(4)
-      ..write(obj.userName);
+      ..write(obj.userName)
+      ..writeByte(5)
+      ..write(obj.onboardingComplete);
   }
 
   @override
