@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/entities/task.dart';
@@ -69,15 +70,16 @@ class HomeScreen extends ConsumerWidget {
                   Text(
                     '$greeting!',
                     style: Theme.of(context).textTheme.headlineMedium,
-                  ),
+                  ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.2),
                   const SizedBox(height: 4),
                   Text(
                     'You have $pendingCount pending tasks.',
                     style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideX(begin: 0.2),
                   const SizedBox(height: 24),
                   if (upNext.hasNext && upNext.course != null)
-                    _buildUpNextCard(context, upNext.course!),
+                    _buildUpNextCard(context, upNext.course!)
+                        .animate().fadeIn(duration: 500.ms).slideY(begin: 0.3),
                   const SizedBox(height: 32),
                   _buildSectionHeader(context, 'Current Courses', 'View all'),
                   const SizedBox(height: 16),
@@ -112,53 +114,59 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildUpNextCard(BuildContext context, CourseEntity course) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.secondary,
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        context.push('/course/${course.id}');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(AppTheme.radiusXXL),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(AppTheme.radiusXXL),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(20)),
-                child: const Text('UP NEXT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1)),
-              ),
-              const Icon(Icons.bolt, color: Colors.white),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(course.name, style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text('${course.code} • ${course.room}', style: const TextStyle(color: Colors.white70)),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              const Icon(Icons.access_time, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
-              Text('${course.startTime} - ${course.endTime}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(20)),
+                  child: const Text('UP NEXT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1)),
+                ),
+                const Icon(Icons.bolt, color: Colors.white),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(course.name, style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('${course.code} • ${course.room}', style: const TextStyle(color: Colors.white70)),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.access_time, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text('${course.startTime} - ${course.endTime}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -175,23 +183,32 @@ class HomeScreen extends ConsumerWidget {
           return Container(
             width: 160,
             margin: const EdgeInsets.only(right: 16),
-            child: AppCard(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Color(course.colorValue).withOpacity(0.1), shape: BoxShape.circle),
-                    child: Icon(Icons.book, color: Color(course.colorValue)),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(course.code, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(course.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                ],
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                context.push('/course/${course.id}');
+              },
+              child: AppCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Hero(
+                      tag: 'course-icon-${course.id}',
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: Color(course.colorValue).withValues(alpha: 0.1), shape: BoxShape.circle),
+                        child: Icon(Icons.book, color: Color(course.colorValue)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(course.code, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(course.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
               ),
             ),
-          );
+          ).animate().fadeIn(duration: 400.ms, delay: (index * 100).ms).slideX(begin: 0.2);
         },
       ),
     );
@@ -214,7 +231,9 @@ class HomeScreen extends ConsumerWidget {
                     ref.read(taskRepositoryProvider).toggleTask(task.id);
                     ref.read(dataRefreshProvider.notifier).state++;
                   },
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: 300.ms,
+                    curve: Curves.easeInOut,
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
@@ -246,7 +265,7 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
           ),
-        );
+        ).animate().fadeIn(duration: 300.ms, delay: (index * 80).ms).slideX(begin: 0.2);
       }),
     );
   }
