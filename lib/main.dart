@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'data/datasources/local_storage.dart';
-import 'data/models/app_settings.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/theme_provider.dart';
 import 'presentation/features/home/home_screen.dart';
@@ -22,22 +21,12 @@ void main() async {
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
-final _onboardingListenable = ValueNotifier<bool>(
-  LocalStorage.appSettingsBox.get('default')?.onboardingComplete ?? false,
-);
 
-GoRouter _buildRouter() {
-  return GoRouter(
-    initialLocation: _onboardingListenable.value ? '/' : '/onboarding',
+final routerProvider = Provider<GoRouter>((ref) {
+  final onboarded = ref.watch(settingsProvider.select((s) => s.onboardingComplete));
+  final router = GoRouter(
+    initialLocation: onboarded ? '/' : '/onboarding',
     navigatorKey: _rootNavigatorKey,
-    refreshListenable: _onboardingListenable,
-    redirect: (context, state) {
-      final onboarded = _onboardingListenable.value;
-      final isOnboarding = state.matchedLocation == '/onboarding';
-      if (!onboarded && !isOnboarding) return '/onboarding';
-      if (onboarded && isOnboarding) return '/';
-      return null;
-    },
     routes: [
       GoRoute(
         path: '/onboarding',
@@ -71,15 +60,6 @@ GoRouter _buildRouter() {
       ),
     ],
   );
-}
-
-final routerProvider = Provider<GoRouter>((ref) {
-  ref.listen(settingsProvider, (prev, next) {
-    if (prev?.onboardingComplete != next.onboardingComplete) {
-      _onboardingListenable.value = next.onboardingComplete;
-    }
-  });
-  final router = _buildRouter();
   ref.onDispose(() => router.dispose());
   return router;
 });
