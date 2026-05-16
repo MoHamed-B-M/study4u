@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'data/datasources/local_storage.dart';
 import 'data/models/app_settings.dart';
 import 'presentation/theme/app_theme.dart';
@@ -27,14 +26,8 @@ final _onboardingListenable = ValueNotifier<bool>(
   LocalStorage.appSettingsBox.get('default')?.onboardingComplete ?? false,
 );
 
-final routerProvider = Provider<GoRouter>((ref) {
-  ref.listen(settingsProvider, (prev, next) {
-    if (prev?.onboardingComplete != next.onboardingComplete) {
-      _onboardingListenable.value = next.onboardingComplete;
-    }
-  });
-
-  final router = GoRouter(
+GoRouter _buildRouter() {
+  return GoRouter(
     initialLocation: _onboardingListenable.value ? '/' : '/onboarding',
     navigatorKey: _rootNavigatorKey,
     refreshListenable: _onboardingListenable,
@@ -78,7 +71,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+}
 
+final routerProvider = Provider<GoRouter>((ref) {
+  ref.listen(settingsProvider, (prev, next) {
+    if (prev?.onboardingComplete != next.onboardingComplete) {
+      _onboardingListenable.value = next.onboardingComplete;
+    }
+  });
+  final router = _buildRouter();
   ref.onDispose(() => router.dispose());
   return router;
 });
@@ -88,30 +89,26 @@ class Stdy4uApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(settingsProvider);
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
-    final s = ref.watch(settingsProvider);
     final seedColor = Color(s.primaryColorValue);
+    final useDynamic = s.useDynamicColor;
 
-    return DynamicColorBuilder(
-      builder: (lightDynamic, darkDynamic) {
-        final useDynamic = s.useDynamicColor;
-        final theme = useDynamic && lightDynamic != null
-            ? AppTheme.lightTheme(seedColor, dynamicColor: true, dynamicScheme: lightDynamic)
-            : AppTheme.lightTheme(seedColor, dynamicColor: false);
-        final darkTheme = useDynamic && darkDynamic != null
-            ? AppTheme.darkTheme(seedColor, dynamicColor: true, dynamicScheme: darkDynamic)
-            : AppTheme.darkTheme(seedColor, dynamicColor: false);
+    final theme = useDynamic
+        ? AppTheme.lightTheme(seedColor, dynamicColor: true)
+        : AppTheme.lightTheme(seedColor, dynamicColor: false);
+    final darkTheme = useDynamic
+        ? AppTheme.darkTheme(seedColor, dynamicColor: true)
+        : AppTheme.darkTheme(seedColor, dynamicColor: false);
 
-        return MaterialApp.router(
-          title: 'stdy4u',
-          debugShowCheckedModeBanner: false,
-          theme: theme,
-          darkTheme: darkTheme,
-          themeMode: themeMode,
-          routerConfig: router,
-        );
-      },
+    return MaterialApp.router(
+      title: 'stdy4u',
+      debugShowCheckedModeBanner: false,
+      theme: theme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
+      routerConfig: router,
     );
   }
 }

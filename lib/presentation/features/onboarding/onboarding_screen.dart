@@ -68,7 +68,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -159,7 +159,9 @@ class _OnboardingPageState extends State<_OnboardingPage>
       begin: const Offset(0, 0.1),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic));
-    if (widget.isActive) _animCtrl.forward();
+    if (widget.isActive) {
+      _animCtrl.value = 1;
+    }
   }
 
   @override
@@ -179,73 +181,71 @@ class _OnboardingPageState extends State<_OnboardingPage>
   @override
   Widget build(BuildContext context) {
     final slide = widget.slide;
-    return AnimatedBuilder(
-      animation: _animCtrl,
-      builder: (context, _) {
-        return Opacity(
-          opacity: _fadeAnim.value,
-          child: Transform.translate(
-            offset: _slideAnim.value,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(flex: 2),
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: slide.color.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(slide.icon, size: 56, color: slide.color),
-                  ),
-                  const SizedBox(height: 40),
-                  Text(
-                    slide.title,
-                    style: GoogleFonts.outfit(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    slide.subtitle,
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: slide.color,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    slide.description,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Spacer(flex: 3),
-                  _buildDots(context),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: widget.currentIndex == widget.totalPages - 1
-                        ? GradientButton(
-                            label: 'Get Started',
-                            icon: Icons.rocket_launch,
-                            onPressed: widget.onDone,
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+    final opacity = widget.isActive ? _fadeAnim.value : 1.0;
+    final offset = widget.isActive ? _slideAnim.value : Offset.zero;
+
+    return Opacity(
+      opacity: opacity,
+      child: Transform.translate(
+        offset: offset,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: slide.color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(slide.icon, size: 56, color: slide.color),
               ),
-            ),
+              const SizedBox(height: 40),
+              Text(
+                slide.title,
+                style: GoogleFonts.outfit(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                slide.subtitle,
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: slide.color,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                slide.description,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
+                textAlign: TextAlign.center,
+              ),
+              const Spacer(flex: 3),
+              _buildDots(context),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: widget.currentIndex == widget.totalPages - 1
+                    ? GradientButton(
+                        label: 'Get Started',
+                        icon: Icons.rocket_launch,
+                        onPressed: widget.onDone,
+                      )
+                    : const SizedBox.shrink(),
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
