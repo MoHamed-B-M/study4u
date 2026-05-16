@@ -24,13 +24,17 @@ class CourseAdapter extends TypeAdapter<Course> {
       startTime: fields[4] as String,
       endTime: fields[5] as String,
       colorValue: fields[6] as int,
+      targetGrade: fields[7] as double,
+      currentGrade: fields[8] as double,
+      creditHours: fields[9] as double,
+      scheduleJson: fields[10] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Course obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,7 +48,15 @@ class CourseAdapter extends TypeAdapter<Course> {
       ..writeByte(5)
       ..write(obj.endTime)
       ..writeByte(6)
-      ..write(obj.colorValue);
+      ..write(obj.colorValue)
+      ..writeByte(7)
+      ..write(obj.targetGrade)
+      ..writeByte(8)
+      ..write(obj.currentGrade)
+      ..writeByte(9)
+      ..write(obj.creditHours)
+      ..writeByte(10)
+      ..write(obj.scheduleJson);
   }
 
   @override
@@ -74,13 +86,16 @@ class StudyTaskAdapter extends TypeAdapter<StudyTask> {
       dueDate: fields[2] as DateTime,
       urgency: fields[3] as TaskUrgency,
       isCompleted: fields[4] as bool,
+      courseId: fields[5] as String,
+      content: fields[6] as String,
+      type: fields[7] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, StudyTask obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -90,7 +105,13 @@ class StudyTaskAdapter extends TypeAdapter<StudyTask> {
       ..writeByte(3)
       ..write(obj.urgency)
       ..writeByte(4)
-      ..write(obj.isCompleted);
+      ..write(obj.isCompleted)
+      ..writeByte(5)
+      ..write(obj.courseId)
+      ..writeByte(6)
+      ..write(obj.content)
+      ..writeByte(7)
+      ..write(obj.type);
   }
 
   @override

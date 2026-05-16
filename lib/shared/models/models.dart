@@ -19,6 +19,14 @@ class Course extends HiveObject {
   final String endTime;
   @HiveField(6)
   final int colorValue;
+  @HiveField(7)
+  final double targetGrade;
+  @HiveField(8)
+  final double currentGrade;
+  @HiveField(9)
+  final double creditHours;
+  @HiveField(10)
+  final String scheduleJson;
 
   Course({
     required this.id,
@@ -28,6 +36,10 @@ class Course extends HiveObject {
     required this.startTime,
     required this.endTime,
     required this.colorValue,
+    this.targetGrade = 4.0,
+    this.currentGrade = 0.0,
+    this.creditHours = 3.0,
+    this.scheduleJson = '[]',
   });
 
   Color get color => Color(colorValue);
@@ -53,13 +65,22 @@ class StudyTask extends HiveObject {
   final TaskUrgency urgency;
   @HiveField(4)
   bool isCompleted;
+  @HiveField(5)
+  final String courseId;
+  @HiveField(6)
+  final String content;
+  @HiveField(7)
+  final String type;
 
   StudyTask({
     required this.id,
     required this.title,
     required this.dueDate,
-    required this.urgency,
+    this.urgency = TaskUrgency.normal,
     this.isCompleted = false,
+    this.courseId = '',
+    this.content = '',
+    this.type = 'task',
   });
 }
 

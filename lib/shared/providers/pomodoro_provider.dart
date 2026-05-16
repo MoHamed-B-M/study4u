@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/app_constants.dart';
 
 enum PomodoroStatus { focus, shortBreak, longBreak, idle }
 
@@ -8,12 +10,14 @@ class PomodoroState {
   final PomodoroStatus status;
   final bool isActive;
   final int completedSessions;
+  final String? courseId;
 
   PomodoroState({
     required this.remainingSeconds,
     required this.status,
     this.isActive = false,
     this.completedSessions = 0,
+    this.courseId,
   });
 
   PomodoroState copyWith({
@@ -21,12 +25,14 @@ class PomodoroState {
     PomodoroStatus? status,
     bool? isActive,
     int? completedSessions,
+    String? courseId,
   }) {
     return PomodoroState(
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       status: status ?? this.status,
       isActive: isActive ?? this.isActive,
       completedSessions: completedSessions ?? this.completedSessions,
+      courseId: courseId ?? this.courseId,
     );
   }
 
@@ -42,14 +48,18 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
 
   PomodoroNotifier()
       : super(PomodoroState(
-          remainingSeconds: 25 * 60,
+          remainingSeconds: AppConstants.pomodoroFocusMinutes * 60,
           status: PomodoroStatus.idle,
         ));
 
-  void startTimer() {
+  void startTimer({String? courseId}) {
     if (state.isActive) return;
-    
-    state = state.copyWith(isActive: true, status: state.status == PomodoroStatus.idle ? PomodoroStatus.focus : state.status);
+    HapticFeedback.mediumImpact();
+    state = state.copyWith(
+      isActive: true,
+      status: state.status == PomodoroStatus.idle ? PomodoroStatus.focus : state.status,
+      courseId: courseId ?? state.courseId,
+    );
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (state.remainingSeconds > 0) {
         state = state.copyWith(remainingSeconds: state.remainingSeconds - 1);
@@ -61,41 +71,50 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
 
   void pauseTimer() {
     _timer?.cancel();
+    HapticFeedback.mediumImpact();
     state = state.copyWith(isActive: false);
   }
 
   void resetTimer() {
     pauseTimer();
     state = PomodoroState(
-      remainingSeconds: 25 * 60,
+      remainingSeconds: AppConstants.pomodoroFocusMinutes * 60,
       status: PomodoroStatus.idle,
     );
   }
 
+  void skipSession() {
+    _handleSessionComplete();
+  }
+
   void _handleSessionComplete() {
     pauseTimer();
+    HapticFeedback.heavyImpact();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      HapticFeedback.heavyImpact();
+    });
+
     if (state.status == PomodoroStatus.focus) {
       final newSessions = state.completedSessions + 1;
-      if (newSessions % 4 == 0) {
+      if (newSessions % AppConstants.pomodoroSessionsBeforeLongBreak == 0) {
         state = state.copyWith(
           status: PomodoroStatus.longBreak,
-          remainingSeconds: 15 * 60,
+          remainingSeconds: AppConstants.pomodoroLongBreakMinutes * 60,
           completedSessions: newSessions,
         );
       } else {
         state = state.copyWith(
           status: PomodoroStatus.shortBreak,
-          remainingSeconds: 5 * 60,
+          remainingSeconds: AppConstants.pomodoroShortBreakMinutes * 60,
           completedSessions: newSessions,
         );
       }
     } else {
       state = state.copyWith(
         status: PomodoroStatus.focus,
-        remainingSeconds: 25 * 60,
+        remainingSeconds: AppConstants.pomodoroFocusMinutes * 60,
       );
     }
-    // TODO: Trigger local notification
   }
 
   @override

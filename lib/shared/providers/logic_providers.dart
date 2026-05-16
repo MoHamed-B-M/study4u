@@ -1,92 +1,62 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import '../models/models.dart';
-import 'package:uuid/uuid.dart';
+import '../../data/repositories/course_repo_impl.dart';
+import '../../data/repositories/task_repo_impl.dart';
+import '../../data/repositories/attendance_repo_impl.dart';
+import '../../domain/entities/course.dart';
+import '../../domain/entities/task.dart';
+import '../../domain/entities/attendance_record.dart';
+import '../../domain/usecases/cgpa_calculator.dart';
+import '../../domain/usecases/attendance_analytics.dart';
+import '../../domain/usecases/schedule_optimizer.dart';
 
-// Providers for Hive Boxes
-final coursesBoxProvider = Provider<Box<Course>>((ref) => Hive.box<Course>('courses'));
-final tasksBoxProvider = Provider<Box<StudyTask>>((ref) => Hive.box<StudyTask>('tasks'));
-final attendanceBoxProvider = Provider<Box<AttendanceRecord>>((ref) => Hive.box<AttendanceRecord>('attendance'));
+final courseRepositoryProvider = Provider((ref) => CourseRepositoryImpl());
+final taskRepositoryProvider = Provider((ref) => TaskRepositoryImpl());
+final attendanceRepositoryProvider = Provider((ref) => AttendanceRepositoryImpl());
+final cgpaCalculatorProvider = Provider((ref) => CgpaCalculatorUseCase());
+final attendanceAnalyticsProvider = Provider((ref) => AttendanceAnalyticsUseCase());
+final scheduleOptimizerProvider = Provider((ref) => ScheduleOptimizerUseCase());
 
-// Course List Notifier
-class CourseListNotifier extends StateNotifier<List<Course>> {
-  final Box<Course> _box;
-  CourseListNotifier(this._box) : super(_box.values.toList());
-
-  void addCourse(Course course) {
-    _box.put(course.id, course);
-    state = _box.values.toList();
-  }
-
-  void deleteCourse(String id) {
-    _box.delete(id);
-    state = _box.values.toList();
-  }
-}
-
-final courseListProvider = StateNotifierProvider<CourseListNotifier, List<Course>>((ref) {
-  return CourseListNotifier(ref.watch(coursesBoxProvider));
+final courseListProvider = Provider<List<CourseEntity>>((ref) {
+  final repo = ref.watch(courseRepositoryProvider);
+  return repo.getCourses();
 });
 
-// Task Manager Notifier
-class TaskManagerNotifier extends StateNotifier<List<StudyTask>> {
-  final Box<StudyTask> _box;
-  TaskManagerNotifier(this._box) : super(_box.values.toList());
-
-  void addTask(String title, DateTime dueDate, TaskUrgency urgency) {
-    final task = StudyTask(
-      id: const Uuid().v4(),
-      title: title,
-      dueDate: dueDate,
-      urgency: urgency,
-    );
-    _box.put(task.id, task);
-    state = _box.values.toList();
-  }
-
-  void toggleTask(String id) {
-    final task = _box.get(id);
-    if (task != null) {
-      task.isCompleted = !task.isCompleted;
-      task.save();
-      state = _box.values.toList();
-    }
-  }
-
-  void deleteTask(String id) {
-    _box.delete(id);
-    state = _box.values.toList();
-  }
-}
-
-final taskManagerProvider = StateNotifierProvider<TaskManagerNotifier, List<StudyTask>>((ref) {
-  return TaskManagerNotifier(ref.watch(tasksBoxProvider));
+final taskListProvider = Provider<List<TaskEntity>>((ref) {
+  final repo = ref.watch(taskRepositoryProvider);
+  return repo.getTasks();
 });
 
-// Attendance Tracker Notifier
-class AttendanceTrackerNotifier extends StateNotifier<List<AttendanceRecord>> {
-  final Box<AttendanceRecord> _box;
-  AttendanceTrackerNotifier(this._box) : super(_box.values.toList());
+final pendingTaskCountProvider = Provider<int>((ref) {
+  final tasks = ref.watch(taskListProvider);
+  return tasks.where((t) => !t.isCompleted).length;
+});
 
-  void markAttendance(String courseId, DateTime date, AttendanceStatus status) {
-    final id = '${courseId}_${date.year}${date.month}${date.day}';
-    final record = AttendanceRecord(
-      id: id,
-      courseId: courseId,
-      date: date,
-      status: status,
-    );
-    _box.put(id, record);
-    state = _box.values.toList();
-  }
-  
-  double getAttendancePercentage() {
-    if (state.isEmpty) return 0;
-    final presentCount = state.where((r) => r.status == AttendanceStatus.present || r.status == AttendanceStatus.late).length;
-    return (presentCount / state.length) * 100;
-  }
-}
+final attendanceRecordsProvider = Provider<List<AttendanceRecordEntity>>((ref) {
+  final repo = ref.watch(attendanceRepositoryProvider);
+  return repo.getRecords();
+});
 
-final attendanceTrackerProvider = StateNotifierProvider<AttendanceTrackerNotifier, List<AttendanceRecord>>((ref) {
-  return AttendanceTrackerNotifier(ref.watch(attendanceBoxProvider));
+final attendanceAnalyticsResultProvider = Provider<AttendanceAnalyticsResult>((ref) {
+  final records = ref.watch(attendanceRecordsProvider);
+  final usecase = ref.watch(attendanceAnalyticsProvider);
+  return usecase.execute(records);
+});
+
+final cgpaResultProvider = Provider<CgpaResult>((ref) {
+  final courses = ref.watch(courseListProvider);
+  final usecase = ref.watch(cgpaCalculatorProvider);
+  return usecase.execute(courses);
+});
+
+final upNextProvider = Provider<UpNextResult>((ref) {
+  final courses = ref.watch(courseListProvider);
+  final usecase = ref.watch(scheduleOptimizerProvider);
+  return usecase.execute(courses);
+});
+
+final greetingProvider = Provider<String>((ref) {
+  final hour = DateTime.now().hour;
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
 });
