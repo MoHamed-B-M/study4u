@@ -148,7 +148,6 @@ class _InfoTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Color(course.colorValue);
-    final scheme = Theme.of(context).colorScheme;
     final style = Theme.of(context).textTheme;
 
     return ListView(
