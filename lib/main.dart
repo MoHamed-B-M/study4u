@@ -26,6 +26,13 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: settings.onboardingComplete ? '/' : '/onboarding',
     navigatorKey: _rootNavigatorKey,
+    redirect: (context, state) {
+      final s = ref.read(settingsProvider);
+      final isOnboarding = state.matchedLocation == '/onboarding';
+      if (!s.onboardingComplete && !isOnboarding) return '/onboarding';
+      if (s.onboardingComplete && isOnboarding) return '/';
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/onboarding',
@@ -60,6 +67,7 @@ class Stdy4uApp extends ConsumerWidget {
       theme: theme,
       darkTheme: AppTheme.darkTheme(
         Color(ref.watch(settingsProvider).primaryColorValue),
+        dynamicColor: ref.watch(settingsProvider).useDynamicColor,
       ),
       themeMode: themeMode,
       routerConfig: router,

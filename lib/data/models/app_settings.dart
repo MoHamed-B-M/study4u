@@ -16,6 +16,8 @@ class AppSettings extends HiveObject {
   final String userName;
   @HiveField(5)
   final bool onboardingComplete;
+  @HiveField(6)
+  final bool useDynamicColor;
 
   AppSettings({
     this.id = 'default',
@@ -24,5 +26,6 @@ class AppSettings extends HiveObject {
     this.notificationEnabled = true,
     this.userName = '',
     this.onboardingComplete = false,
+    this.useDynamicColor = true,
   });
 }

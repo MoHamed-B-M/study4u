@@ -18,16 +18,19 @@ class AppTheme {
   static const double radiusPill = 9999.0;
   static const double standardPadding = 24.0;
 
-  static ThemeData lightTheme(Color seed) {
+  static ThemeData lightTheme(Color seed, {bool dynamicColor = true}) {
+    final scheme = dynamicColor
+        ? ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light)
+        : ColorScheme.fromSeed(
+            seedColor: seed,
+            brightness: Brightness.light,
+            surface: surface,
+            error: error,
+          );
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: seed,
-        brightness: Brightness.light,
-        surface: surface,
-        error: error,
-      ),
+      colorScheme: scheme,
       scaffoldBackgroundColor: background,
       textTheme: _textTheme(),
       cardTheme: _cardTheme(),
@@ -40,15 +43,18 @@ class AppTheme {
     );
   }
 
-  static ThemeData darkTheme(Color seed) {
+  static ThemeData darkTheme(Color seed, {bool dynamicColor = true}) {
+    final scheme = dynamicColor
+        ? ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark)
+        : ColorScheme.fromSeed(
+            seedColor: seed,
+            brightness: Brightness.dark,
+            error: const Color(0xFFFFB4AB),
+          );
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: seed,
-        brightness: Brightness.dark,
-        error: const Color(0xFFFFB4AB),
-      ),
+      colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFF1A1A2E),
       textTheme: _textThemeDark(),
       cardTheme: _cardThemeDark(),

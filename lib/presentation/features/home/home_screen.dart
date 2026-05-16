@@ -212,6 +212,7 @@ class HomeScreen extends ConsumerWidget {
                   onTap: () {
                     HapticFeedback.selectionClick();
                     ref.read(taskRepositoryProvider).toggleTask(task.id);
+                    ref.read(dataRefreshProvider.notifier).state++;
                   },
                   child: Container(
                     width: 24,
