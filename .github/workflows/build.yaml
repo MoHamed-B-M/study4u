@@ -1,21 +1,24 @@
-name: Build Release APK
+name: Build Release APK & Create Release
 
 on:
   push:
     tags:
-      - "v*.*.*" # Trigger on version tags (recommended)
-    branches:
-      - main # Optional: also build on main pushes
-  workflow_dispatch: # Allow manual trigger from GitHub UI
+      - "v*.*.*" # Triggers on tags like v1.0.2, v2.1.0 etc.
+  workflow_dispatch:
 
 jobs:
-  build-apk:
-    name: Build Release APK
+  build-and-release:
+    name: Build APK and Create Release
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Required to create releases
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Important for git history
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -26,28 +29,50 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.41.9" # Change to your Flutter version
+          flutter-version: "3.41.9"
           channel: "stable"
           cache: true
 
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Build Release APK
+      # Extract version from tag
+      - name: Extract version
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          echo "📦 Building version: ${{ env.VERSION }}"
+
+      - name: Update version in pubspec.yaml
+        run: |
+          sed -i "s/version: .*/version: ${{ env.VERSION }}/" pubspec.yaml
+          cat pubspec.yaml | grep "version:"
+
+      - name: Build Release APK (Split per ABI)
         run: flutter build apk --release --split-per-abi
 
-      - name: Upload APK Artifacts
-        uses: actions/upload-artifact@v4
+      # =============== CREATE GITHUB RELEASE WITH NOTES ===============
+      - name: Generate Release Notes & Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: stdy4u-release-apks
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
+          tag_name: ${{ github.ref_name }}
+          name: "v${{ env.VERSION }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true # Auto generates from PRs & commits
+          files: |
             build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
             build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
             build/app/outputs/flutter-apk/app-x86_64-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifacts (for backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: stdy4u-release-apks-v${{ env.VERSION }}
+          path: |
+            build/app/outputs/flutter-apk/app-*.apk
           retention-days: 30
 
       - name: Show APK sizes
-        run: |
-          echo "APK Sizes:"
-          ls -lh build/app/outputs/flutter-apk/
+        run: ls -lh build/app/outputs/flutter-apk/
