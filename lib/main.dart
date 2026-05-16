@@ -11,6 +11,7 @@ import 'presentation/features/tracker/tracker_screen.dart';
 import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/onboarding/onboarding_screen.dart';
+import 'presentation/features/course_detail/course_detail_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,22 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/tracker', builder: (context, state) => const TrackerScreen()),
           GoRoute(path: '/stats', builder: (context, state) => const StatisticsScreen()),
           GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+          GoRoute(
+            path: '/course/:id',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: CourseDetailScreen(courseId: state.pathParameters['id']!),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic)),
+                  child: child,
+                );
+              },
+            ),
+          ),
         ],
       ),
     ],
