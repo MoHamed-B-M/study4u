@@ -13,6 +13,8 @@ class Course extends HiveObject {
   final String name;
   @HiveField(3)
   final String room;
+  @HiveField(11)
+  final String professor;
   @HiveField(4)
   final String startTime;
   @HiveField(5)
@@ -33,6 +35,7 @@ class Course extends HiveObject {
     required this.code,
     required this.name,
     required this.room,
+    this.professor = '',
     required this.startTime,
     required this.endTime,
     required this.colorValue,

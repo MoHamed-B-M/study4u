@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/entities/task.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/pill_chip.dart';
+import '../../widgets/add_course_sheet.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -41,6 +43,13 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/settings');
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
                 onPressed: () {
@@ -245,10 +254,19 @@ class HomeScreen extends ConsumerWidget {
     return FloatingActionButton.extended(
       onPressed: () {
         HapticFeedback.lightImpact();
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXXL)),
+          ),
+          builder: (_) => const AddCourseSheet(),
+        );
       },
       backgroundColor: AppTheme.textPrimary,
-      label: const Text('Add Task', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text('Add Course', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      icon: const Icon(Icons.book_outlined, color: Colors.white),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
