@@ -82,7 +82,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
       endTime: _timeToString(_endTime),
       colorValue: _colorValue,
       targetGrade: _targetGrade,
-      creditHours: _creditHours.toInt(),
+      creditHours: _creditHours,
       scheduleJson: _weekDays.map((d) => _days[d]).toList().toString(),
       weekDays: _weekDays.map((d) => _days[d]).toList(),
     );
