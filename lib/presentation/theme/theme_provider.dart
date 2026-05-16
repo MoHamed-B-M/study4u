@@ -78,6 +78,20 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       themeMode: state.themeMode,
       notificationEnabled: state.notificationEnabled,
       userName: name,
+      onboardingComplete: state.onboardingComplete,
+    );
+    LocalStorage.appSettingsBox.put('default', updated);
+    state = updated;
+  }
+
+  void setOnboardingComplete(bool value) {
+    final updated = AppSettings(
+      id: state.id,
+      primaryColorValue: state.primaryColorValue,
+      themeMode: state.themeMode,
+      notificationEnabled: state.notificationEnabled,
+      userName: state.userName,
+      onboardingComplete: value,
     );
     LocalStorage.appSettingsBox.put('default', updated);
     state = updated;

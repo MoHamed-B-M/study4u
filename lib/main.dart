@@ -10,6 +10,7 @@ import 'presentation/features/home/home_screen.dart';
 import 'presentation/features/tracker/tracker_screen.dart';
 import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
+import 'presentation/features/onboarding/onboarding_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,10 +22,15 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final settings = ref.watch(settingsProvider);
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: settings.onboardingComplete ? '/' : '/onboarding',
     navigatorKey: _rootNavigatorKey,
     routes: [
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => MainScreen(child: child),

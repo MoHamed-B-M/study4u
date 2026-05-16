@@ -3,6 +3,7 @@ class CourseEntity {
   final String code;
   final String name;
   final String room;
+  final String professor;
   final String startTime;
   final String endTime;
   final int colorValue;
@@ -17,6 +18,7 @@ class CourseEntity {
     required this.code,
     required this.name,
     required this.room,
+    this.professor = '',
     required this.startTime,
     required this.endTime,
     required this.colorValue,
