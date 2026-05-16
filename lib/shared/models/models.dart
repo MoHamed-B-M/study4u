@@ -118,6 +118,31 @@ class AttendanceRecord extends HiveObject {
   });
 }
 
+@HiveType(typeId: 6)
+class CourseMaterial extends HiveObject {
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String courseId;
+  @HiveField(2)
+  final String title;
+  @HiveField(3)
+  final String type;
+  @HiveField(4)
+  final String content;
+  @HiveField(5)
+  final DateTime createdAt;
+
+  CourseMaterial({
+    required this.id,
+    required this.courseId,
+    required this.title,
+    this.type = 'link',
+    this.content = '',
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+}
+
 @HiveType(typeId: 5)
 class PomodoroSettings extends HiveObject {
   @HiveField(0)

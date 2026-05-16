@@ -40,6 +40,12 @@ class AppTheme {
       progressIndicatorTheme: _progressIndicatorTheme(),
       bottomSheetTheme: _bottomSheetTheme(),
       appBarTheme: _appBarTheme(),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
   }
 
@@ -64,6 +70,12 @@ class AppTheme {
       progressIndicatorTheme: _progressIndicatorTheme(),
       bottomSheetTheme: _bottomSheetThemeDark(),
       appBarTheme: _appBarThemeDark(),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
   }
 
