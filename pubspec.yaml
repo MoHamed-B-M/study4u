@@ -1,8 +1,8 @@
 name: stdy4u
 description: "A production-ready student productivity tool with local persistence."
-publish_to: 'none'
+publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.11.5
@@ -11,30 +11,30 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  
+
   # State Management
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
-  
+
   # Navigation
   go_router: ^14.2.0
-  
+
   # UI & Design
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.10+1
   animate_do: ^3.3.4
   flutter_animate: ^4.5.0
-  
+
   # Data & Persistence
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   intl: ^0.19.0
-  
+
   # Analytics & Charts
   fl_chart: ^0.68.0
   percent_indicator: ^4.2.3
   table_calendar: ^3.1.2
-  
+
   # System & Logic
   flutter_local_notifications: ^17.1.2
   workmanager: ^0.9.0+3
