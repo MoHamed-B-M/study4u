@@ -31,7 +31,6 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? notificationEnabled,
     String? userName,
     bool? onboardingComplete,
-    bool? useDynamicColor,
   }) {
     return AppSettings(
       id: state.id,
@@ -40,7 +39,6 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       notificationEnabled: notificationEnabled ?? state.notificationEnabled,
       userName: userName ?? state.userName,
       onboardingComplete: onboardingComplete ?? state.onboardingComplete,
-      useDynamicColor: useDynamicColor ?? state.useDynamicColor,
     );
   }
 
@@ -58,6 +56,4 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   void setUserName(String name) => _saveAndUpdate(_copy(userName: name));
 
   void setOnboardingComplete(bool value) => _saveAndUpdate(_copy(onboardingComplete: value));
-
-  void setUseDynamicColor(bool value) => _saveAndUpdate(_copy(useDynamicColor: value));
 }

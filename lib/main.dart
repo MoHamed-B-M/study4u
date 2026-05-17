@@ -73,22 +73,9 @@ class Stdy4uApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
     final seedColor = Color(s.primaryColorValue);
-    final useDynamic = s.useDynamicColor;
 
-    final theme = AppTheme.lightTheme(
-      seedColor,
-      dynamicColor: useDynamic,
-      dynamicScheme: useDynamic
-          ? ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.light, surface: AppTheme.surface, error: AppTheme.error)
-          : null,
-    );
-    final darkTheme = AppTheme.darkTheme(
-      seedColor,
-      dynamicColor: useDynamic,
-      dynamicScheme: useDynamic
-          ? ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.dark, error: const Color(0xFFFFB4AB))
-          : null,
-    );
+    final theme = AppTheme.lightTheme(seedColor);
+    final darkTheme = AppTheme.darkTheme(seedColor);
 
     return MaterialApp.router(
       title: 'stdy4u',
