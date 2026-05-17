@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'data/datasources/local_storage.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/theme_provider.dart';
@@ -10,7 +9,6 @@ import 'presentation/features/home/home_screen.dart';
 import 'presentation/features/tracker/tracker_screen.dart';
 import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
-import 'presentation/features/onboarding/onboarding_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
 
 void main() async {
@@ -23,16 +21,10 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final settings = LocalStorage.appSettingsBox.get('default');
-  final onboarded = settings?.onboardingComplete ?? false;
   final router = GoRouter(
-    initialLocation: onboarded ? '/' : '/onboarding',
+    initialLocation: '/',
     navigatorKey: _rootNavigatorKey,
     routes: [
-      GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
-      ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => MainScreen(child: child),
@@ -117,7 +109,7 @@ class _MainScreenState extends State<MainScreen> {
           if (index == 2) context.go('/stats');
         },
         labelTextStyle: WidgetStateProperty.all(
-          GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600),
+          TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   AppTheme._();
@@ -76,31 +75,31 @@ class AppTheme {
   }
 
   static TextTheme _textTheme() => TextTheme(
-    displayLarge: GoogleFonts.outfit(fontSize: 48, fontWeight: FontWeight.w800, color: textPrimary),
-    displayMedium: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w700, color: textPrimary),
-    headlineLarge: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.w700, color: textPrimary),
-    headlineMedium: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
-    headlineSmall: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w700, color: textPrimary),
-    titleLarge: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
-    bodyLarge: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w400, color: textPrimary),
-    bodyMedium: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary.withOpacity(0.7)),
-    bodySmall: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w400, color: textPrimary.withOpacity(0.6)),
-    labelLarge: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-    labelSmall: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+    displayLarge: TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: textPrimary),
+    displayMedium: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: textPrimary),
+    headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: textPrimary),
+    headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
+    headlineSmall: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: textPrimary),
+    titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
+    bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: textPrimary),
+    bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary.withOpacity(0.7)),
+    bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: textPrimary.withOpacity(0.6)),
+    labelLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+    labelSmall: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
   );
 
   static TextTheme _textThemeDark() => TextTheme(
-    displayLarge: GoogleFonts.outfit(fontSize: 48, fontWeight: FontWeight.w800, color: Colors.white),
-    displayMedium: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w700, color: Colors.white),
-    headlineLarge: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
-    headlineMedium: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
-    headlineSmall: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
-    titleLarge: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
-    bodyLarge: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white70),
-    bodyMedium: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white60),
-    bodySmall: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white54),
-    labelLarge: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: Colors.white70),
-    labelSmall: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: Colors.white60),
+    displayLarge: TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: Colors.white),
+    displayMedium: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: Colors.white),
+    headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
+    headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+    headlineSmall: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+    titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+    bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white70),
+    bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white60),
+    bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white54),
+    labelLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: Colors.white70),
+    labelSmall: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: Colors.white60),
   );
 
   static CardThemeData _cardTheme() => CardThemeData(
@@ -121,7 +120,7 @@ class AppTheme {
     style: ElevatedButton.styleFrom(
       minimumSize: const Size(double.infinity, 56),
       shape: const StadiumBorder(),
-      textStyle: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold),
+      textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
     ),
   );
 
@@ -129,7 +128,7 @@ class AppTheme {
     backgroundColor: Colors.white.withOpacity(0.9),
     indicatorColor: primary.withOpacity(0.2),
     labelTextStyle: WidgetStateProperty.all(
-      GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600),
+      TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
     ),
     elevation: 0,
     shadowColor: Colors.transparent,
@@ -139,7 +138,7 @@ class AppTheme {
     backgroundColor: const Color(0xFF1A1A2E).withOpacity(0.95),
     indicatorColor: primary.withOpacity(0.2),
     labelTextStyle: WidgetStateProperty.all(
-      GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70),
+      TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70),
     ),
     elevation: 0,
     shadowColor: Colors.transparent,
@@ -161,7 +160,7 @@ class AppTheme {
       borderRadius: BorderRadius.circular(radiusMD),
       borderSide: const BorderSide(color: primary, width: 2),
     ),
-    labelStyle: GoogleFonts.plusJakartaSans(fontSize: 14, color: textPrimary.withOpacity(0.6)),
+    labelStyle: TextStyle(fontSize: 14, color: textPrimary.withOpacity(0.6)),
   );
 
   static InputDecorationTheme _inputDecorationThemeDark() => InputDecorationTheme(
@@ -180,7 +179,7 @@ class AppTheme {
       borderRadius: BorderRadius.circular(radiusMD),
       borderSide: BorderSide(color: primary.withOpacity(0.8), width: 2),
     ),
-    labelStyle: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.white60),
+    labelStyle: TextStyle(fontSize: 14, color: Colors.white60),
   );
 
   static ProgressIndicatorThemeData _progressIndicatorTheme() => ProgressIndicatorThemeData(
@@ -208,7 +207,7 @@ class AppTheme {
     elevation: 0,
     scrolledUnderElevation: 0,
     centerTitle: false,
-    titleTextStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
+    titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
   );
 
   static AppBarTheme _appBarThemeDark() => AppBarTheme(
@@ -216,6 +215,6 @@ class AppTheme {
     elevation: 0,
     scrolledUnderElevation: 0,
     centerTitle: false,
-    titleTextStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+    titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
   );
 }
