@@ -46,6 +46,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _completeOnboarding() {
     ref.read(settingsProvider.notifier).setOnboardingComplete(true);
     HapticFeedback.mediumImpact();
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
@@ -121,7 +122,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             },
           ),
           Positioned(
-            bottom: 40,
+            bottom: MediaQuery.of(context).padding.bottom + 24,
             left: 0,
             right: 0,
             child: Padding(
@@ -157,31 +158,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     }),
                   ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      if (isLast) {
-                        _completeOnboarding();
-                      } else {
-                        _pageCtrl.nextPage(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                      decoration: ShapeDecoration(
-                        color: Colors.white,
-                        shape: StadiumBorder(),
-                      ),
-                      child: Text(
-                        isLast ? 'START' : 'NEXT',
-                        style: const TextStyle(
-                          color: Colors.black,
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: isLast
+                          ? _completeOnboarding
+                          : () => _pageCtrl.nextPage(
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeInOut,
+                              ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(
                           fontWeight: FontWeight.w600,
+                          fontSize: 15,
                         ),
                       ),
+                      child: Text(isLast ? 'START' : 'NEXT'),
                     ),
                   ),
                 ],
