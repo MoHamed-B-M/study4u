@@ -23,7 +23,8 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final onboarded = ref.watch(settingsProvider.select((s) => s.onboardingComplete));
+  final settings = LocalStorage.appSettingsBox.get('default');
+  final onboarded = settings?.onboardingComplete ?? false;
   final router = GoRouter(
     initialLocation: onboarded ? '/' : '/onboarding',
     navigatorKey: _rootNavigatorKey,
@@ -60,7 +61,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-  ref.onDispose(() => router.dispose());
   return router;
 });
 
@@ -75,12 +75,20 @@ class Stdy4uApp extends ConsumerWidget {
     final seedColor = Color(s.primaryColorValue);
     final useDynamic = s.useDynamicColor;
 
-    final theme = useDynamic
-        ? AppTheme.lightTheme(seedColor, dynamicColor: true)
-        : AppTheme.lightTheme(seedColor, dynamicColor: false);
-    final darkTheme = useDynamic
-        ? AppTheme.darkTheme(seedColor, dynamicColor: true)
-        : AppTheme.darkTheme(seedColor, dynamicColor: false);
+    final theme = AppTheme.lightTheme(
+      seedColor,
+      dynamicColor: useDynamic,
+      dynamicScheme: useDynamic
+          ? ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.light, surface: AppTheme.surface, error: AppTheme.error)
+          : null,
+    );
+    final darkTheme = AppTheme.darkTheme(
+      seedColor,
+      dynamicColor: useDynamic,
+      dynamicScheme: useDynamic
+          ? ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.dark, error: const Color(0xFFFFB4AB))
+          : null,
+    );
 
     return MaterialApp.router(
       title: 'stdy4u',

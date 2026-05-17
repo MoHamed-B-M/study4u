@@ -62,7 +62,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _onDone() {
     HapticFeedback.heavyImpact();
     ref.read(settingsProvider.notifier).setOnboardingComplete(true);
-    context.go('/');
+    context.replace('/');
   }
 
   @override
