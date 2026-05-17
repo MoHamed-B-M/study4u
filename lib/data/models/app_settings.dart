@@ -23,6 +23,6 @@ class AppSettings extends HiveObject {
     this.themeMode = 'system',
     this.notificationEnabled = true,
     this.userName = '',
-    this.onboardingComplete = false,
+    this.onboardingComplete = true,
   });
 }
