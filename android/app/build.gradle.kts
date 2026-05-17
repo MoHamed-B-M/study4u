@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -8,27 +11,19 @@ plugins {
 // ---------------------------------------------------------------------------
 // Signing config: environment variables > key.properties
 // ---------------------------------------------------------------------------
-val keystoreProperties = java.util.Properties()
+val keystoreProperties = Properties()
 
 // 1. Try loading from local key.properties (for local builds)
 val keyPropsFile = rootProject.file("key.properties")
 if (keyPropsFile.exists()) {
-    keystoreProperties.load(java.io.FileInputStream(keyPropsFile))
+    keystoreProperties.load(FileInputStream(keyPropsFile))
 }
 
 // 2. Override with environment variables (CI/CD)
-if (System.getenv("KEYSTORE_PATH") != null) {
-    keystoreProperties["storeFile"] = System.getenv("KEYSTORE_PATH")
-}
-if (System.getenv("KEYSTORE_PASSWORD") != null) {
-    keystoreProperties["storePassword"] = System.getenv("KEYSTORE_PASSWORD")
-}
-if (System.getenv("KEY_ALIAS") != null) {
-    keystoreProperties["keyAlias"] = System.getenv("KEY_ALIAS")
-}
-if (System.getenv("KEY_PASSWORD") != null) {
-    keystoreProperties["keyPassword"] = System.getenv("KEY_PASSWORD")
-}
+System.getenv("KEYSTORE_PATH")?.let { keystoreProperties["storeFile"] = it }
+System.getenv("KEYSTORE_PASSWORD")?.let { keystoreProperties["storePassword"] = it }
+System.getenv("KEY_ALIAS")?.let { keystoreProperties["keyAlias"] = it }
+System.getenv("KEY_PASSWORD")?.let { keystoreProperties["keyPassword"] = it }
 
 android {
     namespace = "com.example.study4u"
@@ -56,12 +51,12 @@ android {
 
     signingConfigs {
         create("release") {
-            val storeFileProp = keystoreProperties["storeFile"] as? String
+            val storeFileProp = keystoreProperties.getProperty("storeFile")
             if (storeFileProp != null) {
                 storeFile = rootProject.file(storeFileProp)
-                storePassword = keystoreProperties["storePassword"] as? String
-                keyAlias = keystoreProperties["keyAlias"] as? String
-                keyPassword = keystoreProperties["keyPassword"] as? String
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
             }
         }
     }
