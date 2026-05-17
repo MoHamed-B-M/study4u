@@ -35,6 +35,28 @@ jobs:
       - name: Decode keystore
         run: echo "${{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
 
+      - name: Convert keystore to compatible format
+        run: |
+          keytool -importkeystore \
+            -srckeystore android/upload-keystore.jks \
+            -destkeystore android/upload-keystore.jks \
+            -srcstorepass "${{ secrets.STORE_PASSWORD }}" \
+            -deststorepass "${{ secrets.STORE_PASSWORD }}" \
+            -srcalias "${{ secrets.KEY_ALIAS }}" \
+            -destalias "${{ secrets.KEY_ALIAS }}" \
+            -srckeypass "${{ secrets.KEY_PASSWORD }}" \
+            -destkeypass "${{ secrets.KEY_PASSWORD }}" \
+            -deststoretype JKS \
+            -noprompt 2>&1
+
+      - name: Verify keystore
+        run: |
+          keytool -list -keystore android/upload-keystore.jks \
+            -storepass "${{ secrets.STORE_PASSWORD }}" \
+            -alias "${{ secrets.KEY_ALIAS }}" \
+            -keypass "${{ secrets.KEY_PASSWORD }}" \
+            -noprompt
+
       - name: Create key.properties
         run: |
           echo "storeFile=upload-keystore.jks" > android/key.properties
