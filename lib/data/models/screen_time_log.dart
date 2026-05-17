@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'screen_time_log.g.dart';
 
-@HiveType(typeId: 6)
+@HiveType(typeId: 8)
 class ScreenTimeLog extends HiveObject {
   @HiveField(0)
   final String id;
