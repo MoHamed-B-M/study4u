@@ -23,14 +23,13 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       notificationEnabled: fields[3] as bool,
       userName: fields[4] as String,
       onboardingComplete: fields[5] as bool,
-      useDynamicColor: fields[6] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -42,9 +41,7 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(4)
       ..write(obj.userName)
       ..writeByte(5)
-      ..write(obj.onboardingComplete)
-      ..writeByte(6)
-      ..write(obj.useDynamicColor);
+      ..write(obj.onboardingComplete);
   }
 
   @override

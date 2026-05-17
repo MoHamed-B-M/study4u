@@ -18,15 +18,13 @@ class AppTheme {
   static const double radiusPill = 9999.0;
   static const double standardPadding = 24.0;
 
-  static ThemeData lightTheme(Color seed, {bool dynamicColor = true, ColorScheme? dynamicScheme}) {
-    final scheme = dynamicColor && dynamicScheme != null
-        ? dynamicScheme
-        : ColorScheme.fromSeed(
-            seedColor: seed,
-            brightness: Brightness.light,
-            surface: surface,
-            error: error,
-          );
+  static ThemeData lightTheme(Color seed) {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.light,
+      surface: surface,
+      error: error,
+    );
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -49,14 +47,12 @@ class AppTheme {
     );
   }
 
-  static ThemeData darkTheme(Color seed, {bool dynamicColor = true, ColorScheme? dynamicScheme}) {
-    final scheme = dynamicColor && dynamicScheme != null
-        ? dynamicScheme
-        : ColorScheme.fromSeed(
-            seedColor: seed,
-            brightness: Brightness.dark,
-            error: const Color(0xFFFFB4AB),
-          );
+  static ThemeData darkTheme(Color seed) {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.dark,
+      error: const Color(0xFFFFB4AB),
+    );
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
