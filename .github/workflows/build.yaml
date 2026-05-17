@@ -2,9 +2,17 @@ name: Build & Release APK
 
 on:
   push:
+    branches:
+      - main
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+" # Triggers exactly on vx.x.x semantic versioning formats (e.g., v1.0.4)
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
+
+env:
+  IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
   build:
@@ -33,6 +41,7 @@ jobs:
         run: flutter pub get
 
       - name: Decode keystore
+        if: env.IS_RELEASE == 'true'
         env:
           ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
@@ -44,6 +53,7 @@ jobs:
           echo "Keystore decoded ($(wc -c < android/upload-keystore.jks) bytes)"
 
       - name: Convert keystore to compatible format
+        if: env.IS_RELEASE == 'true'
         run: |
           keytool -importkeystore \
             -srckeystore android/upload-keystore.jks \
@@ -57,10 +67,10 @@ jobs:
             -deststoretype JKS \
             -noprompt 2>&1
 
-          # Safely replace the original with the converted file
           mv android/upload-keystore-converted.jks android/upload-keystore.jks
 
       - name: Verify keystore
+        if: env.IS_RELEASE == 'true'
         run: |
           keytool -list -keystore android/upload-keystore.jks \
             -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
@@ -69,6 +79,7 @@ jobs:
             -noprompt
 
       - name: Create key.properties
+        if: env.IS_RELEASE == 'true'
         run: |
           echo "storeFile=upload-keystore.jks" > android/key.properties
           echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
@@ -76,14 +87,24 @@ jobs:
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
 
       - name: Extract version from tag
+        if: env.IS_RELEASE == 'true'
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
       - name: Update pubspec version
+        if: env.IS_RELEASE == 'true'
         run: |
           sed -i "s/version: .*/version: $VERSION+${{ github.run_number }}/" pubspec.yaml
-          echo "Updated to version: $(grep 'version:' pubspec.yaml)"
+
+      - name: Build APK (release — universal arm64+v7a)
+        if: env.IS_RELEASE == 'true'
+        run: flutter build apk --release --target-platform android-arm64,android-arm --build-number=${{ github.run_number }}
+
+      - name: Build APK (debug — verify merge to main)
+        if: env.IS_RELEASE != 'true'
+        run: flutter build apk --debug --target-platform android-arm64,android-arm
 
       - name: Extract release notes from CHANGELOG
+        if: env.IS_RELEASE == 'true'
         run: |
           awk '
             /^## \['"$VERSION"'\]/ { found=1; print; next }
@@ -94,17 +115,12 @@ jobs:
             echo "No CHANGELOG entry found for version $VERSION — using auto-generated notes."
             echo "" > release_notes.md
           fi
-          echo "--- Release notes ---"
-          cat release_notes.md
-
-      - name: Build release APK
-        run: flutter build apk --release --split-per-abi --build-number=${{ github.run_number }}
 
       - name: Create GitHub Release
+        if: env.IS_RELEASE == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: stdy4u ${{ github.ref_name }}
           body_path: release_notes.md
-          files: |
-            build/app/outputs/flutter-apk/app-*-release.apk
+          files: build/app/outputs/flutter-apk/app-release.apk
