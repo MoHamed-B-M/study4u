@@ -40,6 +40,7 @@ class SettingsScreen extends ConsumerWidget {
             _appearanceRow(context, ref, settings),
             _accentColorRow(context, ref, settings),
             _floatingNavRow(context, ref, settings),
+            _hapticRow(context, ref, settings),
           ]),
           _sectionHeader(context, 'NOTIFICATIONS'),
           _settingsGroup(context, [
@@ -231,6 +232,54 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (v) {
                 HapticFeedback.selectionClick();
                 ref.read(settingsProvider.notifier).setUseFloatingNavBar(v);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _hapticRow(BuildContext context, WidgetRef ref, AppSettings settings) {
+    final tint = Theme.of(context).colorScheme.primary;
+    return InkWell(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        ref.read(settingsProvider.notifier).setHapticFeedback(!settings.hapticFeedback);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 28, height: 28,
+              decoration: BoxDecoration(
+                color: tint.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(Icons.vibration, size: 16, color: tint),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Haptic Feedback', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 2),
+                  Text('Vibration on interactions',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    )),
+                ],
+              ),
+            ),
+            Switch(
+              value: settings.hapticFeedback,
+              activeColor: tint,
+              onChanged: (v) {
+                HapticFeedback.selectionClick();
+                ref.read(settingsProvider.notifier).setHapticFeedback(v);
               },
             ),
           ],
