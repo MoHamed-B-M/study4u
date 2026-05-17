@@ -83,6 +83,20 @@ jobs:
           sed -i "s/version: .*/version: $VERSION+${{ github.run_number }}/" pubspec.yaml
           echo "Updated to version: $(grep 'version:' pubspec.yaml)"
 
+      - name: Extract release notes from CHANGELOG
+        run: |
+          awk '
+            /^## \['"$VERSION"'\]/ { found=1; print; next }
+            found { print }
+            /^## \[/ && found { exit }
+          ' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "No CHANGELOG entry found for version $VERSION — using auto-generated notes."
+            echo "" > release_notes.md
+          fi
+          echo "--- Release notes ---"
+          cat release_notes.md
+
       - name: Build release APK
         run: flutter build apk --release --split-per-abi --build-number=${{ github.run_number }}
 
@@ -91,6 +105,6 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: stdy4u ${{ github.ref_name }}
-          generate_release_notes: true # This triggers GitHub to read your .github/release.yml settings
+          body_path: release_notes.md
           files: |
             build/app/outputs/flutter-apk/app-*-release.apk
