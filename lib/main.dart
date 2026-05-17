@@ -11,10 +11,108 @@ import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await LocalStorage.init();
-  runApp(const ProviderScope(child: Stdy4uApp()));
+  LocalStorage.init();
+  runApp(const StartupApp());
+}
+
+class StartupApp extends StatefulWidget {
+  const StartupApp({super.key});
+
+  @override
+  State<StartupApp> createState() => _StartupAppState();
+}
+
+class _StartupAppState extends State<StartupApp> {
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ready = LocalStorage.isReady;
+    if (!_ready) {
+      LocalStorage.onReady(() {
+        if (mounted) setState(() => _ready = true);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ErrorBoundary(
+      child: _ready
+          ? const ProviderScope(child: Stdy4uApp())
+          : const _LoadingApp(),
+    );
+  }
+}
+
+class _LoadingApp extends StatelessWidget {
+  const _LoadingApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text('Loading...', style: TextStyle(color: Colors.grey[600])),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ErrorBoundary extends StatefulWidget {
+  final Widget child;
+  const ErrorBoundary({super.key, required this.child});
+
+  @override
+  State<ErrorBoundary> createState() => _ErrorBoundaryState();
+}
+
+class _ErrorBoundaryState extends State<ErrorBoundary> {
+  FlutterErrorDetails? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      if (mounted) {
+        setState(() => _error = details);
+      }
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_error != null) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                '${_error!.exception}',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return widget.child;
+  }
 }
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -109,7 +207,7 @@ class _MainScreenState extends State<MainScreen> {
           if (index == 2) context.go('/stats');
         },
         labelTextStyle: WidgetStateProperty.all(
-          TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
