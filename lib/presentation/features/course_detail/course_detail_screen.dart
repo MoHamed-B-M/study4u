@@ -57,7 +57,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
-            expandedHeight: 260,
+            expandedHeight: 200,
+            collapsedHeight: kToolbarHeight + 8,
             pinned: true,
             floating: false,
             stretch: true,
@@ -68,8 +69,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               onPressed: () => context.pop(),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(course.name, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16)),
-              titlePadding: const EdgeInsetsDirectional.only(start: 72, bottom: 16),
+              title: Text(course.name, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14)),
+              titlePadding: const EdgeInsetsDirectional.only(start: 72, bottom: 14),
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -80,29 +81,33 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, kToolbarHeight + 8, 20, 8),
+                    padding: EdgeInsets.only(
+                      left: 20,
+                      top: MediaQuery.of(context).padding.top + 8,
+                      right: 20,
+                      bottom: 8,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Hero(
                           tag: 'course-icon-${course.id}',
                           child: Container(
-                            padding: const EdgeInsets.all(14),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.book, size: 28, color: Colors.white),
+                            child: const Icon(Icons.book, size: 22, color: Colors.white),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         Text(course.name,
-                          style: GoogleFonts.outfit(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text('${course.code} ${course.room.isNotEmpty ? '• ${course.room}' : ''}',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.white70),
+                          style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.white70),
                         ),
                       ],
                     ),
@@ -164,25 +169,25 @@ class _InfoTab extends ConsumerWidget {
           icon: Icons.person_outline,
           label: 'Professor',
           value: course.professor.isEmpty ? 'Not assigned' : course.professor,
-        ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.2),
+        ).animate().fadeIn(duration: 200.ms),
         const SizedBox(height: 16),
         _InfoCard(
           icon: Icons.access_time,
           label: 'Schedule',
           value: '${course.startTime} - ${course.endTime}',
-        ).animate().fadeIn(duration: 300.ms, delay: 100.ms).slideX(begin: 0.2),
+        ).animate().fadeIn(duration: 200.ms, delay: 50.ms),
         const SizedBox(height: 16),
         _InfoCard(
           icon: Icons.meeting_room_outlined,
           label: 'Room',
           value: course.room.isEmpty ? 'Not set' : course.room,
-        ).animate().fadeIn(duration: 300.ms, delay: 200.ms).slideX(begin: 0.2),
+        ).animate().fadeIn(duration: 200.ms, delay: 100.ms),
         const SizedBox(height: 16),
         _InfoCard(
           icon: Icons.school_outlined,
           label: 'Credits',
           value: '${course.creditHours.toStringAsFixed(0)} ${course.creditHours == 1 ? 'Credit' : 'Credits'}',
-        ).animate().fadeIn(duration: 300.ms, delay: 300.ms).slideX(begin: 0.2),
+        ).animate().fadeIn(duration: 200.ms, delay: 150.ms),
         const SizedBox(height: 24),
         Text('Grade Progress', style: style.titleLarge),
         const SizedBox(height: 12),
@@ -337,8 +342,7 @@ class _MaterialsTab extends ConsumerWidget {
                 final m = materials[index];
                 return _MaterialTile(material: m)
                     .animate()
-                    .fadeIn(duration: 300.ms, delay: (index * 80).ms)
-                    .slideX(begin: 0.2);
+                    .fadeIn(duration: 200.ms, delay: (index * 40).ms);
               },
             ),
       floatingActionButton: FloatingActionButton.small(
@@ -398,11 +402,15 @@ class _MaterialTile extends StatelessWidget {
     switch (material.type) {
       case 'link':
         final uri = Uri.tryParse(material.content);
-        if (uri != null) launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (uri != null && uri.isAbsolute) {
+          launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
         break;
       case 'file':
-        final uri = Uri.tryParse(material.content);
-        if (uri != null) launchUrl(uri, mode: LaunchMode.externalApplication);
+        final file = File(material.content);
+        if (file.existsSync()) {
+          launchUrl(Uri.file(material.content), mode: LaunchMode.externalApplication);
+        }
         break;
     }
   }
@@ -651,8 +659,7 @@ class _NotesTab extends ConsumerWidget {
                 final note = notes[index];
                 return _NoteTile(note: note)
                     .animate()
-                    .fadeIn(duration: 300.ms, delay: (index * 80).ms)
-                    .slideX(begin: 0.2);
+                    .fadeIn(duration: 200.ms, delay: (index * 40).ms);
               },
             ),
       floatingActionButton: FloatingActionButton.small(
@@ -828,8 +835,7 @@ class _TasksTab extends ConsumerWidget {
                 final task = tasks[index];
                 return _TaskTile(task: task)
                     .animate()
-                    .fadeIn(duration: 300.ms, delay: (index * 80).ms)
-                    .slideX(begin: 0.2);
+                    .fadeIn(duration: 200.ms, delay: (index * 40).ms);
               },
             ),
       floatingActionButton: FloatingActionButton.small(
