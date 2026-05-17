@@ -5,9 +5,11 @@ import '../models/app_settings.dart';
 
 class LocalStorage {
   static bool _ready = false;
+  static String? _initError;
   static void Function()? _onReady;
 
   static bool get isReady => _ready;
+  static String? get initError => _initError;
 
   static void onReady(void Function() callback) {
     if (_ready) {
@@ -47,10 +49,19 @@ class LocalStorage {
       _ready = true;
       _onReady?.call();
       _onReady = null;
-    } catch (_) {
+    } catch (e) {
+      _initError = e.toString();
       _ready = true;
       _onReady?.call();
       _onReady = null;
+    }
+  }
+
+  static Box<T> safeBox<T>(String name) {
+    try {
+      return Hive.box<T>(name);
+    } catch (_) {
+      rethrow;
     }
   }
 

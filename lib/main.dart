@@ -40,6 +40,20 @@ class _StartupAppState extends State<StartupApp> {
 
   @override
   Widget build(BuildContext context) {
+    final initError = LocalStorage.initError;
+    if (initError != null) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text('Init error: $initError', textAlign: TextAlign.center),
+            ),
+          ),
+        ),
+      );
+    }
     return ErrorBoundary(
       child: _ready
           ? const ProviderScope(child: Stdy4uApp())
