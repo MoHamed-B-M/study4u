@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/services/update_service.dart';
 import '../../../data/models/app_settings.dart';
 import '../../theme/theme_provider.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/update_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -372,6 +374,40 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           InkWell(
             borderRadius: BorderRadius.circular(12),
+            onTap: () => _checkForUpdate(context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.system_update_outlined, size: 20, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Check for Updates',
+                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 14)),
+                        Text('Download the latest version',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                          )),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, size: 18,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
             onTap: () => launchUrl(Uri.parse('https://github.com/MoHamed-B-M/study4u')),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -406,6 +442,36 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _checkForUpdate(BuildContext context) async {
+    final service = UpdateService();
+    final update = await service.checkForUpdate();
+    if (!context.mounted) return;
+
+    if (update == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Could not check for updates. Check your connection.'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (!update.isNewer) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('You are on the latest version!'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    await UpdateDialog.show(context: context, update: update);
   }
 
   Widget _buildRadioTile(

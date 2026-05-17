@@ -8,6 +8,7 @@ import '../../../core/utils/grade_calculator.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../shared/providers/pomodoro_provider.dart';
 import '../../../domain/entities/course.dart';
+import '../../../domain/entities/pomodoro_session.dart';
 import '../../../domain/usecases/cgpa_calculator.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
@@ -23,6 +24,7 @@ class StatisticsScreen extends ConsumerWidget {
     final pomodoro = ref.watch(pomodoroProvider);
     final courses = ref.watch(courseListProvider);
     final cgpa = ref.watch(cgpaResultProvider);
+    final sessions = ref.watch(pomodoroSessionsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,6 +38,8 @@ class StatisticsScreen extends ConsumerWidget {
             FadeInUp(child: _buildCGPACard(context, cgpa)),
             const SizedBox(height: 24),
             FadeInUp(delay: const Duration(milliseconds: 200), child: _buildPomodoroControl(context, ref, pomodoro)),
+            const SizedBox(height: 24),
+            FadeInUp(delay: const Duration(milliseconds: 250), child: _buildPomodoroChart(context, sessions)),
             const SizedBox(height: 24),
             FadeInUp(delay: const Duration(milliseconds: 300), child: _buildGradeDistribution(context, courses)),
             const SizedBox(height: 24),
@@ -245,6 +249,107 @@ class StatisticsScreen extends ConsumerWidget {
           color: Colors.white,
           size: 32,
         ),
+      ),
+    );
+  }
+
+  Widget _buildPomodoroChart(BuildContext context, List<PomodoroSessionEntity> sessions) {
+    final scheme = Theme.of(context).colorScheme;
+    final now = DateTime.now();
+    final weekData = List.generate(7, (i) {
+      final day = now.subtract(Duration(days: 6 - i));
+      final dayMinutes = sessions
+          .where((s) =>
+              s.timestamp.year == day.year &&
+              s.timestamp.month == day.month &&
+              s.timestamp.day == day.day)
+          .fold<int>(0, (sum, s) => sum + (s.durationSeconds / 60).round());
+      return (day: day, minutes: dayMinutes);
+    });
+
+    final maxMinutes = weekData.fold<int>(0, (max, d) => d.minutes > max ? d.minutes : max);
+    final hasData = weekData.any((d) => d.minutes > 0);
+
+    return AppCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Focus Analytics', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+              Icon(Icons.timer_outlined, color: scheme.primary, size: 20),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text('Minutes focused per day', style: TextStyle(fontSize: 12, color: scheme.onSurface.withValues(alpha: 0.5))),
+          const SizedBox(height: 24),
+          if (!hasData)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Text('Complete focus sessions to see your weekly chart',
+                  style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.4), fontSize: 13),
+                ),
+              ),
+            )
+          else
+            SizedBox(
+              height: 180,
+              child: BarChart(
+                BarChartData(
+                  gridData: const FlGridData(show: false),
+                  borderData: FlBorderData(show: false),
+                  maxY: (maxMinutes + 5).toDouble(),
+                  barTouchData: BarTouchData(
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        return BarTooltipItem(
+                          '${rod.toY.toInt()} min',
+                          TextStyle(color: scheme.onSurface, fontWeight: FontWeight.bold),
+                        );
+                      },
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          final idx = value.toInt();
+                          if (idx < 0 || idx >= weekData.length) return const SizedBox.shrink();
+                          final day = weekData[idx].day;
+                          final label = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][day.weekday - 1];
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(label, style: TextStyle(fontSize: 9, color: scheme.onSurface.withValues(alpha: 0.5))),
+                          );
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  barGroups: List.generate(weekData.length, (i) {
+                    final d = weekData[i];
+                    return BarChartGroupData(
+                      x: i,
+                      barRods: [
+                        BarChartRodData(
+                          toY: d.minutes.toDouble().clamp(0.5, double.infinity),
+                          color: d.minutes > 0 ? scheme.primary : scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                          width: 18,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

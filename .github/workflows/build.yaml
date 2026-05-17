@@ -91,6 +91,6 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: stdy4u ${{ github.ref_name }}
-          generate_release_notes: true
+          generate_release_notes: true # This triggers GitHub to read your .github/release.yml settings
           files: |
             build/app/outputs/flutter-apk/app-*-release.apk

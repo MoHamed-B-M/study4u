@@ -64,6 +64,38 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
   }
 
   Widget _buildAttendanceStats(BuildContext context, AttendanceAnalyticsResult analytics) {
+    if (!analytics.hasRecords) {
+      return AppCard(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.how_to_reg_outlined,
+                size: 40, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('No classes tracked yet!',
+              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Start marking attendance to see your stats here.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return AppCard(
       padding: const EdgeInsets.all(24),
       child: Column(

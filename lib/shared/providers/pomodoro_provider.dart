@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
+import '../../domain/entities/pomodoro_session.dart';
+import '../../data/repositories/pomodoro_repo_impl.dart';
+import '../providers/logic_providers.dart';
 
 enum PomodoroStatus { focus, shortBreak, longBreak, idle }
 
@@ -44,9 +48,10 @@ class PomodoroState {
 }
 
 class PomodoroNotifier extends StateNotifier<PomodoroState> {
+  final PomodoroRepositoryImpl _repository;
   Timer? _timer;
 
-  PomodoroNotifier()
+  PomodoroNotifier(this._repository)
       : super(PomodoroState(
           remainingSeconds: AppConstants.pomodoroFocusMinutes * 60,
           status: PomodoroStatus.idle,
@@ -95,6 +100,7 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
     });
 
     if (state.status == PomodoroStatus.focus) {
+      _logSession();
       final newSessions = state.completedSessions + 1;
       if (newSessions % AppConstants.pomodoroSessionsBeforeLongBreak == 0) {
         state = state.copyWith(
@@ -117,6 +123,16 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
     }
   }
 
+  void _logSession() {
+    _repository.addSession(PomodoroSessionEntity(
+      id: const Uuid().v4(),
+      courseId: state.courseId,
+      durationSeconds: AppConstants.pomodoroFocusMinutes * 60,
+      timestamp: DateTime.now(),
+      completed: true,
+    ));
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -125,5 +141,6 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
 }
 
 final pomodoroProvider = StateNotifierProvider<PomodoroNotifier, PomodoroState>((ref) {
-  return PomodoroNotifier();
+  final repo = ref.watch(pomodoroRepositoryProvider);
+  return PomodoroNotifier(repo);
 });

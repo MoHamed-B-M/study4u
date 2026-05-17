@@ -252,6 +252,21 @@ class _InfoTab extends ConsumerWidget {
     final total = courseRecords.where((r) => r.status != AttendanceStatus.upcoming).length;
     final rate = total > 0 ? present / total * 100 : 0.0;
 
+    if (total == 0) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+        ),
+        child: Center(
+          child: Text('No attendance records yet',
+            style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.5)),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -333,16 +348,42 @@ class _MaterialsTab extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: materials.isEmpty
-          ? Center(child: Text('No materials yet', style: Theme.of(context).textTheme.bodyMedium))
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.folder_open_outlined, size: 48,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('No materials yet', style: Theme.of(context).textTheme.bodyMedium),
+                  const SizedBox(height: 4),
+                  Text('Tap + to add PDFs, images or links',
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                  ),
+                ],
+              ),
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               physics: const BouncingScrollPhysics(),
               itemCount: materials.length,
               itemBuilder: (context, index) {
                 final m = materials[index];
-                return _MaterialTile(material: m)
-                    .animate()
-                    .fadeIn(duration: 200.ms, delay: (index * 40).ms);
+                return _MaterialTile(
+                  material: m,
+                  onDelete: () {
+                    ref.read(materialRepositoryProvider).deleteMaterial(m.id);
+                    ref.read(dataRefreshProvider.notifier).state++;
+                  },
+                ).animate().fadeIn(duration: 200.ms, delay: (index * 40).ms);
               },
             ),
       floatingActionButton: FloatingActionButton.small(
@@ -351,6 +392,7 @@ class _MaterialsTab extends ConsumerWidget {
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -369,7 +411,8 @@ class _MaterialsTab extends ConsumerWidget {
 
 class _MaterialTile extends StatelessWidget {
   final CourseMaterialEntity material;
-  const _MaterialTile({required this.material});
+  final VoidCallback? onDelete;
+  const _MaterialTile({required this.material, this.onDelete});
 
   String _subtitle(CourseMaterialEntity m) {
     switch (m.type) {
@@ -455,6 +498,16 @@ class _MaterialTile extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onDelete != null)
+                InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: onDelete,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(Icons.delete_outline, size: 18, color: scheme.error.withValues(alpha: 0.6)),
+                  ),
+                ),
+              const SizedBox(width: 4),
               if (material.type == 'link' || material.type == 'file')
                 Icon(Icons.open_in_new, size: 16, color: scheme.onSurface.withValues(alpha: 0.3)),
             ],
@@ -668,6 +721,7 @@ class _NotesTab extends ConsumerWidget {
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -844,6 +898,7 @@ class _TasksTab extends ConsumerWidget {
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

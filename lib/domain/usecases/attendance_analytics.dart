@@ -17,6 +17,8 @@ class AttendanceAnalyticsResult {
     required this.total,
     required this.isBelowThreshold,
   });
+
+  bool get hasRecords => total > 0;
 }
 
 class AttendanceAnalyticsUseCase {

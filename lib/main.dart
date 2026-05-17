@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/update_service.dart';
 import 'data/datasources/local_storage.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/theme_provider.dart';
@@ -11,6 +12,7 @@ import 'presentation/features/tracker/tracker_screen.dart';
 import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
+import 'presentation/widgets/update_dialog.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -170,11 +172,36 @@ final routerProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
-class Stdy4uApp extends ConsumerWidget {
+class Stdy4uApp extends ConsumerStatefulWidget {
   const Stdy4uApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Stdy4uApp> createState() => _Stdy4uAppState();
+}
+
+class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
+  bool _checkedUpdate = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _maybeCheckUpdate();
+  }
+
+  void _maybeCheckUpdate() {
+    if (_checkedUpdate) return;
+    _checkedUpdate = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final service = UpdateService();
+      final update = await service.checkForUpdate();
+      if (!mounted || update == null || !update.isNewer) return;
+      await UpdateDialog.show(context: context, update: update);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final s = ref.watch(settingsProvider);
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);

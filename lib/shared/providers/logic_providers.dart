@@ -7,19 +7,27 @@ import '../../domain/entities/course.dart';
 import '../../domain/entities/task.dart';
 import '../../domain/entities/course_material.dart';
 import '../../domain/entities/attendance_record.dart';
+import '../../domain/entities/pomodoro_session.dart';
 import '../../domain/usecases/cgpa_calculator.dart';
 import '../../domain/usecases/attendance_analytics.dart';
 import '../../domain/usecases/schedule_optimizer.dart';
+import '../../data/repositories/pomodoro_repo_impl.dart';
 
 final courseRepositoryProvider = Provider((ref) => CourseRepositoryImpl());
 final taskRepositoryProvider = Provider((ref) => TaskRepositoryImpl());
 final attendanceRepositoryProvider = Provider((ref) => AttendanceRepositoryImpl());
 final materialRepositoryProvider = Provider((ref) => MaterialRepositoryImpl());
+final pomodoroRepositoryProvider = Provider((ref) => PomodoroRepositoryImpl());
 final cgpaCalculatorProvider = Provider((ref) => CgpaCalculatorUseCase());
 final attendanceAnalyticsProvider = Provider((ref) => AttendanceAnalyticsUseCase());
 final scheduleOptimizerProvider = Provider((ref) => ScheduleOptimizerUseCase());
 
 final dataRefreshProvider = StateProvider<int>((ref) => 0);
+
+final pomodoroSessionsProvider = Provider<List<PomodoroSessionEntity>>((ref) {
+  ref.watch(dataRefreshProvider);
+  return ref.watch(pomodoroRepositoryProvider).getSessions();
+});
 
 final courseListProvider = Provider<List<CourseEntity>>((ref) {
   ref.watch(dataRefreshProvider);

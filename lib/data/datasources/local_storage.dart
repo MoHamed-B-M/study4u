@@ -39,7 +39,7 @@ class LocalStorage {
       await Hive.openBox<PomodoroSettings>('settings');
       await Hive.openBox<ScreenTimeLog>('screenTime');
       await Hive.openBox<AppSettings>('appSettings');
-      await Hive.openBox<CourseMaterial>('materials');
+      await Hive.openBox<String>('pomodoroSessions');
 
       final settingsBox = Hive.box<AppSettings>('appSettings');
       if (settingsBox.isEmpty) {
@@ -72,4 +72,5 @@ class LocalStorage {
   static Box<ScreenTimeLog> get screenTimeBox => Hive.box<ScreenTimeLog>('screenTime');
   static Box<AppSettings> get appSettingsBox => Hive.box<AppSettings>('appSettings');
   static Box<CourseMaterial> get materialsBox => Hive.box<CourseMaterial>('materials');
+  static Box<String> get pomodoroSessionsBox => Hive.box<String>('pomodoroSessions');
 }
