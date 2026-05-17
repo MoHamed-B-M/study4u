@@ -18,6 +18,8 @@ class PomodoroState {
   final int focusMinutes;
   final int shortBreakMinutes;
   final int longBreakMinutes;
+  final String? musicFilePath;
+  final bool isMusicPlaying;
 
   PomodoroState({
     required this.remainingSeconds,
@@ -28,6 +30,8 @@ class PomodoroState {
     this.focusMinutes = AppConstants.pomodoroFocusMinutes,
     this.shortBreakMinutes = AppConstants.pomodoroShortBreakMinutes,
     this.longBreakMinutes = AppConstants.pomodoroLongBreakMinutes,
+    this.musicFilePath,
+    this.isMusicPlaying = false,
   });
 
   PomodoroState copyWith({
@@ -39,6 +43,8 @@ class PomodoroState {
     int? focusMinutes,
     int? shortBreakMinutes,
     int? longBreakMinutes,
+    String? musicFilePath,
+    bool? isMusicPlaying,
   }) {
     return PomodoroState(
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
@@ -49,6 +55,8 @@ class PomodoroState {
       focusMinutes: focusMinutes ?? this.focusMinutes,
       shortBreakMinutes: shortBreakMinutes ?? this.shortBreakMinutes,
       longBreakMinutes: longBreakMinutes ?? this.longBreakMinutes,
+      musicFilePath: musicFilePath ?? this.musicFilePath,
+      isMusicPlaying: isMusicPlaying ?? this.isMusicPlaying,
     );
   }
 
@@ -130,6 +138,14 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
         remainingSeconds: newRemaining,
       );
     }
+  }
+
+  void setMusicFile(String? path) {
+    state = state.copyWith(musicFilePath: path);
+  }
+
+  void toggleMusic() {
+    state = state.copyWith(isMusicPlaying: !state.isMusicPlaying);
   }
 
   void _handleSessionComplete() {

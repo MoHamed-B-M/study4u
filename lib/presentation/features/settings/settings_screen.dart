@@ -39,6 +39,7 @@ class SettingsScreen extends ConsumerWidget {
           _settingsGroup(context, [
             _appearanceRow(context, ref, settings),
             _accentColorRow(context, ref, settings),
+            _floatingNavRow(context, ref, settings),
           ]),
           _sectionHeader(context, 'NOTIFICATIONS'),
           _settingsGroup(context, [
@@ -184,6 +185,54 @@ class SettingsScreen extends ConsumerWidget {
             ),
             Icon(Icons.chevron_right, size: 20,
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _floatingNavRow(BuildContext context, WidgetRef ref, AppSettings settings) {
+    final tint = Theme.of(context).colorScheme.primary;
+    return InkWell(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        ref.read(settingsProvider.notifier).setUseFloatingNavBar(!settings.useFloatingNavBar);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 28, height: 28,
+              decoration: BoxDecoration(
+                color: tint.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(Icons.navigation_outlined, size: 16, color: tint),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Floating Navigation Bar', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 2),
+                  Text('Glassmorphism style bottom nav',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    )),
+                ],
+              ),
+            ),
+            Switch(
+              value: settings.useFloatingNavBar,
+              activeColor: tint,
+              onChanged: (v) {
+                HapticFeedback.selectionClick();
+                ref.read(settingsProvider.notifier).setUseFloatingNavBar(v);
+              },
+            ),
           ],
         ),
       ),

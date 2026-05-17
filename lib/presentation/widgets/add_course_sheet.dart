@@ -130,10 +130,18 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final labelStyle = TextStyle(
+      fontSize: 13,
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+    );
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20, right: 20, top: 12,
+        left: 20,
+        right: 20,
+        top: 12,
       ),
       child: Form(
         key: _formKey,
@@ -143,112 +151,230 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: Container(width: 40, height: 4,
-                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              Text(widget.course != null ? 'Edit Course' : 'Add Course', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w700)),
+              Text(
+                widget.course != null ? 'Edit Course' : 'Add Course',
+                style: GoogleFonts.outfit(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 24),
-              TextFormField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Course Name', hintText: 'e.g. Advanced Mathematics'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _codeCtrl,
-                      decoration: const InputDecoration(labelText: 'Course Code', hintText: 'e.g. MAT201'),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+
+              _sectionHeader('Course Details'),
+              const SizedBox(height: 8),
+              _groupedCard(theme, [
+                _groupedRow(
+                  child: TextFormField(
+                    controller: _nameCtrl,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Course Name',
+                      labelStyle: labelStyle,
                     ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _profCtrl,
-                      decoration: const InputDecoration(labelText: 'Professor', hintText: 'Dr. Smith'),
-                    ),
+                ),
+                _divider(theme),
+                _groupedRow(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _codeCtrl,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelText: 'Course Code',
+                            labelStyle: labelStyle,
+                          ),
+                          validator: (v) =>
+                              v == null || v.trim().isEmpty ? 'Required' : null,
+                        ),
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _profCtrl,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelText: 'Professor',
+                            labelStyle: labelStyle,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _roomCtrl,
-                      decoration: const InputDecoration(labelText: 'Room', hintText: 'e.g. LH 3'),
-                    ),
+                ),
+                _divider(theme),
+                _groupedRow(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _roomCtrl,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelText: 'Room',
+                            labelStyle: labelStyle,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: DropdownButtonFormField<double>(
+                          value: _creditHours,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelText: 'Credits',
+                            labelStyle: labelStyle,
+                          ),
+                          items: List.generate(6, (i) => (i + 1).toDouble())
+                              .map((v) => DropdownMenuItem(
+                                  value: v, child: Text('${v.toInt()}')))
+                              .toList(),
+                          onChanged: (v) =>
+                              setState(() => _creditHours = v ?? 3),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButtonFormField<double>(
-                      value: _creditHours,
-                      decoration: const InputDecoration(labelText: 'Credits'),
-                      items: List.generate(6, (i) => (i + 1).toDouble()).map((v) =>
-                        DropdownMenuItem(value: v, child: Text('${v.toInt()}'))
-                      ).toList(),
-                      onChanged: (v) => setState(() => _creditHours = v ?? 3),
-                    ),
+                ),
+              ]),
+
+              const SizedBox(height: 24),
+
+              _sectionHeader('Schedule'),
+              const SizedBox(height: 8),
+              _groupedCard(theme, [
+                _groupedRow(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _timeField(
+                            'Start Time', _timeToString(_startTime),
+                            () => _pickTime(true), labelStyle),
+                      ),
+                      Expanded(
+                        child: _timeField(
+                            'End Time', _timeToString(_endTime),
+                            () => _pickTime(false), labelStyle),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _timeField('Start Time', _timeToString(_startTime), () => _pickTime(true)),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _timeField('End Time', _timeToString(_endTime), () => _pickTime(false)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text('Days of Week', style: Theme.of(context).textTheme.labelLarge),
+                ),
+              ]),
+
+              const SizedBox(height: 24),
+
+              _sectionHeader('Days'),
               const SizedBox(height: 8),
               Wrap(
-                spacing: 8, runSpacing: 8,
+                spacing: 8,
+                runSpacing: 8,
                 children: List.generate(7, (i) => FilterChip(
                   label: Text(_days[i], style: const TextStyle(fontSize: 12)),
                   selected: _weekDays.contains(i),
-                  onSelected: (v) => setState(() => v ? _weekDays.add(i) : _weekDays.remove(i)),
-                  selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                  checkmarkColor: Theme.of(context).colorScheme.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  onSelected: (v) =>
+                      setState(() => v ? _weekDays.add(i) : _weekDays.remove(i)),
+                  selectedColor:
+                      theme.colorScheme.primary.withValues(alpha: 0.2),
+                  checkmarkColor: theme.colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
                 )),
               ),
-              const SizedBox(height: 16),
-              Text('Color', style: Theme.of(context).textTheme.labelLarge),
+
+              const SizedBox(height: 24),
+
+              _sectionHeader('Color & Grade'),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 12, runSpacing: 12,
-                children: _colors.map((c) => GestureDetector(
-                  onTap: () => setState(() => _colorValue = c.value),
-                  child: Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      color: c, shape: BoxShape.circle,
-                      border: _colorValue == c.value ? Border.all(color: Colors.white, width: 3) : null,
-                      boxShadow: _colorValue == c.value
-                          ? [BoxShadow(color: c.withValues(alpha: 0.5), blurRadius: 8, spreadRadius: 1)]
-                          : null,
-                    ),
-                    child: _colorValue == c.value ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
+              _groupedCard(theme, [
+                _groupedRow(
+                  child: Row(
+                    children: [
+                      Text('Color',
+                          style: GoogleFonts.outfit(
+                              fontSize: 15, fontWeight: FontWeight.w500)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: _colors.map((c) {
+                              final selected = _colorValue == c.value;
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      setState(() => _colorValue = c.value),
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: c,
+                                      shape: BoxShape.circle,
+                                      border: selected
+                                          ? Border.all(
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                              width: 2.5)
+                                          : null,
+                                    ),
+                                    child: selected
+                                        ? const Icon(Icons.check,
+                                            color: Colors.white, size: 14)
+                                        : null,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                )).toList(),
-              ),
-              const SizedBox(height: 16),
-              Text('Target Grade: ${_targetGrade.toStringAsFixed(1)}', style: Theme.of(context).textTheme.labelLarge),
-              Slider(
-                value: _targetGrade,
-                min: 2.0, max: 4.0, divisions: 20,
-                label: _targetGrade.toStringAsFixed(1),
-                onChanged: (v) => setState(() => _targetGrade = v),
-              ),
+                ),
+                _divider(theme),
+                _groupedRow(
+                  child: Row(
+                    children: [
+                      Text('Target Grade',
+                          style: GoogleFonts.outfit(
+                              fontSize: 15, fontWeight: FontWeight.w500)),
+                      Expanded(
+                        child: Slider(
+                          value: _targetGrade,
+                          min: 2.0,
+                          max: 4.0,
+                          divisions: 20,
+                          label: _targetGrade.toStringAsFixed(1),
+                          onChanged: (v) =>
+                              setState(() => _targetGrade = v),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 32,
+                        child: Text(
+                          _targetGrade.toStringAsFixed(1),
+                          style: GoogleFonts.outfit(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+
               const SizedBox(height: 24),
               GradientButton(
                 label: widget.course != null ? 'Save Changes' : 'Add Course',
@@ -263,12 +389,63 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
     );
   }
 
-  Widget _timeField(String label, String value, VoidCallback onTap) {
+  Widget _sectionHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: GoogleFonts.outfit(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+  }
+
+  Widget _groupedCard(ThemeData theme, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _groupedRow({required Widget child}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: child,
+    );
+  }
+
+  Widget _divider(ThemeData theme) {
+    return Divider(
+      height: 1,
+      indent: 16,
+      endIndent: 16,
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+    );
+  }
+
+  Widget _timeField(
+      String label, String value, VoidCallback onTap, TextStyle labelStyle) {
     return InkWell(
       onTap: onTap,
       child: InputDecorator(
-        decoration: InputDecoration(labelText: label),
-        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          labelText: label,
+          labelStyle: labelStyle,
+        ),
+        child: Text(value,
+            style:
+                const TextStyle(fontWeight: FontWeight.w600)),
       ),
     );
   }

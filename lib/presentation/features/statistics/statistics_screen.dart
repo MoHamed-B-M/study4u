@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:animate_do/animate_do.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../core/utils/grade_calculator.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../shared/providers/pomodoro_provider.dart';
@@ -16,11 +16,33 @@ import '../../widgets/gradient_button.dart';
 import '../../widgets/pill_chip.dart';
 import '../../widgets/animated_counter.dart';
 
-class StatisticsScreen extends ConsumerWidget {
+class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
+  @override
+  ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _fadeController;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final pomodoro = ref.watch(pomodoroProvider);
     final courses = ref.watch(courseListProvider);
     final cgpa = ref.watch(cgpaResultProvider);
@@ -35,15 +57,30 @@ class StatisticsScreen extends ConsumerWidget {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            FadeInUp(child: _buildCGPACard(context, cgpa)),
+            FadeTransition(
+              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.0, 0.3, curve: Curves.easeOut))),
+              child: _buildCGPACard(context, cgpa),
+            ),
             const SizedBox(height: 24),
-            FadeInUp(delay: const Duration(milliseconds: 200), child: _buildPomodoroControl(context, ref, pomodoro)),
+            FadeTransition(
+              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.15, 0.45, curve: Curves.easeOut))),
+              child: _buildPomodoroControl(context, ref, pomodoro),
+            ),
             const SizedBox(height: 24),
-            FadeInUp(delay: const Duration(milliseconds: 250), child: _buildPomodoroChart(context, sessions)),
+            FadeTransition(
+              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.3, 0.6, curve: Curves.easeOut))),
+              child: _buildPomodoroChart(context, sessions),
+            ),
             const SizedBox(height: 24),
-            FadeInUp(delay: const Duration(milliseconds: 300), child: _buildGradeDistribution(context, courses)),
+            FadeTransition(
+              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.45, 0.75, curve: Curves.easeOut))),
+              child: _buildGradeDistribution(context, courses),
+            ),
             const SizedBox(height: 24),
-            FadeInUp(delay: const Duration(milliseconds: 400), child: _buildPerformanceOverview(context, courses)),
+            FadeTransition(
+              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.6, 0.9, curve: Curves.easeOut))),
+              child: _buildPerformanceOverview(context, courses),
+            ),
             const SizedBox(height: 40),
           ],
         ),
@@ -139,6 +176,17 @@ class StatisticsScreen extends ConsumerWidget {
                     onTap: () => _showDurationSettings(context, ref, state),
                     child: Icon(Icons.settings, size: 18, color: Theme.of(context).colorScheme.primary),
                   ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => _pickMusicFile(ref, state),
+                    child: Icon(
+                      Icons.music_note,
+                      size: 18,
+                      color: state.musicFilePath != null
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -149,15 +197,12 @@ class StatisticsScreen extends ConsumerWidget {
               alignment: Alignment.center,
               children: [
                 if (state.isActive)
-                  Pulse(
-                    infinite: true,
-                    child: Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
+                  Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
                   ),
                 AnimatedSwitcher(
@@ -189,6 +234,45 @@ class StatisticsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text('${state.completedSessions} sessions today', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          if (state.musicFilePath != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.music_note, size: 16, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Focus Music',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => ref.read(pomodoroProvider.notifier).toggleMusic(),
+                    child: Icon(
+                      state.isMusicPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => _pickMusicFile(ref, state),
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           GradientButton(
             label: 'Start Focus Session',
@@ -350,6 +434,16 @@ class StatisticsScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  void _pickMusicFile(WidgetRef ref, PomodoroState state) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.audio,
+      allowMultiple: false,
+    );
+    if (result != null && result.files.single.path != null) {
+      ref.read(pomodoroProvider.notifier).setMusicFile(result.files.single.path);
+    }
   }
 
   Widget _buildPomodoroChart(BuildContext context, List<PomodoroSessionEntity> sessions) {

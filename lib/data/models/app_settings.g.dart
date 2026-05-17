@@ -23,13 +23,14 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       notificationEnabled: fields[3] as bool,
       userName: fields[4] as String,
       onboardingComplete: fields[5] as bool,
+      useFloatingNavBar: fields[6] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(4)
       ..write(obj.userName)
       ..writeByte(5)
-      ..write(obj.onboardingComplete);
+      ..write(obj.onboardingComplete)
+      ..writeByte(6)
+      ..write(obj.useFloatingNavBar);
   }
 
   @override

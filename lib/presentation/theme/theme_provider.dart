@@ -39,6 +39,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? notificationEnabled,
     String? userName,
     bool? onboardingComplete,
+    bool? useFloatingNavBar,
   }) {
     return AppSettings(
       id: state.id,
@@ -47,6 +48,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       notificationEnabled: notificationEnabled ?? state.notificationEnabled,
       userName: userName ?? state.userName,
       onboardingComplete: onboardingComplete ?? state.onboardingComplete,
+      useFloatingNavBar: useFloatingNavBar ?? state.useFloatingNavBar,
     );
   }
 
@@ -66,4 +68,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   void setUserName(String name) => _saveAndUpdate(_copy(userName: name));
 
   void setOnboardingComplete(bool value) => _saveAndUpdate(_copy(onboardingComplete: value));
+  void setUseFloatingNavBar(bool value) => _saveAndUpdate(_copy(useFloatingNavBar: value));
 }
+
+final useFloatingNavBarProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider).useFloatingNavBar;
+});
