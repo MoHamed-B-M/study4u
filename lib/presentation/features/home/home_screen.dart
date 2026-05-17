@@ -55,6 +55,7 @@ class HomeScreen extends ConsumerWidget {
                 icon: const Icon(Icons.notifications_outlined),
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  _showNotificationHistory(context);
                 },
               ),
               const SizedBox(width: 8),
@@ -96,6 +97,61 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: _buildFAB(context),
+    );
+  }
+
+  void _showNotificationHistory(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text('Notifications', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.info_outline, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Enable notifications in Settings to get reminded about classes, tasks, and pomodoro sessions.',
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.settings_outlined, size: 18),
+                label: const Text('Open Notification Settings'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -174,15 +230,15 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildCoursesList(BuildContext context, List<CourseEntity> courses, WidgetRef ref) {
     if (courses.isEmpty) return Text('No courses added yet.', style: Theme.of(context).textTheme.bodyMedium);
     return SizedBox(
-      height: 140,
+      height: 200,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: courses.length,
         itemBuilder: (context, index) {
           final course = courses[index];
           return Container(
-            width: 160,
-            margin: const EdgeInsets.only(right: 16),
+            width: 170,
+            margin: const EdgeInsets.only(right: 14),
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -206,22 +262,47 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 );
               },
-              child: AppCard(
-                padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.15)),
+                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Hero(
-                      tag: 'course-icon-${course.id}',
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: Color(course.colorValue).withValues(alpha: 0.1), shape: BoxShape.circle),
-                        child: Icon(Icons.book, color: Color(course.colorValue)),
+                    Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Color(course.colorValue),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(course.code, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(course.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(color: Color(course.colorValue).withValues(alpha: 0.12), shape: BoxShape.circle),
+                            child: Icon(Icons.book, color: Color(course.colorValue), size: 20),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(course.code, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          const SizedBox(height: 2),
+                          Text(course.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Icon(Icons.access_time, size: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                              const SizedBox(width: 4),
+                              Text(course.startTime, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

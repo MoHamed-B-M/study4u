@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'presentation/widgets/floating_nav_bar.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
 import 'data/datasources/local_storage.dart';
@@ -156,19 +157,21 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
   }
 }
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {
   final Widget child;
   const MainScreen({super.key, required this.child});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final useFloating = ref.watch(useFloatingNavBarProvider);
+
     return Scaffold(
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
@@ -177,24 +180,35 @@ class _MainScreenState extends State<MainScreen> {
         transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
         child: widget.child,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          HapticFeedback.lightImpact();
-          setState(() => _currentIndex = index);
-          if (index == 0) context.go('/');
-          if (index == 1) context.go('/tracker');
-          if (index == 2) context.go('/stats');
-        },
-        labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Tracker'),
-          NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Stats'),
-        ],
-      ),
+      bottomNavigationBar: useFloating
+          ? FloatingNavBar(
+              currentIndex: _currentIndex,
+              onDestinationSelected: (index) {
+                HapticFeedback.lightImpact();
+                setState(() => _currentIndex = index);
+                if (index == 0) context.go('/');
+                if (index == 1) context.go('/tracker');
+                if (index == 2) context.go('/stats');
+              },
+            )
+          : NavigationBar(
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (index) {
+                HapticFeedback.lightImpact();
+                setState(() => _currentIndex = index);
+                if (index == 0) context.go('/');
+                if (index == 1) context.go('/tracker');
+                if (index == 2) context.go('/stats');
+              },
+              labelTextStyle: WidgetStateProperty.all(
+                const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
+                NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Tracker'),
+                NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Stats'),
+              ],
+            ),
     );
   }
 }
