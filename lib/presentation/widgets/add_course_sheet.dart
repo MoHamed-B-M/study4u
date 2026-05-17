@@ -9,7 +9,8 @@ import '../theme/app_theme.dart';
 import 'gradient_button.dart';
 
 class AddCourseSheet extends ConsumerStatefulWidget {
-  const AddCourseSheet({super.key});
+  final CourseEntity? course;
+  const AddCourseSheet({super.key, this.course});
 
   @override
   ConsumerState<AddCourseSheet> createState() => _AddCourseSheetState();
@@ -42,12 +43,42 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.course != null) {
+      final c = widget.course!;
+      _nameCtrl.text = c.name;
+      _codeCtrl.text = c.code;
+      _profCtrl.text = c.professor;
+      _roomCtrl.text = c.room;
+      _startTime = _parseTime(c.startTime);
+      _endTime = _parseTime(c.endTime);
+      _colorValue = c.colorValue;
+      _targetGrade = c.targetGrade;
+      _creditHours = c.creditHours;
+      _weekDays.addAll(c.weekDays.map((d) => _days.indexOf(d)).where((i) => i >= 0));
+    }
+  }
+
+  @override
   void dispose() {
     _nameCtrl.dispose();
     _codeCtrl.dispose();
     _profCtrl.dispose();
     _roomCtrl.dispose();
     super.dispose();
+  }
+
+  TimeOfDay _parseTime(String timeStr) {
+    final parts = timeStr.split(' ');
+    final time = parts[0].split(':');
+    int hour = int.parse(time[0]);
+    final minute = int.parse(time[1]);
+    if (parts.length > 1) {
+      if (parts[1] == 'PM' && hour != 12) hour += 12;
+      if (parts[1] == 'AM' && hour == 12) hour = 0;
+    }
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   Future<void> _pickTime(bool isStart) async {
@@ -71,8 +102,10 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
 
+    final id = widget.course?.id ?? const Uuid().v4();
+
     final course = CourseEntity(
-      id: const Uuid().v4(),
+      id: id,
       code: _codeCtrl.text.trim(),
       name: _nameCtrl.text.trim(),
       professor: _profCtrl.text.trim(),
@@ -86,7 +119,11 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
       weekDays: _weekDays.map((d) => _days[d]).toList(),
     );
 
-    ref.read(courseRepositoryProvider).addCourse(course);
+    if (widget.course != null) {
+      ref.read(courseRepositoryProvider).updateCourse(course);
+    } else {
+      ref.read(courseRepositoryProvider).addCourse(course);
+    }
     ref.read(dataRefreshProvider.notifier).state++;
     Navigator.of(context).pop();
   }
@@ -110,7 +147,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
                   decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
               ),
               const SizedBox(height: 20),
-              Text('Add Course', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w700)),
+              Text(widget.course != null ? 'Edit Course' : 'Add Course', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w700)),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nameCtrl,
@@ -214,7 +251,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
               ),
               const SizedBox(height: 24),
               GradientButton(
-                label: 'Add Course',
+                label: widget.course != null ? 'Save Changes' : 'Add Course',
                 icon: Icons.book,
                 onPressed: _save,
               ),

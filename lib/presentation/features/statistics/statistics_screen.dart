@@ -131,7 +131,16 @@ class StatisticsScreen extends ConsumerWidget {
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
-              _buildStatusBadge(state.status),
+              Row(
+                children: [
+                  _buildStatusBadge(state.status),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => _showDurationSettings(context, ref, state),
+                    child: Icon(Icons.settings, size: 18, color: Theme.of(context).colorScheme.primary),
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -151,9 +160,14 @@ class StatisticsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                Text(
-                  state.timerString,
-                  style: GoogleFonts.outfit(fontSize: 48, fontWeight: FontWeight.w800),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                  child: Text(
+                    key: ValueKey(state.timerString),
+                    state.timerString,
+                    style: GoogleFonts.outfit(fontSize: 48, fontWeight: FontWeight.w800),
+                  ),
                 ),
               ],
             ),
@@ -241,7 +255,7 @@ class StatisticsScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).textTheme.displayLarge?.color,
+          color: Theme.of(context).colorScheme.primary,
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -250,6 +264,91 @@ class StatisticsScreen extends ConsumerWidget {
           size: 32,
         ),
       ),
+    );
+  }
+
+  void _showDurationSettings(BuildContext context, WidgetRef ref, PomodoroState state) {
+    double focus = state.focusMinutes.toDouble();
+    double shortBreak = state.shortBreakMinutes.toDouble();
+    double longBreak = state.longBreakMinutes.toDouble();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      'Timer Settings',
+                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text('Focus Duration', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Slider(
+                    value: focus,
+                    min: 1,
+                    max: 60,
+                    divisions: 59,
+                    label: '${focus.round()} min',
+                    onChanged: (v) => setSheetState(() => focus = v),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Short Break', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Slider(
+                    value: shortBreak,
+                    min: 1,
+                    max: 30,
+                    divisions: 29,
+                    label: '${shortBreak.round()} min',
+                    onChanged: (v) => setSheetState(() => shortBreak = v),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Long Break', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Slider(
+                    value: longBreak,
+                    min: 1,
+                    max: 60,
+                    divisions: 59,
+                    label: '${longBreak.round()} min',
+                    onChanged: (v) => setSheetState(() => longBreak = v),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GradientButton(
+                      label: 'Save',
+                      onPressed: () {
+                        ref.read(pomodoroProvider.notifier).setDurations(
+                          focus.round(),
+                          shortBreak.round(),
+                          longBreak.round(),
+                        );
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -488,5 +587,3 @@ class StatisticsScreen extends ConsumerWidget {
     );
   }
 }
-
-

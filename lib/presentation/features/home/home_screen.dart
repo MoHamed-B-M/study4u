@@ -83,7 +83,7 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 32),
                   _buildSectionHeader(context, 'Current Courses', 'View all'),
                   const SizedBox(height: 16),
-                  _buildCoursesList(context, courses),
+                  _buildCoursesList(context, courses, ref),
                   const SizedBox(height: 32),
                   _buildSectionHeader(context, 'Due Tasks', null),
                   const SizedBox(height: 16),
@@ -171,7 +171,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCoursesList(BuildContext context, List<CourseEntity> courses) {
+  Widget _buildCoursesList(BuildContext context, List<CourseEntity> courses, WidgetRef ref) {
     if (courses.isEmpty) return Text('No courses added yet.', style: Theme.of(context).textTheme.bodyMedium);
     return SizedBox(
       height: 140,
@@ -187,6 +187,24 @@ class HomeScreen extends ConsumerWidget {
               onTap: () {
                 HapticFeedback.lightImpact();
                 context.push('/course/${course.id}');
+              },
+              onLongPress: () {
+                HapticFeedback.heavyImpact();
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('Delete ${course.name}?'),
+                    content: const Text('This will also remove all related attendance records.'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                      TextButton(onPressed: () {
+                        ref.read(courseRepositoryProvider).deleteCourse(course.id);
+                        ref.read(dataRefreshProvider.notifier).state++;
+                        Navigator.pop(ctx);
+                      }, child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error))),
+                    ],
+                  ),
+                );
               },
               child: AppCard(
                 padding: const EdgeInsets.all(16),
@@ -271,7 +289,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildFAB(BuildContext context) {
-    return FloatingActionButton.extended(
+    return FloatingActionButton(
       onPressed: () {
         HapticFeedback.lightImpact();
         showModalBottomSheet(
@@ -284,10 +302,10 @@ class HomeScreen extends ConsumerWidget {
           builder: (_) => const AddCourseSheet(),
         );
       },
-      backgroundColor: AppTheme.textPrimary,
-      label: const Text('Add Course', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      icon: const Icon(Icons.book_outlined, color: Colors.white),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      shape: const CircleBorder(),
+      child: const Icon(Icons.add),
     );
   }
 }
