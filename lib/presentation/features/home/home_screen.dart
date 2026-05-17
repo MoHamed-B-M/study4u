@@ -246,19 +246,87 @@ class HomeScreen extends ConsumerWidget {
               },
               onLongPress: () {
                 HapticFeedback.heavyImpact();
-                showDialog(
+                showModalBottomSheet(
                   context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: Text('Delete ${course.name}?'),
-                    content: const Text('This will also remove all related attendance records.'),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-                      TextButton(onPressed: () {
-                        ref.read(courseRepositoryProvider).deleteCourse(course.id);
-                        ref.read(dataRefreshProvider.notifier).state++;
-                        Navigator.pop(ctx);
-                      }, child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error))),
-                    ],
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  builder: (ctx) => SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 40, height: 4,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.outlineVariant,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(course.name, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(course.code, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
+                          const SizedBox(height: 24),
+                          ListTile(
+                            leading: const Icon(Icons.edit_outlined),
+                            title: const Text('Edit Course'),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              HapticFeedback.lightImpact();
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXXL)),
+                                ),
+                                builder: (_) => AddCourseSheet(course: course),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          ListTile(
+                            leading: Icon(Icons.delete_outlined, color: Theme.of(context).colorScheme.error),
+                            title: Text('Delete Course', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              HapticFeedback.mediumImpact();
+                              showDialog(
+                                context: context,
+                                builder: (dCtx) => AlertDialog(
+                                  title: Text('Delete ${course.name}?'),
+                                  content: const Text('This will also remove all related attendance records.'),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.pop(dCtx), child: const Text('Cancel')),
+                                    TextButton(
+                                      onPressed: () {
+                                        ref.read(courseRepositoryProvider).deleteCourse(course.id);
+                                        ref.read(dataRefreshProvider.notifier).state++;
+                                        Navigator.pop(dCtx);
+                                      },
+                                      child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          ListTile(
+                            leading: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                            title: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            onTap: () => Navigator.pop(ctx),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },

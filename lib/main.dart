@@ -14,7 +14,9 @@ import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
+import 'presentation/features/onboarding/onboarding_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
+import 'data/models/app_settings.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,8 +73,16 @@ class _StartupAppState extends State<StartupApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: const Color(0xFF111625)),
-      home: const SplashScreen(nextPage: ProviderScope(child: Stdy4uApp())),
+      home: SplashScreen(nextPage: _getNextPage()),
     );
+  }
+
+  Widget _getNextPage() {
+    try {
+      final settings = LocalStorage.appSettingsBox.get('default') ?? AppSettings();
+      if (!settings.onboardingComplete) return const OnboardingScreen();
+    } catch (_) {}
+    return const ProviderScope(child: Stdy4uApp());
   }
 }
 

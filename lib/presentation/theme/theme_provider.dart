@@ -40,6 +40,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     String? userName,
     bool? onboardingComplete,
     bool? useFloatingNavBar,
+    bool? hapticFeedback,
   }) {
     return AppSettings(
       id: state.id,
@@ -49,6 +50,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       userName: userName ?? state.userName,
       onboardingComplete: onboardingComplete ?? state.onboardingComplete,
       useFloatingNavBar: useFloatingNavBar ?? state.useFloatingNavBar,
+      hapticFeedback: hapticFeedback ?? state.hapticFeedback,
     );
   }
 
@@ -69,8 +71,13 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   void setOnboardingComplete(bool value) => _saveAndUpdate(_copy(onboardingComplete: value));
   void setUseFloatingNavBar(bool value) => _saveAndUpdate(_copy(useFloatingNavBar: value));
+  void setHapticFeedback(bool value) => _saveAndUpdate(_copy(hapticFeedback: value));
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {
   return ref.watch(settingsProvider).useFloatingNavBar;
+});
+
+final useHapticFeedbackProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider).hapticFeedback;
 });

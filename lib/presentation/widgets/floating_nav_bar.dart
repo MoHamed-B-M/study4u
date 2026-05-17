@@ -40,8 +40,8 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
+        left: 48,
+        right: 48,
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
       child: ClipRRect(
@@ -49,11 +49,15 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
-            height: 64,
+            height: 56,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.06),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : Colors.black.withValues(alpha: 0.08),
                 width: 0.5,
               ),
               borderRadius: BorderRadius.circular(28),
@@ -87,7 +91,9 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                       isActive ? destination.activeIcon : destination.icon,
                       color: isActive
                           ? Theme.of(context).colorScheme.primary
-                          : Colors.white.withValues(alpha: 0.45),
+                          : Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white.withValues(alpha: 0.45)
+                              : Colors.black.withValues(alpha: 0.45),
                     ),
                   ),
                 );

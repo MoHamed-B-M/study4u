@@ -18,6 +18,8 @@ class AppSettings extends HiveObject {
   final bool onboardingComplete;
   @HiveField(6)
   final bool useFloatingNavBar;
+  @HiveField(7)
+  final bool hapticFeedback;
 
   AppSettings({
     this.id = 'default',
@@ -25,7 +27,8 @@ class AppSettings extends HiveObject {
     this.themeMode = 'system',
     this.notificationEnabled = true,
     this.userName = '',
-    this.onboardingComplete = true,
+    this.onboardingComplete = false,
     this.useFloatingNavBar = false,
+    this.hapticFeedback = true,
   });
 }
