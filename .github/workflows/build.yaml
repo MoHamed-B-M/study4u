@@ -33,7 +33,13 @@ jobs:
         run: flutter pub get
 
       - name: Decode keystore
-        run: echo "${{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
+        run: |
+          printf '%s' "${{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
+          if [ ! -s android/upload-keystore.jks ]; then
+            echo "ERROR: decoded keystore is empty — check that KEY_STORE_BASE64 secret is set"
+            exit 1
+          fi
+          echo "Keystore decoded ($(wc -c < android/upload-keystore.jks) bytes)"
 
       - name: Convert keystore to compatible format
         run: |
