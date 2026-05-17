@@ -95,13 +95,21 @@ jobs:
         run: |
           sed -i "s/version: .*/version: $VERSION+${{ github.run_number }}/" pubspec.yaml
 
-      - name: Build APK (release — universal arm64+v7a)
+      - name: Build APK (signed release — universal arm64+v7a)
         if: env.IS_RELEASE == 'true'
         run: flutter build apk --release --target-platform android-arm64,android-arm --build-number=${{ github.run_number }}
 
-      - name: Build APK (debug — verify merge to main)
+      - name: Build APK (release — universal arm64+v7a)
         if: env.IS_RELEASE != 'true'
-        run: flutter build apk --debug --target-platform android-arm64,android-arm
+        run: flutter build apk --release --target-platform android-arm64,android-arm
+
+      - name: Upload APK as artifact (PR / branch push)
+        if: env.IS_RELEASE != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stdy4u-app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
 
       - name: Extract release notes from CHANGELOG
         if: env.IS_RELEASE == 'true'
