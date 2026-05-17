@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../data/models/app_settings.dart';
 import '../../theme/theme_provider.dart';
 import '../../widgets/app_card.dart';
@@ -49,93 +52,218 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildThemeSection(BuildContext context, WidgetRef ref, AppSettings settings) {
+    final labels = {'system': 'System Default', 'light': 'Light', 'dark': 'Dark'};
+    final current = labels[settings.themeMode] ?? 'System Default';
+    final icons = {'system': Icons.brightness_auto, 'light': Icons.light_mode, 'dark': Icons.dark_mode};
+
     return AppCard(
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Appearance', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          _buildRadioTile(
-            context,
-            title: 'System Default',
-            subtitle: 'Follow your device theme',
-            icon: Icons.brightness_auto,
-            value: 'system',
-            groupValue: settings.themeMode,
-            onChanged: (v) {
-              HapticFeedback.selectionClick();
-              ref.read(settingsProvider.notifier).setThemeMode(v!);
-            },
-          ),
-          _buildRadioTile(
-            context,
-            title: 'Light',
-            subtitle: 'Always light mode',
-            icon: Icons.light_mode,
-            value: 'light',
-            groupValue: settings.themeMode,
-            onChanged: (v) {
-              HapticFeedback.selectionClick();
-              ref.read(settingsProvider.notifier).setThemeMode(v!);
-            },
-          ),
-          _buildRadioTile(
-            context,
-            title: 'Dark',
-            subtitle: 'Always dark mode',
-            icon: Icons.dark_mode,
-            value: 'dark',
-            groupValue: settings.themeMode,
-            onChanged: (v) {
-              HapticFeedback.selectionClick();
-              ref.read(settingsProvider.notifier).setThemeMode(v!);
-            },
-          ),
-        ],
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showThemeSheet(context, ref, settings),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icons[settings.themeMode] ?? Icons.brightness_auto,
+                  color: Theme.of(context).colorScheme.primary, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Appearance', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text(current, style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  )),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showThemeSheet(BuildContext context, WidgetRef ref, AppSettings settings) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text('Choose Theme', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            _buildRadioTile(
+              context,
+              title: 'System Default',
+              subtitle: 'Follow your device theme',
+              icon: Icons.brightness_auto,
+              value: 'system',
+              groupValue: settings.themeMode,
+              onChanged: (v) {
+                HapticFeedback.selectionClick();
+                ref.read(settingsProvider.notifier).setThemeMode(v!);
+                Navigator.of(context).pop();
+              },
+            ),
+            _buildRadioTile(
+              context,
+              title: 'Light',
+              subtitle: 'Always light mode',
+              icon: Icons.light_mode,
+              value: 'light',
+              groupValue: settings.themeMode,
+              onChanged: (v) {
+                HapticFeedback.selectionClick();
+                ref.read(settingsProvider.notifier).setThemeMode(v!);
+                Navigator.of(context).pop();
+              },
+            ),
+            _buildRadioTile(
+              context,
+              title: 'Dark',
+              subtitle: 'Always dark mode',
+              icon: Icons.dark_mode,
+              value: 'dark',
+              groupValue: settings.themeMode,
+              onChanged: (v) {
+                HapticFeedback.selectionClick();
+                ref.read(settingsProvider.notifier).setThemeMode(v!);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildColorSection(BuildContext context, WidgetRef ref, AppSettings settings) {
+    final currentColor = Color(settings.primaryColorValue);
     return AppCard(
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Accent Color', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: _colors.map((color) {
-              final isSelected = color.value == settings.primaryColorValue;
-              return GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  ref.read(settingsProvider.notifier).setPrimaryColor(color.value);
-                },
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(color: Colors.white, width: 3)
-                        : null,
-                    boxShadow: isSelected
-                        ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 12, spreadRadius: 2)]
-                        : null,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showColorSheet(context, ref, settings),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: currentColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.palette_outlined, color: currentColor, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Accent Color', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Container(
+                        width: 14, height: 14,
+                        decoration: BoxDecoration(color: currentColor, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 8),
+                      Text('#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: isSelected
-                      ? const Icon(Icons.check, color: Colors.white)
-                      : null,
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showColorSheet(BuildContext context, WidgetRef ref, AppSettings settings) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-              );
-            }).toList(),
-          ),
-        ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text('Pick Accent Color', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: _colors.map((color) {
+                final isSelected = color.value == settings.primaryColorValue;
+                return GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ref.read(settingsProvider.notifier).setPrimaryColor(color.value);
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
+                      boxShadow: isSelected
+                          ? [BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 12, spreadRadius: 2)]
+                          : null,
+                    ),
+                    child: isSelected ? const Icon(Icons.check, color: Colors.white) : null,
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -146,17 +274,40 @@ class SettingsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Notifications', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('Enable Notifications'),
-            subtitle: const Text('Get reminded about classes and tasks'),
-            value: settings.notificationEnabled,
-            activeColor: Theme.of(context).colorScheme.primary,
-            onChanged: (v) {
-              HapticFeedback.selectionClick();
-              ref.read(settingsProvider.notifier).setNotificationEnabled(v);
-            },
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.notifications_outlined,
+                    color: Theme.of(context).colorScheme.primary, size: 22),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text('Notifications', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Switch(
+                value: settings.notificationEnabled,
+                activeColor: Theme.of(context).colorScheme.primary,
+                onChanged: (v) {
+                  HapticFeedback.selectionClick();
+                  ref.read(settingsProvider.notifier).setNotificationEnabled(v);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 50),
+            child: Text('Get reminded about classes and tasks',
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
           ),
         ],
       ),
@@ -169,24 +320,88 @@ class SettingsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('About', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary, size: 22),
+              ),
+              const SizedBox(width: 16),
+              Text('About', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+            ],
+          ),
           const SizedBox(height: 16),
-          ListTile(
-            title: const Text('stdy4u'),
-            subtitle: const Text('Version 1.0.0'),
-            leading: Container(
-              padding: const EdgeInsets.all(10),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.school, color: Colors.black54, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('stdy4u', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
+                    FutureBuilder<PackageInfo>(
+                      future: PackageInfo.fromPlatform(),
+                      builder: (ctx, snap) {
+                        final ver = snap.data?.version ?? '1.0.0';
+                        final build = snap.data?.buildNumber ?? '1';
+                        return Text('Version $ver+$build',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => launchUrl(Uri.parse('https://github.com/MoHamed-B-M/study4u')),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.school, color: Theme.of(context).colorScheme.primary),
+              child: Row(
+                children: [
+                  Icon(Icons.code, size: 20, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('GitHub Repository',
+                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 14)),
+                        Text('MoHamed-B-M/study4u',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                          )),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.open_in_new, size: 18,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'A premium student productivity tool designed with Material 3 Expressive.',
-            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
       ),
@@ -203,7 +418,7 @@ class SettingsScreen extends ConsumerWidget {
     required ValueChanged<String?> onChanged,
   }) {
     return RadioListTile<String>(
-      title: Text(title),
+      title: Text(title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
       secondary: Icon(icon),
       value: value,
