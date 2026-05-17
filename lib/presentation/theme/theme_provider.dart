@@ -23,7 +23,15 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 });
 
 class SettingsNotifier extends StateNotifier<AppSettings> {
-  SettingsNotifier() : super(LocalStorage.appSettingsBox.get('default') ?? AppSettings());
+  SettingsNotifier() : super(_loadSettings());
+
+  static AppSettings _loadSettings() {
+    try {
+      return LocalStorage.appSettingsBox.get('default') ?? AppSettings();
+    } catch (_) {
+      return AppSettings();
+    }
+  }
 
   AppSettings _copy({
     int? primaryColorValue,
@@ -43,7 +51,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   }
 
   void _saveAndUpdate(AppSettings updated) {
-    LocalStorage.appSettingsBox.put('default', updated);
+    try {
+      LocalStorage.appSettingsBox.put('default', updated);
+    } catch (_) {}
     state = updated;
   }
 
