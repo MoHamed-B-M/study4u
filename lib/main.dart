@@ -14,7 +14,7 @@ import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
-import 'presentation/features/onboarding/onboarding_screen.dart';
+import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
 import 'data/models/app_settings.dart';
 
@@ -80,7 +80,7 @@ class _StartupAppState extends State<StartupApp> {
   Widget _getNextPage() {
     try {
       final settings = LocalStorage.appSettingsBox.get('default') ?? AppSettings();
-      if (!settings.onboardingComplete) return const OnboardingScreen();
+      if (!settings.onboardingComplete) return const FeaturePreviewScreen();
     } catch (_) {}
     return const ProviderScope(child: Stdy4uApp());
   }
