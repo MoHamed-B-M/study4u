@@ -12,6 +12,7 @@ import 'presentation/features/tracker/tracker_screen.dart';
 import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
+import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
 
 void main() {
@@ -58,78 +59,19 @@ class _StartupAppState extends State<StartupApp> {
         ),
       );
     }
-    return ErrorBoundary(
-      child: _ready
-          ? const ProviderScope(child: Stdy4uApp())
-          : const _LoadingApp(),
-    );
-  }
-}
-
-class _LoadingApp extends StatelessWidget {
-  const _LoadingApp();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text('Loading...', style: TextStyle(color: Colors.grey[600])),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ErrorBoundary extends StatefulWidget {
-  final Widget child;
-  const ErrorBoundary({super.key, required this.child});
-
-  @override
-  State<ErrorBoundary> createState() => _ErrorBoundaryState();
-}
-
-class _ErrorBoundaryState extends State<ErrorBoundary> {
-  FlutterErrorDetails? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    FlutterError.onError = (details) {
-      FlutterError.presentError(details);
-      if (mounted) {
-        setState(() => _error = details);
-      }
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_error != null) {
-      return MaterialApp(
+    if (!_ready) {
+      return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Text(
-                '${_error!.exception}',
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+          body: Center(child: CircularProgressIndicator()),
         ),
       );
     }
-    return widget.child;
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: const Color(0xFF111625)),
+      home: const SplashScreen(nextPage: ProviderScope(child: Stdy4uApp())),
+    );
   }
 }
 
@@ -180,24 +122,17 @@ class Stdy4uApp extends ConsumerStatefulWidget {
 }
 
 class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
-  bool _checkedUpdate = false;
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _maybeCheckUpdate();
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdate());
   }
 
-  void _maybeCheckUpdate() {
-    if (_checkedUpdate) return;
-    _checkedUpdate = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      final service = UpdateService();
-      final update = await service.checkForUpdate();
-      if (!mounted || update == null || !update.isNewer) return;
-      await UpdateDialog.show(context: context, update: update);
-    });
+  Future<void> _checkUpdate() async {
+    final service = UpdateService();
+    final update = await service.checkForUpdate();
+    if (!mounted || update == null || !update.isNewer) return;
+    await UpdateDialog.show(context: context, update: update);
   }
 
   @override

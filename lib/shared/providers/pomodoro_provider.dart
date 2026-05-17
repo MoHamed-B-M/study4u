@@ -15,6 +15,9 @@ class PomodoroState {
   final bool isActive;
   final int completedSessions;
   final String? courseId;
+  final int focusMinutes;
+  final int shortBreakMinutes;
+  final int longBreakMinutes;
 
   PomodoroState({
     required this.remainingSeconds,
@@ -22,6 +25,9 @@ class PomodoroState {
     this.isActive = false,
     this.completedSessions = 0,
     this.courseId,
+    this.focusMinutes = AppConstants.pomodoroFocusMinutes,
+    this.shortBreakMinutes = AppConstants.pomodoroShortBreakMinutes,
+    this.longBreakMinutes = AppConstants.pomodoroLongBreakMinutes,
   });
 
   PomodoroState copyWith({
@@ -30,6 +36,9 @@ class PomodoroState {
     bool? isActive,
     int? completedSessions,
     String? courseId,
+    int? focusMinutes,
+    int? shortBreakMinutes,
+    int? longBreakMinutes,
   }) {
     return PomodoroState(
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
@@ -37,6 +46,9 @@ class PomodoroState {
       isActive: isActive ?? this.isActive,
       completedSessions: completedSessions ?? this.completedSessions,
       courseId: courseId ?? this.courseId,
+      focusMinutes: focusMinutes ?? this.focusMinutes,
+      shortBreakMinutes: shortBreakMinutes ?? this.shortBreakMinutes,
+      longBreakMinutes: longBreakMinutes ?? this.longBreakMinutes,
     );
   }
 
@@ -83,13 +95,41 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
   void resetTimer() {
     pauseTimer();
     state = PomodoroState(
-      remainingSeconds: AppConstants.pomodoroFocusMinutes * 60,
+      remainingSeconds: state.focusMinutes * 60,
       status: PomodoroStatus.idle,
+      focusMinutes: state.focusMinutes,
+      shortBreakMinutes: state.shortBreakMinutes,
+      longBreakMinutes: state.longBreakMinutes,
     );
   }
 
   void skipSession() {
     _handleSessionComplete();
+  }
+
+  void setDurations(int focus, int shortBreak, int longBreak) {
+    if (state.isActive) {
+      state = state.copyWith(
+        focusMinutes: focus,
+        shortBreakMinutes: shortBreak,
+        longBreakMinutes: longBreak,
+      );
+    } else {
+      int newRemaining = state.remainingSeconds;
+      if (state.status == PomodoroStatus.idle || state.status == PomodoroStatus.focus) {
+        newRemaining = focus * 60;
+      } else if (state.status == PomodoroStatus.shortBreak) {
+        newRemaining = shortBreak * 60;
+      } else if (state.status == PomodoroStatus.longBreak) {
+        newRemaining = longBreak * 60;
+      }
+      state = state.copyWith(
+        focusMinutes: focus,
+        shortBreakMinutes: shortBreak,
+        longBreakMinutes: longBreak,
+        remainingSeconds: newRemaining,
+      );
+    }
   }
 
   void _handleSessionComplete() {
@@ -105,20 +145,20 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
       if (newSessions % AppConstants.pomodoroSessionsBeforeLongBreak == 0) {
         state = state.copyWith(
           status: PomodoroStatus.longBreak,
-          remainingSeconds: AppConstants.pomodoroLongBreakMinutes * 60,
+          remainingSeconds: state.longBreakMinutes * 60,
           completedSessions: newSessions,
         );
       } else {
         state = state.copyWith(
           status: PomodoroStatus.shortBreak,
-          remainingSeconds: AppConstants.pomodoroShortBreakMinutes * 60,
+          remainingSeconds: state.shortBreakMinutes * 60,
           completedSessions: newSessions,
         );
       }
     } else {
       state = state.copyWith(
         status: PomodoroStatus.focus,
-        remainingSeconds: AppConstants.pomodoroFocusMinutes * 60,
+        remainingSeconds: state.focusMinutes * 60,
       );
     }
   }
@@ -127,7 +167,7 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
     _repository.addSession(PomodoroSessionEntity(
       id: const Uuid().v4(),
       courseId: state.courseId,
-      durationSeconds: AppConstants.pomodoroFocusMinutes * 60,
+      durationSeconds: state.focusMinutes * 60,
       timestamp: DateTime.now(),
       completed: true,
     ));

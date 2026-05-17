@@ -390,6 +390,7 @@ class _MaterialsTab extends ConsumerWidget {
         onPressed: () => _showAddMaterialSheet(context, ref),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
+        shape: const CircleBorder(),
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -453,6 +454,13 @@ class _MaterialTile extends StatelessWidget {
         final file = File(material.content);
         if (file.existsSync()) {
           launchUrl(Uri.file(material.content), mode: LaunchMode.externalApplication);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('File not found. It may have been moved.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
         break;
     }
@@ -719,6 +727,7 @@ class _NotesTab extends ConsumerWidget {
         onPressed: () => _showAddNoteSheet(context, ref),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
+        shape: const CircleBorder(),
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -896,6 +905,7 @@ class _TasksTab extends ConsumerWidget {
         onPressed: () => _showAddTaskSheet(context, ref),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
+        shape: const CircleBorder(),
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
