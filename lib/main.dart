@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'core/services/notification_service.dart';
 import 'data/datasources/local_storage.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/theme_provider.dart';
@@ -13,6 +14,7 @@ import 'presentation/features/course_detail/course_detail_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService.instance.init();
   LocalStorage.init();
   runApp(const StartupApp());
 }
@@ -207,7 +209,9 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
         transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
         child: widget.child,
       ),
