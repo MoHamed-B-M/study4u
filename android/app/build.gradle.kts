@@ -27,7 +27,7 @@ System.getenv("KEY_PASSWORD")?.let { keystoreProperties["keyPassword"] = it }
 
 android {
     namespace = "com.example.study4u"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "28.2.13676358"
 
     compileOptions {
@@ -43,7 +43,7 @@ android {
     defaultConfig {
         applicationId = "com.example.study4u"
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
