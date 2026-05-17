@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -28,7 +29,10 @@ class UpdateService {
 
       final response = await http.get(
         Uri.parse(_apiUrl),
-        headers: {'Accept': 'application/vnd.github.v3+json'},
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'stdy4u/1.0',
+        },
       );
       if (response.statusCode != 200) return null;
 
@@ -55,7 +59,8 @@ class UpdateService {
         releaseNotes: body,
         isNewer: isNewer,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('UpdateService.checkForUpdate error: $e');
       return null;
     }
   }
