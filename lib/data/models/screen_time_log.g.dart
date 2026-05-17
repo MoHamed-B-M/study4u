@@ -8,7 +8,7 @@ part of 'screen_time_log.dart';
 
 class ScreenTimeLogAdapter extends TypeAdapter<ScreenTimeLog> {
   @override
-  final int typeId = 6;
+  final int typeId = 8;
 
   @override
   ScreenTimeLog read(BinaryReader reader) {
