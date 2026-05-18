@@ -1,18 +1,32 @@
-# 📚 stdy4u
-
-A modern student productivity companion built with Flutter and Material 3.
-
-> **Version 1.1.0** — Local-first, no account required.
+<div align="center">
+  <br>
+  <h1>📚 stdy4u</h1>
+  <h3><em>STUDY SMARTER</em></h3>
+  <p><strong>v1.1.2</strong> — Local-first student productivity companion</p>
+  <br>
+</div>
 
 ---
 
-## Features
+## 📱 Preview
+
+<p align="center">
+  <img src="screenshot/Skreenup_1779140422542.png" width="180" alt="Dashboard">
+  <img src="screenshot/Skreenup_1779140432966.png" width="180" alt="Attendance Tracker">
+  <img src="screenshot/Skreenup_1779140444045.png" width="180" alt="Statistics">
+  <img src="screenshot/Skreenup_1779140457709.png" width="180" alt="Settings">
+  <img src="screenshot/Skreenup_1779140469510.png" width="180" alt="Course Detail">
+</p>
+
+---
+
+## ✨ Features
 
 ### 🎓 Course Management
 - Add courses with name, code, professor, room, schedule, and color coding
 - Track grades, target GPA, and credit hours per course
-- Visual progress bar for each subject
-- Horizontal carousel on the home screen for quick access
+- Edit or delete courses via long-press context menu
+- Visual progress indicators on the home dashboard
 
 ### ✅ Tasks & Notes
 - Create tasks with due dates and urgency levels (Normal / Urgent)
@@ -24,42 +38,52 @@ A modern student productivity companion built with Flutter and Material 3.
 - Add materials as **links**, **notes**, or **uploaded files** (PDF, images, docs)
 - Stored locally — files are copied to the app's documents directory
 - Tap to open files or URLs
+- Delete unwanted materials with the delete button
 
 ### 📅 Attendance Tracker
-- Mark attendance per course: Present / Late / Absent
-- Calendar view with `table_calendar`
-- Automatic attendance rate calculation with 75% threshold warning
+- Mark attendance per course: Present / Late / Absent / Excused
+- Calendar view with `table_calendar` — tap a day to see all courses
+- Automatic attendance rate calculation with configurable threshold warning
 - Quick-action chips in the daily schedule
 
 ### 📊 Statistics & Analytics
-- CGPA calculation with letter grade conversion
-- Grade distribution bar chart (`fl_chart`)
-- Per-subject performance overview
-- Pomodoro timer with focus/break sessions
+- CGPA calculation with letter grade conversion (A, B, C, D, F)
+- Grade distribution bar chart per course
+- Per-subject performance overview with progress rings
+- Pomodoro focus time analytics — weekly bar chart
 
 ### ⏱️ Pomodoro Timer
-- 25-minute focus sessions with short (5 min) and long (15 min) breaks
-- Auto-rotation through focus → short break → focus → ... → long break
-- Session counter
-- Haptic feedback on start/pause/complete
+- Focus sessions with configurable durations (1–60 min)
+- Short break (1–30 min) and long break (1–60 min) with auto-rotation
+- Session counter and haptic feedback
+- Calm music player — pick audio files to play during focus sessions
+- Weekly focus analytics dashboard
 
-### 🎨 Theming
+### 🎨 Theming & Personalization
 - Light, Dark, and System Default modes
 - 8 accent colors to personalize the UI
-- Material 3 expressive design with dynamic color schemes
+- **Floating Navigation Bar** — glassmorphism frosted glass effect
+- Haptic feedback toggle
+- Material 3 expressive design
 
 ### 🔔 Notifications
-- Task reminders and session alerts via `flutter_local_notifications`
+- Weekly recurring class reminders (15 min before each class)
+- Task reminders and session alerts
+- Notification history bottom sheet
 - Toggle notifications in Settings
-- Android notification channel ("General Notifications")
+
+### 🚀 Updates
+- On-launch GitHub OTA update check
+- Download progress dialog with auto-install
+- Manual check in Settings → About → Check for Updates
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | Flutter + Dart |
+| **Framework** | Flutter 3.44 + Dart |
 | **State Management** | Riverpod (`flutter_riverpod`) |
 | **Navigation** | GoRouter with ShellRoute |
 | **Local Storage** | Hive (`hive_flutter`) |
@@ -67,12 +91,14 @@ A modern student productivity companion built with Flutter and Material 3.
 | **Calendar** | table_calendar |
 | **Animations** | flutter_animate, animate_do |
 | **Notifications** | flutter_local_notifications |
+| **Audio** | just_audio |
 | **File Picker** | file_picker |
 | **Code Generation** | build_runner + hive_generator + riverpod_generator |
+| **CI/CD** | GitHub Actions (build + release APK) |
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 lib/
@@ -80,7 +106,7 @@ lib/
 │   ├── constants/       # App-wide constants
 │   ├── errors/          # Custom exception classes
 │   ├── extensions/      # BuildContext helpers
-│   ├── services/        # NotificationService
+│   ├── services/        # NotificationService, UpdateService
 │   └── utils/           # Grade calculator, time utilities
 ├── data/
 │   ├── datasources/     # LocalStorage (Hive init + box access)
@@ -90,22 +116,28 @@ lib/
 │   ├── entities/        # Course, Task, CourseMaterial, AttendanceRecord
 │   ├── repositories/    # Abstract repository interfaces
 │   └── usecases/        # Business logic: CGPA, attendance, schedule
-├── features/            # (legacy, contains screen files)
 ├── presentation/
 │   ├── features/        # Screen widgets grouped by feature
-│   ├── theme/           # AppTheme, ThemeProvider/SettingsNotifier
+│   │   ├── dashboard/   # Home dashboard with greeting + progress
+│   │   ├── home/        # Main screen shell with tabs
+│   │   ├── tracker/     # Attendance tracker with calendar
+│   │   ├── stats/       # Statistics & CGPA visualization
+│   │   ├── settings/    # App settings & about
+│   │   ├── splash/      # Animated splash screen
+│   │   └── course_detail/ # Course detail & tasks/materials
+│   ├── theme/           # AppTheme, DesignTokens, ThemeProvider
 │   └── widgets/         # Reusable UI components
 └── shared/
-    ├── models/          # Hive-annotated shared models (generated)
+    ├── models/          # Hive-annotated shared models
     └── providers/       # Riverpod providers
 ```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- Flutter SDK (see `pubspec.yaml` for required version)
+- Flutter SDK `>=3.6.0 <4.0.0`
 - Android Studio / VS Code with Flutter plugins
 
 ### Setup
@@ -118,7 +150,7 @@ cd study4u
 # Install dependencies
 flutter pub get
 
-# Generate Hive adapters (if models changed)
+# Generate Hive adapters & Riverpod providers
 dart run build_runner build --delete-conflicting-outputs
 
 # Run in debug mode
@@ -128,37 +160,35 @@ flutter run
 flutter build apk --release
 ```
 
-### Local Signing (Optional)
-
-Copy `android/key.properties.sample` to `android/key.properties` and fill in your keystore details:
-
-```properties
-storeFile=../keystore/upload-keystore.jks
-storePassword=your-store-password
-keyAlias=your-key-alias
-keyPassword=your-key-password
-```
-
-> Add `key.properties` and `keystore/` to `.gitignore`.
 
 ---
 
-## Building for Release
+## 📦 Building for Release
 
 ```bash
-# Increment version manually in pubspec.yaml, then:
+# Increment version in pubspec.yaml, then:
 flutter build apk --release --build-number=$YOUR_BUILD_NUMBER
 
 # Or with signing env vars (CI):
-KEYSTORE_PATH=... KEYSTORE_PASSWORD=... KEY_ALIAS=... KEY_PASSWORD=... \
-  flutter build apk --release --build-number=$CI_PIPELINE_ID
+flutter build apk --release --build-number=$CI_PIPELINE_ID
 ```
 
+> The repository includes a GitHub Actions workflow (`.github/workflows/build_apk.yml`) that builds a release APK automatically on every push.
 
-[ROADMAP.md](https://github.com/user-attachments/files/27901117/ROADMAP.md)
+---
 
+## 📄 Changelog
 
+See [CHANGELOG.md](CHANGELOG.md) for a full history of changes.
 
-## License
+---
+
+## 🏫 School Project
+
+This app was developed as a school project for **Madame Basma**.
+
+---
+
+## 📝 License
 
 Private project.
