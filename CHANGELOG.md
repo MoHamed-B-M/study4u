@@ -4,6 +4,37 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
+## [1.1.2] - 2026-05-18
+
+### Added
+- **Design Tokens System**: New `DesignTokens` class with centralized palette (lavender/blue primaries, pastel card colors, spacing, radius, shadows) for consistent theming across the app.
+- **Dashboard View**: Extracted standalone `DashboardView` with personalized greeting, course progress rings, pending task count, and "Up Next" quick view.
+- **Settings View**: Complete rewrite as a dedicated `SettingsView` with iOS-style grouped sections, color picker for theme accent, and about/update section.
+- **Stats View**: New dedicated `StatsView` with GPA bar chart, course-by-course breakdown, and pomodoro focus time analytics.
+- **Tracker View**: New standalone `TrackerView` with `table_calendar` integration, per-course attendance marking (Present/Absent/Excused), and daily attendance summary.
+- **Dashboard Card Widget**: Reusable `DashboardCard` container with gradient backgrounds, rounded corners, and tap support.
+- **Circular Progress Ring Widget**: Custom `CircularProgressRing` for attendance/GPA progress visualization with label and sublabel.
+- **Study Charts Widget**: `StudyBarChart` component for GPA and weekly focus time visualization.
+- **Study Bottom Nav Widget**: New `StudyBottomNav` Cupertino-style navigation bar with centered add button.
+- **CI Workflow**: New `build_apk.yml` GitHub Actions workflow for automated APK builds on push.
+- **Screenshots**: Added 6 new app screenshots for store/README.
+
+### Changed
+- **Complete UI Redesign**: Refactored all major screens (Home, Course Detail, Settings, Statistics, Tracker) with updated color scheme — dark theme now uses `#111625` scaffold and `#1B2236` surface colors.
+- **Theme System**: Replaced `opacity()` calls with `withValues(alpha:)` for null-safety compliance. Card border radius standardized to 24.0 (`radiusCard`). Page transitions switched to `FadeUpwardsPageTransitionsBuilder`.
+- **Screen Architecture**: Monolithic screens decomposed into focused view widgets — `DashboardView`, `SettingsView`, `StatsView`, `TrackerView` — for better maintainability.
+- **SDK Constraint**: Relaxed from `^3.11.5` to `>=3.6.0 <4.0.0` for broader compatibility.
+
+### Fixed
+- **Duplicate Closure Parameter**: Changed `builder: (_, _)` to `builder: (context, child)` in `AddCourseSheet` to comply with Dart's no-duplicate-parameter-name rule.
+- **CI Workflow**: Fixed syntax issues in `.github/workflows/build.yaml`.
+- **Null-Safe Opacity**: Replaced deprecated `Color.withOpacity()` with `Color.withValues(alpha:)` throughout the theme.
+
+### Dependencies
+- Downgraded `flutter_lints` from `^6.0.0` to `^5.0.0`.
+
+---
+
 ## [1.1.1] - 2026-05-17
 
 ### Added
