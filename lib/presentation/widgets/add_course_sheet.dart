@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show TimeOfDay, DayPeriod;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/course.dart';
 import '../../shared/providers/logic_providers.dart';
@@ -17,7 +17,6 @@ class AddCourseSheet extends ConsumerStatefulWidget {
 }
 
 class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
-  final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
   final _profCtrl = TextEditingController();
@@ -83,13 +82,37 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
 
   Future<void> _pickTime(bool isStart) async {
     final initial = isStart ? _startTime : _endTime;
-    final picked = await showTimePicker(context: context, initialTime: initial);
-    if (picked != null) {
-      setState(() {
-        if (isStart) _startTime = picked;
-        else _endTime = picked;
-      });
-    }
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 250,
+        color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        child: Column(
+          children: [
+            Expanded(
+              child: CupertinoDatePicker(
+                initialDateTime: DateTime(2024, 1, 1, initial.hour, initial.minute),
+                mode: CupertinoDatePickerMode.time,
+                onDateTimeChanged: (date) {
+                  setState(() {
+                    final tod = TimeOfDay(hour: date.hour, minute: date.minute);
+                    if (isStart) {
+                      _startTime = tod;
+                    } else {
+                      _endTime = tod;
+                    }
+                  });
+                },
+              ),
+            ),
+            CupertinoButton(
+              child: const Text('Done'),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   String _timeToString(TimeOfDay t) {
@@ -99,7 +122,6 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
   }
 
   void _save() {
-    if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
 
     final id = widget.course?.id ?? const Uuid().v4();
@@ -130,12 +152,6 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final labelStyle = TextStyle(
-      fontSize: 13,
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-    );
-
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -143,166 +159,173 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
         right: 20,
         top: 12,
       ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(
+              child: Text(
+                'Course Details',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 16),
+            CupertinoTextField(
+              controller: _nameCtrl,
+              placeholder: 'Course Name',
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: CupertinoTextField(
+                    controller: _codeCtrl,
+                    placeholder: 'Course Code',
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                widget.course != null ? 'Edit Course' : 'Add Course',
-                style: GoogleFonts.outfit(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CupertinoTextField(
+                    controller: _profCtrl,
+                    placeholder: 'Professor',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-
-              _sectionHeader('Course Details'),
-              const SizedBox(height: 8),
-              _groupedCard(theme, [
-                _groupedRow(
-                  child: TextFormField(
-                    controller: _nameCtrl,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      labelText: 'Course Name',
-                      labelStyle: labelStyle,
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: CupertinoTextField(
+                    controller: _roomCtrl,
+                    placeholder: 'Room',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CupertinoTextField(
+                    readOnly: true,
+                    controller: TextEditingController(text: '${_creditHours.toInt()}'),
+                    placeholder: 'Credits',
+                    suffix: GestureDetector(
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (ctx) => Container(
+                            height: 200,
+                            color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: CupertinoPicker(
+                                    scrollController: FixedExtentScrollController(
+                                      initialItem: _creditHours.toInt() - 1,
+                                    ),
+                                    itemExtent: 32,
+                                    onSelectedItemChanged: (v) {
+                                      setState(() => _creditHours = v + 1.0);
+                                    },
+                                    children: List.generate(6, (i) => Center(child: Text('${i + 1}'))),
+                                  ),
+                                ),
+                                CupertinoButton(
+                                  child: const Text('Done'),
+                                  onPressed: () => Navigator.pop(ctx),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Icon(CupertinoIcons.chevron_down, size: 16, color: CupertinoColors.systemGrey2),
                     ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Required' : null,
                   ),
                 ),
-                _divider(theme),
-                _groupedRow(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _codeCtrl,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: 'Course Code',
-                            labelStyle: labelStyle,
-                          ),
-                          validator: (v) =>
-                              v == null || v.trim().isEmpty ? 'Required' : null,
-                        ),
-                      ),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _profCtrl,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: 'Professor',
-                            labelStyle: labelStyle,
-                          ),
-                        ),
-                      ),
-                    ],
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Text('Schedule', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: CupertinoButton(
+                    onPressed: () => _pickTime(true),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(CupertinoIcons.clock, size: 16),
+                        const SizedBox(width: 8),
+                        Text(_timeToString(_startTime)),
+                      ],
+                    ),
                   ),
                 ),
-                _divider(theme),
-                _groupedRow(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _roomCtrl,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: 'Room',
-                            labelStyle: labelStyle,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: DropdownButtonFormField<double>(
-                          value: _creditHours,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: 'Credits',
-                            labelStyle: labelStyle,
-                          ),
-                          items: List.generate(6, (i) => (i + 1).toDouble())
-                              .map((v) => DropdownMenuItem(
-                                  value: v, child: Text('${v.toInt()}')))
-                              .toList(),
-                          onChanged: (v) =>
-                              setState(() => _creditHours = v ?? 3),
-                        ),
-                      ),
-                    ],
+                Expanded(
+                  child: CupertinoButton(
+                    onPressed: () => _pickTime(false),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(CupertinoIcons.clock_fill, size: 16),
+                        const SizedBox(width: 8),
+                        Text(_timeToString(_endTime)),
+                      ],
+                    ),
                   ),
                 ),
-              ]),
-
-              const SizedBox(height: 24),
-
-              _sectionHeader('Schedule'),
-              const SizedBox(height: 8),
-              _groupedCard(theme, [
-                _groupedRow(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _timeField(
-                            'Start Time', _timeToString(_startTime),
-                            () => _pickTime(true), labelStyle),
-                      ),
-                      Expanded(
-                        child: _timeField(
-                            'End Time', _timeToString(_endTime),
-                            () => _pickTime(false), labelStyle),
-                      ),
-                    ],
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Text('Days', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(7, (i) {
+                final selected = _weekDays.contains(i);
+                return CupertinoButton(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  color: selected
+                      ? CupertinoTheme.of(context).primaryColor.withOpacity(0.2)
+                      : CupertinoColors.systemGrey6,
+                  borderRadius: BorderRadius.circular(20),
+                  onPressed: () {
+                    setState(() {
+                      if (selected) {
+                        _weekDays.remove(i);
+                      } else {
+                        _weekDays.add(i);
+                      }
+                    });
+                  },
+                  child: Text(
+                    _days[i],
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: selected
+                          ? CupertinoTheme.of(context).primaryColor
+                          : CupertinoColors.label,
+                    ),
                   ),
-                ),
-              ]),
-
-              const SizedBox(height: 24),
-
-              _sectionHeader('Days'),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: List.generate(7, (i) => FilterChip(
-                  label: Text(_days[i], style: const TextStyle(fontSize: 12)),
-                  selected: _weekDays.contains(i),
-                  onSelected: (v) =>
-                      setState(() => v ? _weekDays.add(i) : _weekDays.remove(i)),
-                  selectedColor:
-                      theme.colorScheme.primary.withValues(alpha: 0.2),
-                  checkmarkColor: theme.colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                )),
+                );
+              }),
+            ),
+            const SizedBox(height: 24),
+            const Text('Color & Grade', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey6,
+                borderRadius: BorderRadius.circular(12),
               ),
-
-              const SizedBox(height: 24),
-
-              _sectionHeader('Color & Grade'),
-              const SizedBox(height: 8),
-              _groupedCard(theme, [
-                _groupedRow(
-                  child: Row(
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Text('Color',
-                          style: GoogleFonts.outfit(
-                              fontSize: 15, fontWeight: FontWeight.w500)),
+                      const Text('Color'),
                       const SizedBox(width: 12),
                       Expanded(
                         child: SingleChildScrollView(
@@ -311,11 +334,9 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
                             children: _colors.map((c) {
                               final selected = _colorValue == c.value;
                               return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
                                 child: GestureDetector(
-                                  onTap: () =>
-                                      setState(() => _colorValue = c.value),
+                                  onTap: () => setState(() => _colorValue = c.value),
                                   child: Container(
                                     width: 28,
                                     height: 28,
@@ -323,15 +344,11 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
                                       color: c,
                                       shape: BoxShape.circle,
                                       border: selected
-                                          ? Border.all(
-                                              color:
-                                                  theme.colorScheme.onSurface,
-                                              width: 2.5)
+                                          ? Border.all(color: CupertinoColors.label, width: 2.5)
                                           : null,
                                     ),
                                     child: selected
-                                        ? const Icon(Icons.check,
-                                            color: Colors.white, size: 14)
+                                        ? const Icon(CupertinoIcons.check_mark, color: CupertinoColors.white, size: 14)
                                         : null,
                                   ),
                                 ),
@@ -342,110 +359,41 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
                       ),
                     ],
                   ),
-                ),
-                _divider(theme),
-                _groupedRow(
-                  child: Row(
+                  const SizedBox(height: 12),
+                  Row(
                     children: [
-                      Text('Target Grade',
-                          style: GoogleFonts.outfit(
-                              fontSize: 15, fontWeight: FontWeight.w500)),
+                      const Text('Target Grade'),
                       Expanded(
-                        child: Slider(
+                        child: CupertinoSlider(
                           value: _targetGrade,
                           min: 2.0,
                           max: 4.0,
                           divisions: 20,
-                          label: _targetGrade.toStringAsFixed(1),
-                          onChanged: (v) =>
-                              setState(() => _targetGrade = v),
+                          onChanged: (v) => setState(() => _targetGrade = v),
                         ),
                       ),
                       SizedBox(
                         width: 32,
                         child: Text(
                           _targetGrade.toStringAsFixed(1),
-                          style: GoogleFonts.outfit(
-                              fontSize: 15, fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                           textAlign: TextAlign.right,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ]),
-
-              const SizedBox(height: 24),
-              GradientButton(
-                label: widget.course != null ? 'Save Changes' : 'Add Course',
-                icon: Icons.book,
-                onPressed: _save,
+                ],
               ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            GradientButton(
+              label: widget.course != null ? 'Save Changes' : 'Add Course',
+              icon: CupertinoIcons.book,
+              onPressed: _save,
+            ),
+            const SizedBox(height: 24),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _sectionHeader(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        text.toUpperCase(),
-        style: GoogleFonts.outfit(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-        ),
-      ),
-    );
-  }
-
-  Widget _groupedCard(ThemeData theme, List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
-    );
-  }
-
-  Widget _groupedRow({required Widget child}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: child,
-    );
-  }
-
-  Widget _divider(ThemeData theme) {
-    return Divider(
-      height: 1,
-      indent: 16,
-      endIndent: 16,
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
-    );
-  }
-
-  Widget _timeField(
-      String label, String value, VoidCallback onTap, TextStyle labelStyle) {
-    return InkWell(
-      onTap: onTap,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          labelText: label,
-          labelStyle: labelStyle,
-        ),
-        child: Text(value,
-            style:
-                const TextStyle(fontWeight: FontWeight.w600)),
       ),
     );
   }

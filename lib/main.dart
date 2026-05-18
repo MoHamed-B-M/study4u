@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,29 +51,33 @@ class _StartupAppState extends State<StartupApp> {
   Widget build(BuildContext context) {
     final initError = LocalStorage.initError;
     if (initError != null) {
-      return MaterialApp(
+      return const CupertinoApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Center(
+        home: CupertinoPageScaffold(
+          child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Text('Init error: $initError', textAlign: TextAlign.center),
+              padding: EdgeInsets.all(32),
+              child: Text('Init error', textAlign: TextAlign.center),
             ),
           ),
         ),
       );
     }
     if (!_ready) {
-      return const MaterialApp(
+      return const CupertinoApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+        home: CupertinoPageScaffold(
+          child: Center(child: CupertinoActivityIndicator()),
         ),
       );
     }
-    return MaterialApp(
+    return CupertinoApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: const Color(0xFF111625)),
+      theme: CupertinoThemeData(
+        brightness: Brightness.dark,
+        barBackgroundColor: const Color(0xFF111625),
+        scaffoldBackgroundColor: const Color(0xFF111625),
+      ),
       home: SplashScreen(nextPage: _getNextPage()),
     );
   }
@@ -98,24 +103,39 @@ final routerProvider = Provider<GoRouter>((ref) {
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => MainScreen(child: child),
         routes: [
-          GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
-          GoRoute(path: '/tracker', builder: (context, state) => const TrackerScreen()),
-          GoRoute(path: '/stats', builder: (context, state) => const StatisticsScreen()),
-          GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+          GoRoute(
+            path: '/',
+            pageBuilder: (context, state) => CupertinoPage(
+              key: state.pageKey,
+              child: const HomeScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/tracker',
+            pageBuilder: (context, state) => CupertinoPage(
+              key: state.pageKey,
+              child: const TrackerScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/stats',
+            pageBuilder: (context, state) => CupertinoPage(
+              key: state.pageKey,
+              child: const StatisticsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/settings',
+            pageBuilder: (context, state) => CupertinoPage(
+              key: state.pageKey,
+              child: const SettingsScreen(),
+            ),
+          ),
           GoRoute(
             path: '/course/:id',
-            pageBuilder: (context, state) => CustomTransitionPage(
+            pageBuilder: (context, state) => CupertinoPage(
               key: state.pageKey,
               child: CourseDetailScreen(courseId: state.pathParameters['id']!),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1, 0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic)),
-                  child: child,
-                );
-              },
             ),
           ),
         ],
@@ -152,15 +172,15 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
     final router = ref.watch(routerProvider);
     final seedColor = Color(ref.watch(primaryColorProvider));
 
-    final theme = AppTheme.lightTheme(seedColor);
-    final darkTheme = AppTheme.darkTheme(seedColor);
+    final brightness = MediaQuery.platformBrightnessOf(context);
+    final isDark = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system && brightness == Brightness.dark);
+    final theme = isDark ? AppTheme.darkTheme(seedColor) : AppTheme.lightTheme(seedColor);
 
-    return MaterialApp.router(
+    return CupertinoApp.router(
       title: 'stdy4u',
       debugShowCheckedModeBanner: false,
       theme: theme,
-      darkTheme: darkTheme,
-      themeMode: themeMode,
       routerConfig: router,
     );
   }
@@ -181,46 +201,52 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final useFloating = ref.watch(useFloatingNavBarProvider);
 
-    return Scaffold(
-      body: RepaintBoundary(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-          child: widget.child,
-        ),
-      ),
-      bottomNavigationBar: RepaintBoundary(
-        child: useFloating
-            ? FloatingNavBar(
-                currentIndex: _currentIndex,
-                onDestinationSelected: (index) {
-                  HapticFeedback.lightImpact();
-                  setState(() => _currentIndex = index);
-                  if (index == 0) context.go('/');
-                  if (index == 1) context.go('/tracker');
-                  if (index == 2) context.go('/stats');
-                },
-              )
-            : NavigationBar(
-                selectedIndex: _currentIndex,
-                onDestinationSelected: (index) {
-                  HapticFeedback.lightImpact();
-                  setState(() => _currentIndex = index);
-                  if (index == 0) context.go('/');
-                  if (index == 1) context.go('/tracker');
-                  if (index == 2) context.go('/stats');
-                },
-                labelTextStyle: WidgetStateProperty.all(
-                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: RepaintBoundary(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                  child: widget.child,
                 ),
-                destinations: const [
-                  NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-                  NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Tracker'),
-                  NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Stats'),
-                ],
               ),
+            ),
+            RepaintBoundary(
+              child: useFloating
+                  ? FloatingNavBar(
+                      currentIndex: _currentIndex,
+                      onDestinationSelected: (index) {
+                        HapticFeedback.lightImpact();
+                        setState(() => _currentIndex = index);
+                        if (index == 0) context.go('/');
+                        if (index == 1) context.go('/tracker');
+                        if (index == 2) context.go('/stats');
+                      },
+                    )
+                  : CupertinoTabBar(
+                      currentIndex: _currentIndex,
+                      onTap: (index) {
+                        HapticFeedback.lightImpact();
+                        setState(() => _currentIndex = index);
+                        if (index == 0) context.go('/');
+                        if (index == 1) context.go('/tracker');
+                        if (index == 2) context.go('/stats');
+                      },
+                      items: const [
+                        BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Home'),
+                        BottomNavigationBarItem(icon: Icon(CupertinoIcons.calendar), label: 'Tracker'),
+                        BottomNavigationBarItem(icon: Icon(CupertinoIcons.chart_bar_alt_fill), label: 'Stats'),
+                      ],
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

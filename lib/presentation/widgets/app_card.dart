@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/app_theme.dart';
 
 class AppCard extends StatelessWidget {
@@ -30,10 +30,10 @@ class AppCard extends StatelessWidget {
   }) {
     return AppCard(
       child: child,
-      color: Colors.white.withOpacity(0.6),
+      color: CupertinoColors.systemBackground.withOpacity(0.6),
       padding: padding,
       borderRadius: borderRadius,
-      border: Border.all(color: Colors.white.withOpacity(0.3)),
+      border: Border.all(color: CupertinoColors.systemGrey4),
       boxShadow: [
         BoxShadow(
           color: AppTheme.primary.withOpacity(0.08),
@@ -71,13 +71,13 @@ class AppCard extends StatelessWidget {
       width: width,
       padding: padding ?? const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: gradient != null ? null : (color ?? Theme.of(context).cardTheme.color ?? AppTheme.surface),
+        color: gradient != null ? null : (color ?? CupertinoColors.systemGrey6),
         gradient: gradient,
         borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusXXL),
-        border: border ?? Border.all(color: AppTheme.outline.withOpacity(0.3), width: 1),
+        border: border,
         boxShadow: boxShadow ?? [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: CupertinoColors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

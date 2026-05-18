@@ -1,9 +1,8 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show LinearProgressIndicator;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -25,126 +24,49 @@ class CourseDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<CourseDetailScreen> createState() => _CourseDetailScreenState();
 }
 
-class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
+  int _selectedTab = 0;
 
   @override
   Widget build(BuildContext context) {
     final course = ref.watch(courseDetailProvider(widget.courseId));
     if (course == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Course not found')),
-        body: const Center(child: Text('This course no longer exists.')),
+      return CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(middle: Text('Course not found')),
+        child: const Center(child: Text('This course no longer exists.')),
       );
     }
     final color = Color(course.colorValue);
-    final scheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverAppBar(
-            expandedHeight: 200,
-            collapsedHeight: kToolbarHeight + 8,
-            pinned: true,
-            floating: false,
-            stretch: true,
-            backgroundColor: color,
-            foregroundColor: Colors.white,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(course.name, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14)),
-              titlePadding: const EdgeInsetsDirectional.only(start: 72, bottom: 14),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [color, color.withValues(alpha: 0.6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 20,
-                      top: MediaQuery.of(context).padding.top + 8,
-                      right: 20,
-                      bottom: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Hero(
-                          tag: 'course-icon-${course.id}',
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.book, size: 22, color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(course.name,
-                          style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        const SizedBox(height: 2),
-                        Text('${course.code} ${course.room.isNotEmpty ? '• ${course.room}' : ''}',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(48),
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: TabBar(
-                  controller: _tabController,
-                  labelColor: scheme.primary,
-                  unselectedLabelColor: scheme.onSurface.withValues(alpha: 0.5),
-                  indicatorColor: scheme.primary,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  labelStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 12),
-                  tabs: const [
-                    Tab(text: 'Info', icon: Icon(Icons.info_outline, size: 18)),
-                    Tab(text: 'Materials', icon: Icon(Icons.folder_outlined, size: 18)),
-                    Tab(text: 'Notes', icon: Icon(Icons.note_alt_outlined, size: 18)),
-                    Tab(text: 'Tasks', icon: Icon(Icons.checklist_outlined, size: 18)),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-        body: TabBarView(
-          controller: _tabController,
-          physics: const BouncingScrollPhysics(),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        child: Column(
           children: [
-            _InfoTab(course: course),
-            _MaterialsTab(courseId: course.id),
-            _NotesTab(courseId: course.id),
-            _TasksTab(courseId: course.id),
+            CupertinoSlidingSegmentedControl<int>(
+              groupValue: _selectedTab,
+              onValueChanged: (v) {
+                if (v != null) setState(() => _selectedTab = v);
+              },
+              children: const {
+                0: Text('Info'),
+                1: Text('Materials'),
+                2: Text('Notes'),
+                3: Text('Tasks'),
+              },
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: IndexedStack(
+                index: _selectedTab,
+                children: [
+                  _InfoTab(course: course),
+                  _MaterialsTab(courseId: course.id, color: color),
+                  _NotesTab(courseId: course.id),
+                  _TasksTab(courseId: course.id),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -159,54 +81,52 @@ class _InfoTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Color(course.colorValue);
-    final style = Theme.of(context).textTheme;
 
     return ListView(
       padding: const EdgeInsets.all(20),
       physics: const BouncingScrollPhysics(),
       children: [
         _InfoCard(
-          icon: Icons.person_outline,
+          icon: CupertinoIcons.person,
           label: 'Professor',
           value: course.professor.isEmpty ? 'Not assigned' : course.professor,
         ).animate().fadeIn(duration: 200.ms),
         const SizedBox(height: 16),
         _InfoCard(
-          icon: Icons.access_time,
+          icon: CupertinoIcons.clock,
           label: 'Schedule',
           value: '${course.startTime} - ${course.endTime}',
         ).animate().fadeIn(duration: 200.ms, delay: 50.ms),
         const SizedBox(height: 16),
         _InfoCard(
-          icon: Icons.meeting_room_outlined,
+          icon: CupertinoIcons.location,
           label: 'Room',
           value: course.room.isEmpty ? 'Not set' : course.room,
         ).animate().fadeIn(duration: 200.ms, delay: 100.ms),
         const SizedBox(height: 16),
         _InfoCard(
-          icon: Icons.school_outlined,
+          icon: CupertinoIcons.book,
           label: 'Credits',
           value: '${course.creditHours.toStringAsFixed(0)} ${course.creditHours == 1 ? 'Credit' : 'Credits'}',
         ).animate().fadeIn(duration: 200.ms, delay: 150.ms),
         const SizedBox(height: 24),
-        Text('Grade Progress', style: style.titleLarge),
+        const Text('Grade Progress', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         _buildGradeSection(context, color),
         const SizedBox(height: 24),
-        Text('Attendance', style: style.titleLarge),
+        const Text('Attendance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-              _buildAttendanceQuickView(context, ref),
+        _buildAttendanceQuickView(context, ref),
       ],
     );
   }
 
   Widget _buildGradeSection(BuildContext context, Color color) {
     final percentage = course.percentage;
-    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: CupertinoColors.systemGrey6,
         borderRadius: BorderRadius.circular(AppTheme.radiusMD),
       ),
       child: Column(
@@ -214,17 +134,26 @@ class _InfoTab extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${course.currentGrade.toStringAsFixed(1)} / ${course.targetGrade.toStringAsFixed(1)}',
-                style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: scheme.onSurface),
+              Text(
+                '${course.currentGrade.toStringAsFixed(1)} / ${course.targetGrade.toStringAsFixed(1)}',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: percentage >= 80 ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+                  color: percentage >= 80
+                      ? CupertinoColors.systemGreen.withOpacity(0.1)
+                      : CupertinoColors.systemOrange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text('${percentage.toStringAsFixed(0)}%',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: percentage >= 80 ? Colors.green : Colors.orange),
+                child: Text(
+                  '${percentage.toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: percentage >= 80
+                        ? CupertinoColors.systemGreen
+                        : CupertinoColors.systemOrange,
+                  ),
                 ),
               ),
             ],
@@ -235,7 +164,7 @@ class _InfoTab extends ConsumerWidget {
             child: LinearProgressIndicator(
               value: percentage / 100,
               minHeight: 10,
-              backgroundColor: scheme.surfaceContainerHighest,
+              backgroundColor: CupertinoColors.systemGrey5,
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
@@ -245,7 +174,6 @@ class _InfoTab extends ConsumerWidget {
   }
 
   Widget _buildAttendanceQuickView(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
     final records = ref.watch(attendanceRecordsProvider);
     final courseRecords = records.where((r) => r.courseId == course.id).toList();
     final present = courseRecords.where((r) => r.status == AttendanceStatus.present).length;
@@ -256,13 +184,11 @@ class _InfoTab extends ConsumerWidget {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          color: CupertinoColors.systemGrey6,
           borderRadius: BorderRadius.circular(AppTheme.radiusMD),
         ),
-        child: Center(
-          child: Text('No attendance records yet',
-            style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.5)),
-          ),
+        child: const Center(
+          child: Text('No attendance records yet', style: TextStyle(color: CupertinoColors.systemGrey2)),
         ),
       );
     }
@@ -270,17 +196,17 @@ class _InfoTab extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: CupertinoColors.systemGrey6,
         borderRadius: BorderRadius.circular(AppTheme.radiusMD),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStat(Icons.check_circle_outline, 'Present', '$present', Colors.green),
-          Container(width: 1, height: 40, color: scheme.outlineVariant),
-          _buildStat(Icons.cancel_outlined, 'Absent', '${total - present}', Colors.red.shade300),
-          Container(width: 1, height: 40, color: scheme.outlineVariant),
-          _buildStat(Icons.trending_up, 'Rate', '${rate.toStringAsFixed(0)}%', scheme.primary),
+          _buildStat(CupertinoIcons.checkmark_circle, 'Present', '$present', CupertinoColors.systemGreen),
+          Container(width: 1, height: 40, color: CupertinoColors.systemGrey4),
+          _buildStat(CupertinoIcons.xmark_circle, 'Absent', '${total - present}', CupertinoColors.systemRed),
+          Container(width: 1, height: 40, color: CupertinoColors.systemGrey4),
+          _buildStat(CupertinoIcons.chart_bar_alt_fill, 'Rate', '${rate.toStringAsFixed(0)}%', CupertinoTheme.of(context).primaryColor),
         ],
       ),
     );
@@ -291,8 +217,8 @@ class _InfoTab extends ConsumerWidget {
       children: [
         Icon(icon, color: color, size: 22),
         const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.7))),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label, style: TextStyle(fontSize: 11, color: color.withOpacity(0.7))),
       ],
     );
   }
@@ -306,11 +232,10 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: CupertinoColors.systemGrey6,
         borderRadius: BorderRadius.circular(AppTheme.radiusMD),
       ),
       child: Row(
@@ -318,18 +243,18 @@ class _InfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: scheme.primaryContainer.withValues(alpha: 0.3),
+              color: CupertinoTheme.of(context).primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: scheme.primary, size: 20),
+            child: Icon(icon, color: CupertinoTheme.of(context).primaryColor, size: 20),
           ),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: 12, color: scheme.onSurface.withValues(alpha: 0.5))),
+              Text(label, style: TextStyle(fontSize: 12, color: CupertinoColors.systemGrey2)),
               const SizedBox(height: 2),
-              Text(value, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 15)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
             ],
           ),
         ],
@@ -340,72 +265,88 @@ class _InfoCard extends StatelessWidget {
 
 class _MaterialsTab extends ConsumerWidget {
   final String courseId;
-  const _MaterialsTab({required this.courseId});
+  final Color color;
+  const _MaterialsTab({required this.courseId, required this.color});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final materials = ref.watch(courseMaterialsProvider(courseId));
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: materials.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.folder_open_outlined, size: 48,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
-                    ),
+    return Column(
+      children: [
+        Expanded(
+          child: materials.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemGrey6,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.folder,
+                          size: 48,
+                          color: CupertinoColors.systemGrey3,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No materials yet',
+                        style: TextStyle(color: CupertinoColors.systemGrey2),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tap + to add PDFs, images or links',
+                        style: TextStyle(fontSize: 13, color: CupertinoColors.systemGrey3),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text('No materials yet', style: Theme.of(context).textTheme.bodyMedium),
-                  const SizedBox(height: 4),
-                  Text('Tap + to add PDFs, images or links',
-                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              physics: const BouncingScrollPhysics(),
-              itemCount: materials.length,
-              itemBuilder: (context, index) {
-                final m = materials[index];
-                return _MaterialTile(
-                  material: m,
-                  onDelete: () {
-                    ref.read(materialRepositoryProvider).deleteMaterial(m.id);
-                    ref.read(dataRefreshProvider.notifier).state++;
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(20),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: materials.length,
+                  itemBuilder: (context, index) {
+                    final m = materials[index];
+                    return _MaterialTile(
+                      material: m,
+                      onDelete: () {
+                        ref.read(materialRepositoryProvider).deleteMaterial(m.id);
+                        ref.read(dataRefreshProvider.notifier).state++;
+                      },
+                    ).animate().fadeIn(duration: 200.ms, delay: (index * 40).ms);
                   },
-                ).animate().fadeIn(duration: 200.ms, delay: (index * 40).ms);
-              },
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: CupertinoButton.filled(
+            onPressed: () => _showAddMaterialSheet(context, ref),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.add, size: 18),
+                SizedBox(width: 8),
+                Text('Add Material'),
+              ],
             ),
-      floatingActionButton: FloatingActionButton.small(
-        onPressed: () => _showAddMaterialSheet(context, ref),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          ),
+        ),
+      ],
     );
   }
 
   void _showAddMaterialSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showCupertinoModalPopup(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXXL)),
+      builder: (_) => CupertinoPageScaffold(
+        backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        child: SafeArea(
+          child: _AddMaterialSheet(courseId: courseId),
+        ),
       ),
-      builder: (_) => _AddMaterialSheet(courseId: courseId),
     );
   }
 }
@@ -431,14 +372,14 @@ class _MaterialTile extends StatelessWidget {
   IconData _icon() {
     switch (material.type) {
       case 'link':
-        return Icons.link;
+        return CupertinoIcons.link;
       case 'file':
         final ext = material.content.split('.').last.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(ext)) return Icons.image_outlined;
-        if (ext == 'pdf') return Icons.picture_as_pdf;
-        return Icons.description_outlined;
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(ext)) return CupertinoIcons.photo;
+        if (ext == 'pdf') return CupertinoIcons.doc_richtext;
+        return CupertinoIcons.doc;
       default:
-        return Icons.article_outlined;
+        return CupertinoIcons.doc_text;
     }
   }
 
@@ -455,10 +396,18 @@ class _MaterialTile extends StatelessWidget {
         if (file.existsSync()) {
           launchUrl(Uri.file(material.content), mode: LaunchMode.externalApplication);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('File not found. It may have been moved.'),
-              behavior: SnackBarBehavior.floating,
+          showCupertinoDialog(
+            context: context,
+            builder: (ctx) => CupertinoAlertDialog(
+              title: const Text('File Not Found'),
+              content: const Text('File may have been moved.'),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  child: const Text('OK'),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
             ),
           );
         }
@@ -468,16 +417,14 @@ class _MaterialTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+      child: GestureDetector(
         onTap: () => _open(context),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            color: CupertinoColors.systemGrey6,
             borderRadius: BorderRadius.circular(AppTheme.radiusMD),
           ),
           child: Row(
@@ -485,21 +432,21 @@ class _MaterialTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: scheme.primaryContainer.withValues(alpha: 0.3),
+                  color: CupertinoTheme.of(context).primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(_icon(), color: scheme.primary, size: 20),
+                child: Icon(_icon(), color: CupertinoTheme.of(context).primaryColor, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(material.title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                    Text(material.title, style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
                     Text(
                       _subtitle(material),
-                      style: TextStyle(fontSize: 12, color: scheme.onSurface.withValues(alpha: 0.5)),
+                      style: TextStyle(fontSize: 12, color: CupertinoColors.systemGrey2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -507,17 +454,20 @@ class _MaterialTile extends StatelessWidget {
                 ),
               ),
               if (onDelete != null)
-                InkWell(
-                  borderRadius: BorderRadius.circular(8),
+                GestureDetector(
                   onTap: onDelete,
                   child: Padding(
                     padding: const EdgeInsets.all(4),
-                    child: Icon(Icons.delete_outline, size: 18, color: scheme.error.withValues(alpha: 0.6)),
+                    child: Icon(
+                      CupertinoIcons.trash,
+                      size: 18,
+                      color: CupertinoColors.systemRed.withOpacity(0.6),
+                    ),
                   ),
                 ),
               const SizedBox(width: 4),
               if (material.type == 'link' || material.type == 'file')
-                Icon(Icons.open_in_new, size: 16, color: scheme.onSurface.withValues(alpha: 0.3)),
+                const Icon(CupertinoIcons.arrow_up_right, size: 16, color: CupertinoColors.systemGrey3),
             ],
           ),
         ),
@@ -558,8 +508,7 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
     if (result == null || result.files.isEmpty) return;
 
     final file = result.files.single;
-    final sourcePath = file.path;
-    if (sourcePath == null) return;
+    final sourcePath = file.path!;
 
     final dir = await getApplicationDocumentsDirectory();
     final destDir = Directory('${dir.path}/study4u_materials');
@@ -576,7 +525,6 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
         left: 24, right: 24, top: 16,
@@ -586,86 +534,67 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: scheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
-            ),
+          const Center(child: Text('Add Material', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold))),
+          const SizedBox(height: 20),
+          CupertinoSegmentedControl<String>(
+            groupValue: _type,
+            onValueChanged: (v) => setState(() => _type = v),
+            children: const {
+              'link': Text('Link'),
+              'note': Text('Note'),
+              'file': Text('File'),
+            },
           ),
           const SizedBox(height: 20),
-          Text('Add Material', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'link', label: Text('Link'), icon: Icon(Icons.link, size: 16)),
-              ButtonSegment(value: 'note', label: Text('Note'), icon: Icon(Icons.article, size: 16)),
-              ButtonSegment(value: 'file', label: Text('File'), icon: Icon(Icons.upload_file, size: 16)),
-            ],
-            selected: {_type},
-            onSelectionChanged: (v) => setState(() => _type = v.first),
-            style: ButtonStyle(
-              visualDensity: VisualDensity.compact,
-              shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextField(
+          CupertinoTextField(
             controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Title', hintText: 'e.g. Lecture 1 Notes'),
+            placeholder: 'Title',
+            prefix: const Icon(CupertinoIcons.textformat, size: 18, color: CupertinoColors.systemGrey2),
           ),
           const SizedBox(height: 16),
           if (_type == 'link')
-            TextField(
+            CupertinoTextField(
               controller: _urlController,
-              decoration: const InputDecoration(
-                labelText: 'URL',
-                hintText: 'https://...',
-                prefixIcon: Icon(Icons.link, size: 20),
-              ),
+              placeholder: 'https://...',
+              prefix: const Icon(CupertinoIcons.link, size: 18, color: CupertinoColors.systemGrey2),
             ),
           if (_type == 'note')
-            TextField(
+            CupertinoTextField(
               controller: _noteController,
-              decoration: const InputDecoration(
-                labelText: 'Content',
-                hintText: 'Write your note...',
-              ),
+              placeholder: 'Write your note...',
               maxLines: 3,
             ),
           if (_type == 'file') ...[
-            OutlinedButton.icon(
+            CupertinoButton(
               onPressed: _pickFile,
-              icon: const Icon(Icons.attach_file, size: 20),
-              label: Text(_pickedFileName ?? 'Pick a file (PDF, image, doc...)'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                side: BorderSide(color: scheme.outlineVariant),
-              ),
+              child: Text(_pickedFileName ?? 'Pick a file'),
             ),
-            if (_pickedFileName != null) ...[
-              const SizedBox(height: 8),
+            if (_pickedFileName != null)
               Row(
                 children: [
-                  Icon(Icons.check_circle, size: 16, color: Colors.green),
+                  const Icon(CupertinoIcons.checkmark_circle, size: 16, color: CupertinoColors.systemGreen),
                   const SizedBox(width: 6),
                   Expanded(
-                    child: Text(_pickedFileName!, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13, color: Colors.green)),
+                    child: Text(
+                      _pickedFileName!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGreen),
+                    ),
                   ),
                 ],
               ),
-            ],
           ],
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Material'),
-              style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+          CupertinoButton.filled(
+            onPressed: _submit,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.add, size: 18),
+                SizedBox(width: 8),
+                Text('Add Material'),
+              ],
             ),
           ),
         ],
@@ -708,41 +637,52 @@ class _NotesTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notes = ref.watch(courseNotesProvider(courseId));
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: notes.isEmpty
-          ? Center(child: Text('No notes yet', style: Theme.of(context).textTheme.bodyMedium))
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              physics: const BouncingScrollPhysics(),
-              itemCount: notes.length,
-              itemBuilder: (context, index) {
-                final note = notes[index];
-                return _NoteTile(note: note)
-                    .animate()
-                    .fadeIn(duration: 200.ms, delay: (index * 40).ms);
-              },
+    return Column(
+      children: [
+        Expanded(
+          child: notes.isEmpty
+              ? Center(
+                  child: Text('No notes yet', style: TextStyle(color: CupertinoColors.systemGrey2)),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(20),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: notes.length,
+                  itemBuilder: (context, index) {
+                    final note = notes[index];
+                    return _NoteTile(note: note)
+                        .animate()
+                        .fadeIn(duration: 200.ms, delay: (index * 40).ms);
+                  },
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: CupertinoButton.filled(
+            onPressed: () => _showAddNoteSheet(context, ref),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.add, size: 18),
+                SizedBox(width: 8),
+                Text('Add Note'),
+              ],
             ),
-      floatingActionButton: FloatingActionButton.small(
-        onPressed: () => _showAddNoteSheet(context, ref),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          ),
+        ),
+      ],
     );
   }
 
   void _showAddNoteSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showCupertinoModalPopup(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXXL)),
+      builder: (_) => CupertinoPageScaffold(
+        backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        child: SafeArea(
+          child: _AddNoteSheet(courseId: courseId),
+        ),
       ),
-      builder: (_) => _AddNoteSheet(courseId: courseId),
     );
   }
 }
@@ -753,13 +693,12 @@ class _NoteTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          color: CupertinoColors.systemGrey6,
           borderRadius: BorderRadius.circular(AppTheme.radiusMD),
         ),
         child: Row(
@@ -768,24 +707,28 @@ class _NoteTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: scheme.tertiaryContainer.withValues(alpha: 0.3),
+                color: AppTheme.tertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.note_alt_outlined, color: scheme.tertiary, size: 20),
+              child: const Icon(CupertinoIcons.doc_text, color: CupertinoColors.systemOrange, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(note.title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                  Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600)),
                   if (note.content.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text(note.content, style: TextStyle(fontSize: 13, color: scheme.onSurface.withValues(alpha: 0.6))),
+                    Text(
+                      note.content,
+                      style: TextStyle(fontSize: 13, color: CupertinoColors.systemGrey2),
+                    ),
                   ],
                   const SizedBox(height: 6),
-                  Text(DateFormat('MMM dd, yyyy').format(note.dueDate),
-                    style: TextStyle(fontSize: 11, color: scheme.onSurface.withValues(alpha: 0.4)),
+                  Text(
+                    DateFormat('MMM dd, yyyy').format(note.dueDate),
+                    style: TextStyle(fontSize: 11, color: CupertinoColors.systemGrey3),
                   ),
                 ],
               ),
@@ -818,7 +761,6 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
         left: 24, right: 24, top: 16,
@@ -828,34 +770,28 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: scheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
-            ),
-          ),
+          const Center(child: Text('Add Note', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold))),
           const SizedBox(height: 20),
-          Text('Add Note', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          TextField(
+          CupertinoTextField(
             controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Title', hintText: 'Note title'),
+            placeholder: 'Title',
           ),
           const SizedBox(height: 16),
-          TextField(
+          CupertinoTextField(
             controller: _contentController,
-            decoration: const InputDecoration(labelText: 'Content', hintText: 'Write your note...'),
+            placeholder: 'Write your note...',
             maxLines: 4,
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Note'),
-              style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+          CupertinoButton.filled(
+            onPressed: _submit,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.add, size: 18),
+                SizedBox(width: 8),
+                Text('Add Note'),
+              ],
             ),
           ),
         ],
@@ -886,41 +822,52 @@ class _TasksTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(courseTasksProvider(courseId));
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: tasks.isEmpty
-          ? Center(child: Text('No tasks yet', style: Theme.of(context).textTheme.bodyMedium))
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              physics: const BouncingScrollPhysics(),
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                final task = tasks[index];
-                return _TaskTile(task: task)
-                    .animate()
-                    .fadeIn(duration: 200.ms, delay: (index * 40).ms);
-              },
+    return Column(
+      children: [
+        Expanded(
+          child: tasks.isEmpty
+              ? Center(
+                  child: Text('No tasks yet', style: TextStyle(color: CupertinoColors.systemGrey2)),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(20),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: tasks.length,
+                  itemBuilder: (context, index) {
+                    final task = tasks[index];
+                    return _TaskTile(task: task)
+                        .animate()
+                        .fadeIn(duration: 200.ms, delay: (index * 40).ms);
+                  },
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: CupertinoButton.filled(
+            onPressed: () => _showAddTaskSheet(context, ref),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.add, size: 18),
+                SizedBox(width: 8),
+                Text('Add Task'),
+              ],
             ),
-      floatingActionButton: FloatingActionButton.small(
-        onPressed: () => _showAddTaskSheet(context, ref),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          ),
+        ),
+      ],
     );
   }
 
   void _showAddTaskSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showCupertinoModalPopup(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXXL)),
+      builder: (_) => CupertinoPageScaffold(
+        backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        child: SafeArea(
+          child: _AddTaskSheet(courseId: courseId),
+        ),
       ),
-      builder: (_) => _AddTaskSheet(courseId: courseId),
     );
   }
 }
@@ -931,13 +878,12 @@ class _TaskTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          color: CupertinoColors.systemGrey6,
           borderRadius: BorderRadius.circular(AppTheme.radiusMD),
         ),
         child: Row(
@@ -949,19 +895,24 @@ class _TaskTile extends ConsumerWidget {
                 ref.read(dataRefreshProvider.notifier).state++;
               },
               child: AnimatedContainer(
-                duration: 300.ms,
+                duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                width: 24, height: 24,
+                width: 24,
+                height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: task.isCompleted ? scheme.primary : Colors.transparent,
+                  color: task.isCompleted
+                      ? CupertinoTheme.of(context).primaryColor
+                      : CupertinoColors.transparent,
                   border: Border.all(
-                    color: task.isCompleted ? scheme.primary : scheme.outlineVariant,
+                    color: task.isCompleted
+                        ? CupertinoTheme.of(context).primaryColor
+                        : CupertinoColors.systemGrey3,
                     width: 2,
                   ),
                 ),
                 child: task.isCompleted
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
+                    ? const Icon(CupertinoIcons.check_mark, size: 16, color: CupertinoColors.white)
                     : null,
               ),
             ),
@@ -970,20 +921,24 @@ class _TaskTile extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(task.title,
+                  Text(
+                    task.title,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                      color: task.isCompleted ? scheme.onSurface.withValues(alpha: 0.5) : scheme.onSurface,
+                      color: task.isCompleted
+                          ? CupertinoColors.systemGrey2
+                          : CupertinoColors.label,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(DateFormat('MMM dd, hh:mm a').format(task.dueDate),
+                  Text(
+                    DateFormat('MMM dd, hh:mm a').format(task.dueDate),
                     style: TextStyle(
                       fontSize: 12,
                       color: task.urgency == TaskUrgency.urgent
-                          ? AppTheme.error
-                          : scheme.onSurface.withValues(alpha: 0.5),
+                          ? CupertinoColors.systemRed
+                          : CupertinoColors.systemGrey2,
                     ),
                   ),
                 ],
@@ -993,10 +948,13 @@ class _TaskTile extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.error.withValues(alpha: 0.1),
+                  color: CupertinoColors.systemRed.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text('URGENT', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.error)),
+                child: const Text(
+                  'URGENT',
+                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: CupertinoColors.systemRed),
+                ),
               ),
           ],
         ),
@@ -1026,7 +984,6 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
         left: 24, right: 24, top: 16,
@@ -1036,60 +993,67 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: scheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
-            ),
-          ),
+          const Center(child: Text('Add Task', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold))),
           const SizedBox(height: 20),
-          Text('Add Task', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          TextField(
+          CupertinoTextField(
             controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Task', hintText: 'What needs to be done?'),
+            placeholder: 'What needs to be done?',
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: CupertinoButton(
                   onPressed: _pickDate,
-                  icon: const Icon(Icons.calendar_today, size: 18),
-                  label: Text(DateFormat('MMM dd, yyyy').format(_dueDate)),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(CupertinoIcons.calendar, size: 18),
+                      const SizedBox(width: 8),
+                      Text(DateFormat('MMM dd, yyyy').format(_dueDate)),
+                    ],
                   ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: OutlinedButton.icon(
+                child: CupertinoButton(
                   onPressed: _toggleUrgency,
-                  icon: Icon(Icons.flag, size: 18,
-                    color: _urgency == TaskUrgency.urgent ? AppTheme.error : null),
-                  label: Text(_urgency == TaskUrgency.urgent ? 'Urgent' : 'Normal'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    side: _urgency == TaskUrgency.urgent
-                        ? const BorderSide(color: AppTheme.error)
-                        : null,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        CupertinoIcons.flag,
+                        size: 18,
+                        color: _urgency == TaskUrgency.urgent
+                            ? CupertinoColors.systemRed
+                            : CupertinoColors.systemGrey2,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _urgency == TaskUrgency.urgent ? 'Urgent' : 'Normal',
+                        style: TextStyle(
+                          color: _urgency == TaskUrgency.urgent
+                              ? CupertinoColors.systemRed
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Task'),
-              style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+          CupertinoButton.filled(
+            onPressed: _submit,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.add, size: 18),
+                SizedBox(width: 8),
+                Text('Add Task'),
+              ],
             ),
           ),
         ],
@@ -1098,13 +1062,30 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
   }
 
   Future<void> _pickDate() async {
-    final date = await showDatePicker(
+    showCupertinoModalPopup(
       context: context,
-      initialDate: _dueDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (ctx) => Container(
+        height: 250,
+        color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        child: Column(
+          children: [
+            Expanded(
+              child: CupertinoDatePicker(
+                initialDateTime: _dueDate,
+                minimumDate: DateTime.now(),
+                maximumDate: DateTime.now().add(const Duration(days: 365)),
+                mode: CupertinoDatePickerMode.date,
+                onDateTimeChanged: (date) => setState(() => _dueDate = date),
+              ),
+            ),
+            CupertinoButton(
+              child: const Text('Done'),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
+      ),
     );
-    if (date != null) setState(() => _dueDate = date);
   }
 
   void _toggleUrgency() {
