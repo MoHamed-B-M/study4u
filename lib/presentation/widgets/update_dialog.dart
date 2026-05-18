@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show LinearProgressIndicator;
 import 'package:open_filex/open_filex.dart';
 import '../../core/services/update_service.dart';
 
@@ -9,7 +9,7 @@ class UpdateDialog {
     required BuildContext context,
     required UpdateInfo update,
   }) async {
-    return showDialog(
+    return showCupertinoDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => _UpdateDialogContent(update: update),
@@ -50,44 +50,31 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return AlertDialog(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    return CupertinoAlertDialog(
+      title: _downloadProgress == null
+          ? const Text('Update Available')
+          : Text(_error != null ? 'Download Failed' : 'Downloading...'),
       content: _downloadProgress == null
-          ? _buildInfo(scheme)
-          : _buildProgress(scheme),
+          ? _buildInfo()
+          : _buildProgress(),
+      actions: _buildActions(),
     );
   }
 
-  Widget _buildInfo(ColorScheme scheme) {
+  Widget _buildInfo() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.system_update, color: scheme.primary, size: 32),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'Update Available',
-          style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
         Text(
           'v${widget.update.latestVersion}',
-          style: GoogleFonts.outfit(fontSize: 16, color: scheme.primary),
+          style: const TextStyle(fontSize: 16, color: CupertinoColors.systemBlue),
         ),
         if (widget.update.releaseNotes != null) ...[
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: CupertinoColors.systemGrey6,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -98,85 +85,60 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
             ),
           ),
         ],
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: Text('Ignore',
-                  style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.7)),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: _startDownload,
-                icon: const Icon(Icons.download, size: 18),
-                label: const Text('Download'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }
 
-  Widget _buildProgress(ColorScheme scheme) {
+  Widget _buildProgress() {
     final progress = (_downloadProgress ?? 0.0).clamp(0.0, 1.0);
     final percent = (progress * 100).toInt();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: _error != null
-              ? Icon(Icons.error_outline, color: scheme.error, size: 32)
-              : Icon(Icons.downloading, color: scheme.primary, size: 32),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          _error != null ? 'Download Failed' : 'Downloading...',
-          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
         if (_error != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text(_error!, style: TextStyle(color: scheme.error, fontSize: 13)),
+            child: Text(_error!, style: const TextStyle(color: CupertinoColors.systemRed, fontSize: 13)),
           ),
+        const SizedBox(height: 8),
+        Text('$percent%', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 10,
-            backgroundColor: scheme.surfaceContainerHighest,
-            valueColor: AlwaysStoppedAnimation(scheme.primary),
+            backgroundColor: CupertinoColors.systemGrey6,
+            valueColor: const AlwaysStoppedAnimation(CupertinoColors.systemBlue),
           ),
         ),
-        const SizedBox(height: 8),
-        Text('$percent%', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
-        if (_error != null) ...[
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
       ],
     );
+  }
+
+  List<CupertinoDialogAction> _buildActions() {
+    if (_error != null) {
+      return [
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          child: const Text('Close'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ];
+    }
+    if (_downloadProgress != null) {
+      return [];
+    }
+    return [
+      CupertinoDialogAction(
+        child: const Text('Ignore'),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      CupertinoDialogAction(
+        isDefaultAction: true,
+        child: const Text('Download'),
+        onPressed: _startDownload,
+      ),
+    ];
   }
 }

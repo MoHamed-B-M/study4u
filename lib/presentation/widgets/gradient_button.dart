@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 
@@ -23,10 +23,16 @@ class GradientButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradientColors = colors ?? [AppTheme.primary, AppTheme.secondary];
-    return SizedBox(
-      width: width ?? double.infinity,
-      height: height,
-      child: DecoratedBox(
+    return GestureDetector(
+      onTap: onPressed != null
+          ? () {
+              HapticFeedback.lightImpact();
+              onPressed!();
+            }
+          : null,
+      child: Container(
+        width: width ?? double.infinity,
+        height: height,
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(AppTheme.radiusPill),
@@ -38,35 +44,23 @@ class GradientButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-            onTap: onPressed != null
-                ? () {
-                    HapticFeedback.lightImpact();
-                    onPressed!();
-                  }
-                : null,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, color: CupertinoColors.white, size: 20),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                label,
+                style: const TextStyle(
+                  color: CupertinoColors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

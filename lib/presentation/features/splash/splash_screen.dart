@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class SplashScreen extends StatefulWidget {
   final Widget nextPage;
@@ -58,12 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
     _navigated = true;
     Navigator.pushReplacement(
       context,
-      PageRouteBuilder(
-        pageBuilder: (_, _, _) => widget.nextPage,
-        transitionsBuilder: (_, animation, _, child) =>
-            FadeTransition(opacity: animation, child: child),
-        transitionDuration: const Duration(milliseconds: 600),
-      ),
+      CupertinoPageRoute(builder: (_) => widget.nextPage),
     );
   }
 
@@ -77,9 +72,9 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: _bgColor,
-      body: Stack(
+      child: Stack(
         children: [
           AnimatedBuilder(
             animation: _glowIn,
@@ -95,9 +90,9 @@ class _SplashScreenState extends State<SplashScreen>
                       center: const Alignment(0, 0.9),
                       radius: 0.9,
                       colors: [
-                        _glowColor.withValues(alpha: 0.35),
-                        _glowColor.withValues(alpha: 0.08),
-                        Colors.transparent,
+                        _glowColor.withOpacity(0.35),
+                        _glowColor.withOpacity(0.08),
+                        CupertinoColors.transparent,
                       ],
                     ),
                   ),
@@ -119,22 +114,22 @@ class _SplashScreenState extends State<SplashScreen>
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: CupertinoColors.white.withOpacity(0.06),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
-                          Icons.school,
+                          CupertinoIcons.book,
                           size: 52,
-                          color: Colors.white,
+                          color: CupertinoColors.white,
                         ),
                       ),
                       const SizedBox(height: 28),
-                      Text(
+                      const Text(
                         'stdy4u',
                         style: TextStyle(
                           fontSize: 38,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: CupertinoColors.white,
                           letterSpacing: -1.2,
                           height: 1,
                         ),
@@ -145,7 +140,7 @@ class _SplashScreenState extends State<SplashScreen>
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withValues(alpha: 0.45),
+                          color: CupertinoColors.white.withOpacity(0.45),
                           letterSpacing: 3.5,
                         ),
                       ),

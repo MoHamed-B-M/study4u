@@ -1,6 +1,6 @@
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 class FloatingNavBar extends StatefulWidget {
@@ -20,24 +20,26 @@ class FloatingNavBar extends StatefulWidget {
 class _FloatingNavBarState extends State<FloatingNavBar> {
   final List<_NavDestination> _destinations = const [
     _NavDestination(
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
+      icon: CupertinoIcons.home,
+      activeIcon: CupertinoIcons.house_fill,
       label: 'Home',
     ),
     _NavDestination(
-      icon: Icons.calendar_today_outlined,
-      activeIcon: Icons.calendar_today,
+      icon: CupertinoIcons.calendar,
+      activeIcon: CupertinoIcons.calendar_circle_fill,
       label: 'Tracker',
     ),
     _NavDestination(
-      icon: Icons.analytics_outlined,
-      activeIcon: Icons.analytics,
+      icon: CupertinoIcons.chart_bar_alt_fill,
+      activeIcon: CupertinoIcons.chart_bar_alt_fill,
       label: 'Stats',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 48,
@@ -51,13 +53,13 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
           child: Container(
             height: 56,
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.06),
+              color: isDark
+                  ? CupertinoColors.white.withOpacity(0.08)
+                  : CupertinoColors.black.withOpacity(0.06),
               border: Border.all(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withValues(alpha: 0.12)
-                    : Colors.black.withValues(alpha: 0.08),
+                color: isDark
+                    ? CupertinoColors.white.withOpacity(0.12)
+                    : CupertinoColors.black.withOpacity(0.08),
                 width: 0.5,
               ),
               borderRadius: BorderRadius.circular(28),
@@ -80,20 +82,17 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                     height: 44,
                     decoration: BoxDecoration(
                       color: isActive
-                          ? Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: 0.25)
-                          : Colors.transparent,
+                          ? CupertinoTheme.of(context).primaryColor.withOpacity(0.25)
+                          : CupertinoColors.transparent,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
                       isActive ? destination.activeIcon : destination.icon,
                       color: isActive
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white.withValues(alpha: 0.45)
-                              : Colors.black.withValues(alpha: 0.45),
+                          ? CupertinoTheme.of(context).primaryColor
+                          : isDark
+                              ? CupertinoColors.white.withOpacity(0.45)
+                              : CupertinoColors.black.withOpacity(0.45),
                     ),
                   ),
                 );

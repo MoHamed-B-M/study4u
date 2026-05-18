@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/theme_provider.dart';
@@ -37,12 +37,7 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      PageRouteBuilder(
-        pageBuilder: (_, _, _) => const ProviderScope(child: Stdy4uApp()),
-        transitionsBuilder: (_, animation, _, child) =>
-            FadeTransition(opacity: animation, child: child),
-        transitionDuration: const Duration(milliseconds: 600),
-      ),
+      CupertinoPageRoute(builder: (_) => const ProviderScope(child: Stdy4uApp())),
     );
   }
 
@@ -55,9 +50,9 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
       sceneC: 'Tasks',
     );
 
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: const Color(0xFF111625),
-      body: SafeArea(
+      child: SafeArea(
         child: Column(
           children: [
             const Spacer(flex: 1),
@@ -83,8 +78,8 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                   const SizedBox(height: 20),
                   Text(
                     sceneLabel.label,
-                    style: TextStyle(
-                      color: const Color(0xFF4ADE80).withValues(alpha: 0.7),
+                    style: const TextStyle(
+                      color: Color(0xFF4ADE80),
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1.5,
@@ -103,7 +98,7 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                         decoration: BoxDecoration(
                           color: active
                               ? const Color(0xFF4ADE80)
-                              : const Color(0xFF4ADE80).withValues(alpha: 0.2),
+                              : const Color(0xFF4ADE80).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       );
@@ -119,20 +114,16 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                 width: double.infinity,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: ElevatedButton(
+                  child: CupertinoButton.filled(
                     onPressed: _continue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: const StadiumBorder(),
-                      textStyle: const TextStyle(
+                    child: const Text(
+                      'START APPLICATION',
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                         letterSpacing: 1.2,
                       ),
                     ),
-                    child: const Text('START APPLICATION'),
                   ),
                 ),
               ),
@@ -162,7 +153,7 @@ double _tremap(double t, double start, double end) {
   return (t - start) / (end - start);
 }
 
-Color _green(double opacity) => Color(0xFF4ADE80).withValues(alpha: opacity);
+Color _green(double opacity) => const Color(0xFF4ADE80).withOpacity(opacity);
 
 class _SceneAPomodoro extends StatelessWidget {
   final double value;
@@ -197,7 +188,7 @@ class _SceneAPomodoro extends StatelessWidget {
                 painter: _RingPainter(
                   progress: progress,
                   color: const Color(0xFF4ADE80),
-                  trackColor: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+                  trackColor: const Color(0xFF4ADE80).withOpacity(0.15),
                 ),
               ),
               Transform.scale(
@@ -215,7 +206,7 @@ class _SceneAPomodoro extends StatelessWidget {
                 ),
               ),
               Text(
-                progress >= 1.0 ? '✓' : '$displayMin:$displaySec',
+                progress >= 1.0 ? '\u2713' : '$displayMin:$displaySec',
                 style: TextStyle(
                   color: _green(0.9),
                   fontSize: progress >= 1.0 ? 32 : 18,
@@ -373,7 +364,7 @@ class _ScheduleCard extends StatelessWidget {
                       color: _green(0.9),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.check, size: 12, color: Color(0xFF111625)),
+                    child: const Icon(CupertinoIcons.check_mark, size: 12, color: Color(0xFF111625)),
                   ),
                 ),
             ],
@@ -416,7 +407,7 @@ class _SceneCTasks extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: _green(0.15)),
                       ),
-                      child: Icon(Icons.description_outlined, size: 14, color: _green(0.5)),
+                      child: Icon(CupertinoIcons.doc, size: 14, color: _green(0.5)),
                     ),
                   ),
                 );
