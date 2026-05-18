@@ -80,7 +80,7 @@ class _StartupAppState extends State<StartupApp> {
   Widget _getNextPage() {
     try {
       final settings = LocalStorage.appSettingsBox.get('default') ?? AppSettings();
-      if (!settings.onboardingComplete) return const FeaturePreviewScreen();
+      if (!settings.onboardingComplete) return const ProviderScope(child: FeaturePreviewScreen());
     } catch (_) {}
     return const ProviderScope(child: Stdy4uApp());
   }
