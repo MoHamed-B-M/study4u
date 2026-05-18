@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
+import 'design_tokens.dart';
 
 class AppTheme {
   AppTheme._();
 
-  static const Color primary = Color(0xFF4ADE80);
-  static const Color secondary = Color(0xFF2DD4BF);
+  static const Color primary = DesignTokens.primaryLavender;
+  static const Color secondary = DesignTokens.secondaryBlue;
   static const Color tertiary = Color(0xFFFBBF24);
-  static const Color background = Color(0xFFF4F9F6);
-  static const Color surface = Color(0xFFF8FAF9);
-  static const Color textPrimary = Color(0xFF1E293B);
+  static const Color background = DesignTokens.background;
+  static const Color surface = DesignTokens.surface;
+  static const Color textPrimary = DesignTokens.textPrimary;
   static const Color error = Color(0xFFBA1A1A);
   static const Color outline = Color(0xFFCBD5E1);
 
@@ -21,22 +22,22 @@ class AppTheme {
     return CupertinoThemeData(
       brightness: Brightness.light,
       primaryColor: seed,
-      scaffoldBackgroundColor: background,
-      barBackgroundColor: surface,
+      scaffoldBackgroundColor: DesignTokens.background,
+      barBackgroundColor: DesignTokens.surface,
       textTheme: CupertinoTextThemeData(
         textStyle: TextStyle(
           fontSize: 17,
-          color: textPrimary,
+          color: DesignTokens.textPrimary,
         ),
         navTitleTextStyle: TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w600,
-          color: textPrimary,
+          color: DesignTokens.textPrimary,
         ),
         navLargeTitleTextStyle: TextStyle(
           fontSize: 34,
           fontWeight: FontWeight.w700,
-          color: textPrimary,
+          color: DesignTokens.textPrimary,
           letterSpacing: 0.37,
         ),
         tabLabelTextStyle: TextStyle(
