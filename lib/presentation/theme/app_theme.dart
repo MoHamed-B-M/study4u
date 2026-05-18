@@ -41,6 +41,14 @@ class AppTheme {
       progressIndicatorTheme: _progressIndicatorTheme(),
       bottomSheetTheme: _bottomSheetTheme(),
       appBarTheme: _appBarTheme(),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+        },
+      ),
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
 
@@ -64,6 +72,14 @@ class AppTheme {
       progressIndicatorTheme: _progressIndicatorTheme(),
       bottomSheetTheme: _bottomSheetThemeDark(),
       appBarTheme: _appBarThemeDark(),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+        },
+      ),
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
 

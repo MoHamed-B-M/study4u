@@ -1,6 +1,6 @@
 import 'dart:math' as math;
-import 'package:flutter/cupertino.dart';
-import '../theme/design_tokens.dart';
+import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class CircularProgressRing extends StatelessWidget {
   final double progress;
@@ -17,7 +17,7 @@ class CircularProgressRing extends StatelessWidget {
     required this.progress,
     this.size = 80,
     this.strokeWidth = 8,
-    this.progressColor = DesignTokens.primaryLavender,
+    this.progressColor = AppTheme.primary,
     this.backgroundColor,
     this.child,
     this.label,
@@ -27,6 +27,8 @@ class CircularProgressRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = backgroundColor ?? progressColor.withValues(alpha: 0.12);
+    final cs = Theme.of(context).colorScheme;
+
     return SizedBox(
       width: size,
       height: size,
@@ -53,7 +55,7 @@ class CircularProgressRing extends StatelessWidget {
                   style: TextStyle(
                     fontSize: size * 0.24,
                     fontWeight: FontWeight.w800,
-                    color: DesignTokens.textPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
                 if (sublabel != null)
@@ -62,7 +64,7 @@ class CircularProgressRing extends StatelessWidget {
                     style: TextStyle(
                       fontSize: size * 0.12,
                       fontWeight: FontWeight.w500,
-                      color: DesignTokens.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
               ],
@@ -133,7 +135,7 @@ class MiniProgressRing extends StatelessWidget {
     super.key,
     required this.progress,
     this.size = 48,
-    this.color = DesignTokens.primaryLavender,
+    this.color = AppTheme.primary,
   });
 
   @override

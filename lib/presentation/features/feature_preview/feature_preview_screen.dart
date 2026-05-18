@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/theme_provider.dart';
@@ -37,7 +37,11 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      CupertinoPageRoute(builder: (_) => const ProviderScope(child: Stdy4uApp())),
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const ProviderScope(child: Stdy4uApp()),
+        transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
     );
   }
 
@@ -50,9 +54,9 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
       sceneC: 'Tasks',
     );
 
-    return CupertinoPageScaffold(
+    return Scaffold(
       backgroundColor: const Color(0xFF111625),
-      child: SafeArea(
+      body: SafeArea(
         child: Column(
           children: [
             const Spacer(flex: 1),
@@ -66,7 +70,7 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                     height: 330,
                     child: AnimatedBuilder(
                       animation: _ctrl,
-                      builder: (context, child) => Stack(
+                      builder: (context, _) => Stack(
                         children: [
                           _SceneAPomodoro(value: _ctrl.value),
                           _SceneBSchedule(value: _ctrl.value),
@@ -98,7 +102,7 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                         decoration: BoxDecoration(
                           color: active
                               ? const Color(0xFF4ADE80)
-                              : const Color(0xFF4ADE80).withOpacity(0.2),
+                              : const Color(0xFF4ADE80).withAlpha(51),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       );
@@ -114,8 +118,12 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                 width: double.infinity,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: CupertinoButton.filled(
+                  child: FilledButton(
                     onPressed: _continue,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: const StadiumBorder(),
+                    ),
                     child: const Text(
                       'START APPLICATION',
                       style: TextStyle(
@@ -188,7 +196,7 @@ class _SceneAPomodoro extends StatelessWidget {
                 painter: _RingPainter(
                   progress: progress,
                   color: const Color(0xFF4ADE80),
-                  trackColor: const Color(0xFF4ADE80).withOpacity(0.15),
+                  trackColor: const Color(0xFF4ADE80).withAlpha(38),
                 ),
               ),
               Transform.scale(
@@ -364,7 +372,7 @@ class _ScheduleCard extends StatelessWidget {
                       color: _green(0.9),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(CupertinoIcons.check_mark, size: 12, color: Color(0xFF111625)),
+                    child: const Icon(Icons.check, size: 12, color: Color(0xFF111625)),
                   ),
                 ),
             ],
@@ -407,33 +415,18 @@ class _SceneCTasks extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: _green(0.15)),
                       ),
-                      child: Icon(CupertinoIcons.doc, size: 14, color: _green(0.5)),
+                      child: Icon(Icons.description_outlined, size: 14, color: _green(0.5)),
                     ),
                   ),
                 );
               }),
             ),
             const SizedBox(height: 16),
-            _FallingCircle(
-              delay: 0.1,
-              local: local,
-              bottomY: 70,
-              size: 12,
-            ),
+            _FallingCircle(delay: 0.1, local: local, bottomY: 70, size: 12),
             const SizedBox(height: 4),
-            _FallingCircle(
-              delay: 0.25,
-              local: local,
-              bottomY: 70,
-              size: 10,
-            ),
+            _FallingCircle(delay: 0.25, local: local, bottomY: 70, size: 10),
             const SizedBox(height: 4),
-            _FallingCircle(
-              delay: 0.4,
-              local: local,
-              bottomY: 70,
-              size: 14,
-            ),
+            _FallingCircle(delay: 0.4, local: local, bottomY: 70, size: 14),
           ],
         ),
       ),

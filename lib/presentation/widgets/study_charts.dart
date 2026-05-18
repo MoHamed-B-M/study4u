@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import '../theme/design_tokens.dart';
+import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'dashboard_card.dart';
 import 'circular_progress_ring.dart';
 
@@ -14,13 +14,14 @@ class StudyBarChart extends StatelessWidget {
     super.key,
     required this.data,
     this.maxHeight = 160,
-    this.barColor = DesignTokens.primaryLavender,
+    this.barColor = AppTheme.primary,
     this.yLabel = 'GPA',
     this.yMax = 4.0,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final maxVal = data.fold<double>(0, (max, d) => d.value > max ? d.value : max);
     final effectiveMax = maxVal > 0 ? maxVal : yMax;
 
@@ -35,11 +36,11 @@ class StudyBarChart extends StatelessWidget {
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(yMax.toStringAsFixed(1), style: _axisStyle),
-                  Text((yMax * 0.75).toStringAsFixed(1), style: _axisStyle),
-                  Text((yMax * 0.5).toStringAsFixed(1), style: _axisStyle),
-                  Text((yMax * 0.25).toStringAsFixed(1), style: _axisStyle),
-                  Text('0.0', style: _axisStyle),
+                  Text(yMax.toStringAsFixed(1), style: _axisStyle(cs)),
+                  Text((yMax * 0.75).toStringAsFixed(1), style: _axisStyle(cs)),
+                  Text((yMax * 0.5).toStringAsFixed(1), style: _axisStyle(cs)),
+                  Text((yMax * 0.25).toStringAsFixed(1), style: _axisStyle(cs)),
+                  Text('0.0', style: _axisStyle(cs)),
                 ],
               ),
               const SizedBox(width: 8),
@@ -72,10 +73,10 @@ class StudyBarChart extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           d.label,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: DesignTokens.textTertiary,
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -90,10 +91,10 @@ class StudyBarChart extends StatelessWidget {
     );
   }
 
-  static const TextStyle _axisStyle = TextStyle(
+  static TextStyle _axisStyle(ColorScheme cs) => TextStyle(
     fontSize: 9,
     fontWeight: FontWeight.w500,
-    color: DesignTokens.textTertiary,
+    color: cs.onSurfaceVariant,
   );
 }
 
@@ -126,10 +127,10 @@ class AttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DashboardCard(
-      backgroundColor: DesignTokens.primaryLavender,
-      borderRadius: DesignTokens.radiusLG,
+      backgroundColor: AppTheme.primary,
+      borderRadius: AppTheme.radiusCard,
       onTap: onTap,
-      padding: const EdgeInsets.all(DesignTokens.spacingLG),
+      padding: const EdgeInsets.all(24),
       child: Row(
         children: [
           Expanded(
@@ -141,13 +142,13 @@ class AttendanceCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: DesignTokens.textWhite.withValues(alpha: 0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        CupertinoIcons.book,
+                        Icons.menu_book_rounded,
                         size: 16,
-                        color: DesignTokens.textWhite,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -156,7 +157,7 @@ class AttendanceCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: DesignTokens.textWhite,
+                        color: Colors.white,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -173,7 +174,7 @@ class AttendanceCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: DesignTokens.textWhite,
+                            color: Colors.white,
                           ),
                         ),
                         Text(
@@ -181,7 +182,7 @@ class AttendanceCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
-                            color: DesignTokens.textWhite,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -195,7 +196,7 @@ class AttendanceCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: DesignTokens.textWhite,
+                            color: Colors.white,
                           ),
                         ),
                         Text(
@@ -203,7 +204,7 @@ class AttendanceCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
-                            color: DesignTokens.textWhite,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -218,8 +219,8 @@ class AttendanceCard extends StatelessWidget {
             progress: gradePercentage / 100,
             size: 64,
             strokeWidth: 6,
-            progressColor: DesignTokens.textWhite,
-            backgroundColor: DesignTokens.textWhite.withValues(alpha: 0.2),
+            progressColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.2),
             label: '${gradePercentage.toStringAsFixed(0)}%',
           ),
         ],
@@ -246,10 +247,12 @@ class PomodoroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return DashboardCard(
-      backgroundColor: DesignTokens.cardPurple,
-      borderRadius: DesignTokens.radiusLG,
-      padding: const EdgeInsets.all(DesignTokens.spacingLG),
+      backgroundColor: cs.surfaceContainerLow,
+      borderRadius: AppTheme.radiusCard,
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -258,22 +261,22 @@ class PomodoroCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: DesignTokens.cardPurpleAccent.withValues(alpha: 0.15),
+                  color: AppTheme.primary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  CupertinoIcons.timer,
+                  Icons.timer_outlined,
                   size: 16,
-                  color: DesignTokens.cardPurpleAccent,
+                  color: AppTheme.primary,
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Focus Timer',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: DesignTokens.textSecondary,
+                  color: cs.onSurfaceVariant,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -285,89 +288,47 @@ class PomodoroCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   timerDisplay,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
-                    color: DesignTokens.textPrimary,
-                    fontFeatures: [FontFeature.tabularFigures()],
+                    color: cs.onSurface,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ),
               MiniProgressRing(
                 progress: isActive ? 0.6 : 0.0,
                 size: 48,
-                color: DesignTokens.cardPurpleAccent,
+                color: AppTheme.primary,
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             '$completedSessions sessions today',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: DesignTokens.textSecondary,
+              color: cs.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: GestureDetector(
-                  onTap: onStartPause,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [DesignTokens.primaryLavender, DesignTokens.secondaryBlue],
-                      ),
-                      borderRadius: BorderRadius.circular(DesignTokens.radiusPill),
-                      boxShadow: [
-                        BoxShadow(
-                          color: DesignTokens.primaryLavender.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          isActive ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill,
-                          color: DesignTokens.textWhite,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isActive ? 'Pause' : 'Start Focus',
-                          style: const TextStyle(
-                            color: DesignTokens.textWhite,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                child: FilledButton.icon(
+                  onPressed: onStartPause,
+                  icon: Icon(isActive ? Icons.pause : Icons.play_arrow),
+                  label: Text(isActive ? 'Pause' : 'Start Focus'),
                 ),
               ),
               if (onReset != null) ...[
                 const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: onReset,
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: DesignTokens.textWhite,
-                      shape: BoxShape.circle,
-                      boxShadow: DesignTokens.cardShadow,
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.arrow_counterclockwise,
-                      size: 18,
-                      color: DesignTokens.cardPurpleAccent,
-                    ),
+                IconButton(
+                  onPressed: onReset,
+                  icon: const Icon(Icons.refresh_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: cs.surfaceContainerHighest,
                   ),
                 ),
               ],

@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AnimatedCounter extends StatefulWidget {
   final double targetValue;
