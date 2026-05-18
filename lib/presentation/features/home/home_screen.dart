@@ -58,46 +58,90 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       child: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: Text('Home'),
-              border: const Border(bottom: BorderSide.none),
-              backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        child: Stack(
+          children: [
+            CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                CupertinoSliverNavigationBar(
+                  largeTitle: Text('Home'),
+                  border: const Border(bottom: BorderSide.none),
+                  backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        Text(
+                          'Good morning!',
+                          style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+                        ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.2),
+                        const SizedBox(height: 4),
+                        Text(
+                          'You have $pendingCount pending tasks.',
+                          style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                            color: CupertinoColors.systemGrey2,
+                          ),
+                        ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideX(begin: 0.2),
+                        const SizedBox(height: 24),
+                        if (upNext.hasNext && upNext.course != null)
+                          _buildUpNextCard(context, upNext.course!, primaryColor)
+                              .animate().fadeIn(duration: 500.ms).slideY(begin: 0.3),
+                        const SizedBox(height: 32),
+                        _buildSectionHeader(context, 'Current Courses'),
+                        const SizedBox(height: 16),
+                        _buildCoursesList(context, courses, ref),
+                        const SizedBox(height: 32),
+                        _buildSectionHeader(context, 'Due Tasks'),
+                        const SizedBox(height: 16),
+                        _buildTasksList(context, ref, tasks),
+                        const SizedBox(height: 120),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    Text(
-                      'Good morning!',
-                      style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
-                    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.2),
-                    const SizedBox(height: 4),
-                    Text(
-                      'You have $pendingCount pending tasks.',
-                      style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                        color: CupertinoColors.systemGrey2,
+            Positioned(
+              right: 20,
+              bottom: 20,
+              child: SafeArea(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    showCupertinoModalPopup<void>(
+                      context: context,
+                      builder: (modalCtx) => CupertinoPageScaffold(
+                        backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                        child: SafeArea(
+                          child: AddCourseSheet(),
+                        ),
                       ),
-                    ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideX(begin: 0.2),
-                    const SizedBox(height: 24),
-                    if (upNext.hasNext && upNext.course != null)
-                      _buildUpNextCard(context, upNext.course!, primaryColor)
-                          .animate().fadeIn(duration: 500.ms).slideY(begin: 0.3),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader(context, 'Current Courses'),
-                    const SizedBox(height: 16),
-                    _buildCoursesList(context, courses, ref),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader(context, 'Due Tasks'),
-                    const SizedBox(height: 16),
-                    _buildTasksList(context, ref, tasks),
-                    const SizedBox(height: 120),
-                  ],
+                    );
+                  },
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.add,
+                      color: CupertinoColors.white,
+                      size: 28,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -108,22 +152,26 @@ class HomeScreen extends ConsumerWidget {
   }
 
   void _showNotificationHistory(BuildContext context) {
-    showCupertinoModalPopup(
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) => CupertinoActionSheet(
+      builder: (BuildContext modalCtx) => CupertinoActionSheet(
         title: const Text('Notifications'),
         message: const Text(
           'Enable notifications in Settings to get reminded about classes, tasks, and pomodoro sessions.',
         ),
         actions: [
           CupertinoActionSheetAction(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              Navigator.of(modalCtx).pop();
+              context.push('/settings');
+            },
             child: const Text('Open Notification Settings'),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
-          onPressed: () => Navigator.of(context).pop(),
+          isDestructiveAction: true,
+          onPressed: () => Navigator.of(modalCtx).pop(),
           child: const Text('Close'),
         ),
       ),

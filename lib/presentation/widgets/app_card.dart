@@ -14,13 +14,13 @@ class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
     required this.child,
-    this.color,
     this.padding,
     this.borderRadius,
     this.border,
     this.boxShadow,
     this.gradient,
     this.width,
+    this.color,
   });
 
   factory AppCard.glass({
@@ -30,13 +30,12 @@ class AppCard extends StatelessWidget {
   }) {
     return AppCard(
       child: child,
-      color: CupertinoColors.systemBackground.withOpacity(0.6),
       padding: padding,
       borderRadius: borderRadius,
       border: Border.all(color: CupertinoColors.systemGrey4),
       boxShadow: [
         BoxShadow(
-          color: AppTheme.primary.withOpacity(0.08),
+          color: AppTheme.primary.withValues(alpha: 0.08),
           blurRadius: 20,
           offset: const Offset(0, 8),
         ),
@@ -57,7 +56,7 @@ class AppCard extends StatelessWidget {
       borderRadius: borderRadius,
       boxShadow: [
         BoxShadow(
-          color: colors.first.withOpacity(0.3),
+          color: colors.first.withValues(alpha: 0.3),
           blurRadius: 20,
           offset: const Offset(0, 10),
         ),
@@ -67,17 +66,22 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
     return Container(
       width: width,
       padding: padding ?? const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: gradient != null ? null : (color ?? CupertinoColors.systemGrey6),
+        color: gradient != null
+            ? null
+            : (color ?? (isDark
+                ? const Color(0xFF1C1C1E)
+                : CupertinoColors.systemGrey6)),
         gradient: gradient,
         borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusXXL),
         border: border,
         boxShadow: boxShadow ?? [
           BoxShadow(
-            color: CupertinoColors.black.withOpacity(0.02),
+            color: CupertinoColors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

@@ -43,71 +43,77 @@ class SettingsScreen extends ConsumerWidget {
             CupertinoFormSection.insetGrouped(
               header: const Text('APPEARANCE'),
               children: [
-                CupertinoFormRow(
-                  prefix: _buildRowIcon(CupertinoIcons.circle_lefthalf_fill, primaryColor),
-                  child: CupertinoButton(
-                    onPressed: () => _showThemeSheet(context, ref, settings),
-                    padding: EdgeInsets.zero,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Appearance'),
-                            Text(
-                              _themeLabel(settings.themeMode),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: CupertinoColors.systemGrey2,
+            CupertinoFormRow(
+              prefix: _buildRowIcon(CupertinoIcons.circle_lefthalf_fill, primaryColor),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _showThemeSheet(context, ref, settings),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Appearance'),
+                          Text(
+                            _themeLabel(settings.themeMode),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.systemGrey2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            CupertinoFormRow(
+              prefix: _buildRowIcon(CupertinoIcons.paintbrush, primaryColor),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _showColorSheet(context, ref, settings),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Accent Color'),
+                          Row(
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: Color(settings.primaryColorValue),
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
-                      ],
-                    ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: CupertinoColors.systemGrey2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    ],
                   ),
                 ),
-                CupertinoFormRow(
-                  prefix: _buildRowIcon(CupertinoIcons.paintbrush, primaryColor),
-                  child: CupertinoButton(
-                    onPressed: () => _showColorSheet(context, ref, settings),
-                    padding: EdgeInsets.zero,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Accent Color'),
-                            Row(
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: Color(settings.primaryColorValue),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: CupertinoColors.systemGrey2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
-                      ],
-                    ),
-                  ),
-                ),
+              ),
+            ),
                 CupertinoFormRow(
                   prefix: _buildRowIcon(CupertinoIcons.square_stack_3d_up, primaryColor),
                   child: Row(
@@ -227,58 +233,64 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                CupertinoFormRow(
-                  prefix: _buildRowIcon(CupertinoIcons.arrow_down_circle, primaryColor),
-                  child: CupertinoButton(
-                    onPressed: () => _checkForUpdate(context),
-                    padding: EdgeInsets.zero,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Check for Updates'),
-                            Text(
-                              'Download the latest version',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: CupertinoColors.systemGrey2,
-                              ),
+            CupertinoFormRow(
+              prefix: _buildRowIcon(CupertinoIcons.arrow_down_circle, primaryColor),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _checkForUpdate(context),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Check for Updates'),
+                          Text(
+                            'Download the latest version',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.systemGrey2,
                             ),
-                          ],
-                        ),
-                        const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    ],
                   ),
                 ),
-                CupertinoFormRow(
-                  prefix: _buildRowIcon(CupertinoIcons.book, primaryColor),
-                  child: CupertinoButton(
-                    onPressed: () => launchUrl(Uri.parse('https://github.com/MoHamed-B-M/study4u')),
-                    padding: EdgeInsets.zero,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('GitHub Repository'),
-                            Text(
-                              'MoHamed-B-M/study4u',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: CupertinoColors.systemGrey2,
-                              ),
+              ),
+            ),
+            CupertinoFormRow(
+              prefix: _buildRowIcon(CupertinoIcons.book, primaryColor),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => launchUrl(Uri.parse('https://github.com/MoHamed-B-M/study4u')),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('GitHub Repository'),
+                          Text(
+                            'MoHamed-B-M/study4u',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.systemGrey2,
                             ),
-                          ],
-                        ),
-                        const Icon(CupertinoIcons.arrow_up_right, size: 16, color: CupertinoColors.systemGrey3),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      const Icon(CupertinoIcons.arrow_up_right, size: 16, color: CupertinoColors.systemGrey3),
+                    ],
                   ),
                 ),
+              ),
+            ),
               ],
             ),
             const SizedBox(height: 32),
@@ -356,16 +368,16 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showThemeSheet(BuildContext context, WidgetRef ref, AppSettings settings) {
-    showCupertinoModalPopup(
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) => CupertinoActionSheet(
+      builder: (BuildContext modalCtx) => CupertinoActionSheet(
         title: const Text('Choose Theme'),
         actions: [
           CupertinoActionSheetAction(
             onPressed: () {
               HapticFeedback.selectionClick();
               ref.read(settingsProvider.notifier).setThemeMode('system');
-              Navigator.of(context).pop();
+              Navigator.of(modalCtx).pop();
             },
             child: const Text('System Default'),
           ),
@@ -373,7 +385,7 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () {
               HapticFeedback.selectionClick();
               ref.read(settingsProvider.notifier).setThemeMode('light');
-              Navigator.of(context).pop();
+              Navigator.of(modalCtx).pop();
             },
             child: const Text('Light'),
           ),
@@ -381,14 +393,15 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () {
               HapticFeedback.selectionClick();
               ref.read(settingsProvider.notifier).setThemeMode('dark');
-              Navigator.of(context).pop();
+              Navigator.of(modalCtx).pop();
             },
             child: const Text('Dark'),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
-          onPressed: () => Navigator.of(context).pop(),
+          isDestructiveAction: true,
+          onPressed: () => Navigator.of(modalCtx).pop(),
           child: const Text('Cancel'),
         ),
       ),
@@ -396,45 +409,42 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showColorSheet(BuildContext context, WidgetRef ref, AppSettings settings) {
-    showCupertinoModalPopup(
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (_) => CupertinoActionSheet(
+      builder: (BuildContext modalCtx) => CupertinoActionSheet(
         title: const Text('Pick Accent Color'),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {},
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: _colors.map((color) {
-                final isSelected = color.value == settings.primaryColorValue;
-                return GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    ref.read(settingsProvider.notifier).setPrimaryColor(color.value);
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: isSelected ? Border.all(color: CupertinoColors.white, width: 3) : null,
-                      boxShadow: isSelected
-                          ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 12, spreadRadius: 2)]
-                          : null,
-                    ),
-                    child: isSelected ? const Icon(CupertinoIcons.check_mark, color: CupertinoColors.white) : null,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
+        message: Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
+          children: _colors.map((color) {
+            final isSelected = color.value == settings.primaryColorValue;
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                ref.read(settingsProvider.notifier).setPrimaryColor(color.value);
+                Navigator.of(modalCtx).pop();
+              },
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: isSelected ? Border.all(color: CupertinoColors.white, width: 3) : null,
+                  boxShadow: isSelected
+                      ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 12, spreadRadius: 2)]
+                      : null,
+                ),
+                child: isSelected ? const Icon(CupertinoIcons.check_mark, color: CupertinoColors.white) : null,
+              ),
+            );
+          }).toList(),
+        ),
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
-          onPressed: () => Navigator.of(context).pop(),
+          isDestructiveAction: true,
+          onPressed: () => Navigator.of(modalCtx).pop(),
           child: const Text('Cancel'),
         ),
       ),
