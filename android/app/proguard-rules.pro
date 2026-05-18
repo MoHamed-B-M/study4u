@@ -28,6 +28,12 @@
     public static final android.os.Parcelable$Creator *;
 }
 
+# Play Core (Play Store split install / deferred components)
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**
+-keep class com.google.android.play.core.** { *; }
+
 # Keep R8 optimized code paths
 -keep,allowobfuscation,allowshrinking class * {
     @keep <fields>;
