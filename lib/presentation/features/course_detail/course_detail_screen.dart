@@ -14,6 +14,7 @@ import '../../../domain/entities/task.dart';
 import '../../../domain/entities/course_material.dart';
 import '../../../domain/entities/attendance_record.dart';
 import '../../../shared/providers/logic_providers.dart';
+import '../../theme/design_tokens.dart';
 import '../../theme/app_theme.dart';
 
 class CourseDetailScreen extends ConsumerStatefulWidget {
@@ -127,7 +128,7 @@ class _InfoTab extends ConsumerWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
       ),
       child: Column(
         children: [
@@ -185,7 +186,7 @@ class _InfoTab extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: CupertinoColors.systemGrey6,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
         ),
         child: const Center(
           child: Text('No attendance records yet', style: TextStyle(color: CupertinoColors.systemGrey2)),
@@ -197,7 +198,7 @@ class _InfoTab extends ConsumerWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -236,7 +237,7 @@ class _InfoCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
       ),
       child: Row(
         children: [
@@ -425,7 +426,7 @@ class _MaterialTile extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: CupertinoColors.systemGrey6,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
           ),
           child: Row(
             children: [
@@ -699,7 +700,7 @@ class _NoteTile extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: CupertinoColors.systemGrey6,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -884,7 +885,7 @@ class _TaskTile extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: CupertinoColors.systemGrey6,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
         ),
         child: Row(
           children: [

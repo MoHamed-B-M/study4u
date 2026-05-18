@@ -3,20 +3,21 @@ import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'presentation/widgets/floating_nav_bar.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
 import 'data/datasources/local_storage.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/theme_provider.dart';
-import 'presentation/features/home/home_screen.dart';
-import 'presentation/features/tracker/tracker_screen.dart';
-import 'presentation/features/statistics/statistics_screen.dart';
-import 'presentation/features/settings/settings_screen.dart';
+import 'presentation/features/dashboard/dashboard_view.dart';
+import 'presentation/features/stats/stats_view.dart';
+import 'presentation/features/tracker/tracker_view.dart';
+import 'presentation/features/settings/settings_view.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
+import 'presentation/widgets/study_bottom_nav.dart';
+import 'presentation/widgets/add_course_sheet.dart';
 import 'data/models/app_settings.dart';
 
 void main() {
@@ -107,28 +108,28 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/',
             pageBuilder: (context, state) => CupertinoPage(
               key: state.pageKey,
-              child: const HomeScreen(),
-            ),
-          ),
-          GoRoute(
-            path: '/tracker',
-            pageBuilder: (context, state) => CupertinoPage(
-              key: state.pageKey,
-              child: const TrackerScreen(),
+              child: const DashboardView(),
             ),
           ),
           GoRoute(
             path: '/stats',
             pageBuilder: (context, state) => CupertinoPage(
               key: state.pageKey,
-              child: const StatisticsScreen(),
+              child: const StatsView(),
+            ),
+          ),
+          GoRoute(
+            path: '/tracker',
+            pageBuilder: (context, state) => CupertinoPage(
+              key: state.pageKey,
+              child: const TrackerView(),
             ),
           ),
           GoRoute(
             path: '/settings',
             pageBuilder: (context, state) => CupertinoPage(
               key: state.pageKey,
-              child: const SettingsScreen(),
+              child: const SettingsView(),
             ),
           ),
           GoRoute(
@@ -197,10 +198,21 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
+  void _onAddPressed() {
+    HapticFeedback.lightImpact();
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (modalCtx) => CupertinoPageScaffold(
+        backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+        child: SafeArea(
+          child: AddCourseSheet(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final useFloating = ref.watch(useFloatingNavBarProvider);
-
     return CupertinoPageScaffold(
       backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
@@ -217,33 +229,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ),
               ),
             ),
-            RepaintBoundary(
-              child: useFloating
-                  ? FloatingNavBar(
-                      currentIndex: _currentIndex,
-                      onDestinationSelected: (index) {
-                        HapticFeedback.lightImpact();
-                        setState(() => _currentIndex = index);
-                        if (index == 0) context.go('/');
-                        if (index == 1) context.go('/tracker');
-                        if (index == 2) context.go('/stats');
-                      },
-                    )
-                  : CupertinoTabBar(
-                      currentIndex: _currentIndex,
-                      onTap: (index) {
-                        HapticFeedback.lightImpact();
-                        setState(() => _currentIndex = index);
-                        if (index == 0) context.go('/');
-                        if (index == 1) context.go('/tracker');
-                        if (index == 2) context.go('/stats');
-                      },
-                      items: const [
-                        BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Home'),
-                        BottomNavigationBarItem(icon: Icon(CupertinoIcons.calendar), label: 'Tracker'),
-                        BottomNavigationBarItem(icon: Icon(CupertinoIcons.chart_bar_alt_fill), label: 'Stats'),
-                      ],
-                    ),
+            StudyBottomNav(
+              currentIndex: _currentIndex,
+              onDestinationSelected: (index) {
+                setState(() => _currentIndex = index);
+                if (index == 0) context.go('/');
+                if (index == 1) context.go('/stats');
+                if (index == 2) context.go('/tracker');
+                if (index == 3) context.go('/settings');
+              },
+              onAddPressed: _onAddPressed,
             ),
           ],
         ),
