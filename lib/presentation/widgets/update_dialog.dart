@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show LinearProgressIndicator;
+import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import '../../core/services/update_service.dart';
 
@@ -9,7 +8,7 @@ class UpdateDialog {
     required BuildContext context,
     required UpdateInfo update,
   }) async {
-    return showCupertinoDialog(
+    return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => _UpdateDialogContent(update: update),
@@ -50,7 +49,7 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoAlertDialog(
+    return AlertDialog(
       title: _downloadProgress == null
           ? const Text('Update Available')
           : Text(_error != null ? 'Download Failed' : 'Downloading...'),
@@ -65,16 +64,14 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'v${widget.update.latestVersion}',
-          style: const TextStyle(fontSize: 16, color: CupertinoColors.systemBlue),
-        ),
+        Text('v${widget.update.latestVersion}',
+          style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.primary)),
         if (widget.update.releaseNotes != null) ...[
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemGrey6,
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -98,7 +95,7 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
         if (_error != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text(_error!, style: const TextStyle(color: CupertinoColors.systemRed, fontSize: 13)),
+            child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13)),
           ),
         const SizedBox(height: 8),
         Text('$percent%', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
@@ -108,21 +105,19 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 10,
-            backgroundColor: CupertinoColors.systemGrey6,
-            valueColor: const AlwaysStoppedAnimation(CupertinoColors.systemBlue),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
         ),
       ],
     );
   }
 
-  List<CupertinoDialogAction> _buildActions() {
+  List<Widget> _buildActions() {
     if (_error != null) {
       return [
-        CupertinoDialogAction(
-          isDefaultAction: true,
-          child: const Text('Close'),
+        TextButton(
           onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
         ),
       ];
     }
@@ -130,14 +125,13 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
       return [];
     }
     return [
-      CupertinoDialogAction(
-        child: const Text('Ignore'),
+      TextButton(
         onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Ignore'),
       ),
-      CupertinoDialogAction(
-        isDefaultAction: true,
-        child: const Text('Download'),
+      FilledButton(
         onPressed: _startDownload,
+        child: const Text('Download'),
       ),
     ];
   }

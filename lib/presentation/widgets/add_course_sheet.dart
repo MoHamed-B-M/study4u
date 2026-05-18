@@ -1,12 +1,10 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show TimeOfDay, DayPeriod;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/course.dart';
 import '../../shared/providers/logic_providers.dart';
 import '../theme/app_theme.dart';
-import 'gradient_button.dart';
 
 class AddCourseSheet extends ConsumerStatefulWidget {
   final CourseEntity? course;
@@ -82,37 +80,16 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
 
   Future<void> _pickTime(bool isStart) async {
     final initial = isStart ? _startTime : _endTime;
-    showCupertinoModalPopup(
+    final picked = await showTimePicker(
       context: context,
-      builder: (ctx) => Container(
-        height: 250,
-        color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-        child: Column(
-          children: [
-            Expanded(
-              child: CupertinoDatePicker(
-                initialDateTime: DateTime(2024, 1, 1, initial.hour, initial.minute),
-                mode: CupertinoDatePickerMode.time,
-                onDateTimeChanged: (date) {
-                  setState(() {
-                    final tod = TimeOfDay(hour: date.hour, minute: date.minute);
-                    if (isStart) {
-                      _startTime = tod;
-                    } else {
-                      _endTime = tod;
-                    }
-                  });
-                },
-              ),
-            ),
-            CupertinoButton(
-              child: const Text('Done'),
-              onPressed: () => Navigator.pop(ctx),
-            ),
-          ],
-        ),
-      ),
+      initialTime: initial,
     );
+    if (picked != null) {
+      setState(() {
+        if (isStart) _startTime = picked;
+        else _endTime = picked;
+      });
+    }
   }
 
   String _timeToString(TimeOfDay t) {
@@ -123,9 +100,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
 
   void _save() {
     HapticFeedback.mediumImpact();
-
     final id = widget.course?.id ?? const Uuid().v4();
-
     final course = CourseEntity(
       id: id,
       code: _codeCtrl.text.trim(),
@@ -152,244 +127,211 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20,
-        right: 20,
-        top: 12,
+        left: 24, right: 24, top: 12,
       ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
-              child: Text(
-                'Course Details',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
               ),
             ),
-            const SizedBox(height: 16),
-            CupertinoTextField(
+            const SizedBox(height: 20),
+            Center(child: Text('Course Details', style: Theme.of(context).textTheme.titleLarge)),
+            const SizedBox(height: 24),
+            TextField(
               controller: _nameCtrl,
-              placeholder: 'Course Name',
+              decoration: InputDecoration(labelText: 'Course Name', filled: true),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(
-                  child: CupertinoTextField(
-                    controller: _codeCtrl,
-                    placeholder: 'Course Code',
-                  ),
-                ),
+                Expanded(child: TextField(controller: _codeCtrl, decoration: InputDecoration(labelText: 'Course Code', filled: true))),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: CupertinoTextField(
-                    controller: _profCtrl,
-                    placeholder: 'Professor',
-                  ),
-                ),
+                Expanded(child: TextField(controller: _profCtrl, decoration: InputDecoration(labelText: 'Professor', filled: true))),
               ],
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(
-                  child: CupertinoTextField(
-                    controller: _roomCtrl,
-                    placeholder: 'Room',
-                  ),
-                ),
+                Expanded(child: TextField(controller: _roomCtrl, decoration: InputDecoration(labelText: 'Room', filled: true))),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: CupertinoTextField(
+                SizedBox(
+                  width: 100,
+                  child: TextField(
                     readOnly: true,
                     controller: TextEditingController(text: '${_creditHours.toInt()}'),
-                    placeholder: 'Credits',
-                    suffix: GestureDetector(
-                      onTap: () {
-                        showCupertinoModalPopup(
-                          context: context,
-                          builder: (ctx) => Container(
-                            height: 200,
-                            color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: CupertinoPicker(
-                                    scrollController: FixedExtentScrollController(
-                                      initialItem: _creditHours.toInt() - 1,
-                                    ),
-                                    itemExtent: 32,
-                                    onSelectedItemChanged: (v) {
-                                      setState(() => _creditHours = v + 1.0);
-                                    },
-                                    children: List.generate(6, (i) => Center(child: Text('${i + 1}'))),
+                    decoration: InputDecoration(
+                      labelText: 'Credits',
+                      filled: true,
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.expand_more, size: 20),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (ctx) => SizedBox(
+                              height: 220,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 12),
+                                    width: 40, height: 4,
+                                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
                                   ),
-                                ),
-                                CupertinoButton(
-                                  child: const Text('Done'),
-                                  onPressed: () => Navigator.pop(ctx),
-                                ),
-                              ],
+                                  Expanded(
+                                    child: ListWheelScrollView(
+                                      itemExtent: 40,
+                                      useMagnifier: true,
+                                      magnification: 1.2,
+                                      children: List.generate(6, (i) {
+                                        final credits = i + 1;
+                                        return Center(child: Text('$credits', style: Theme.of(context).textTheme.titleMedium));
+                                      }),
+                                      onSelectedItemChanged: (v) => setState(() => _creditHours = v + 1.0),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: FilledButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text('Done'),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      child: const Icon(CupertinoIcons.chevron_down, size: 16, color: CupertinoColors.systemGrey2),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            const Text('Schedule', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            Text('Schedule', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
-                  child: CupertinoButton(
+                  child: OutlinedButton.icon(
                     onPressed: () => _pickTime(true),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(CupertinoIcons.clock, size: 16),
-                        const SizedBox(width: 8),
-                        Text(_timeToString(_startTime)),
-                      ],
-                    ),
+                    icon: const Icon(Icons.schedule, size: 18),
+                    label: Text(_timeToString(_startTime)),
                   ),
                 ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: CupertinoButton(
+                  child: OutlinedButton.icon(
                     onPressed: () => _pickTime(false),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(CupertinoIcons.clock_fill, size: 16),
-                        const SizedBox(width: 8),
-                        Text(_timeToString(_endTime)),
-                      ],
-                    ),
+                    icon: const Icon(Icons.schedule, size: 18),
+                    label: Text(_timeToString(_endTime)),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            const Text('Days', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 20),
+            Text('Days', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 8, runSpacing: 8,
               children: List.generate(7, (i) {
                 final selected = _weekDays.contains(i);
-                return CupertinoButton(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  color: selected
-                      ? CupertinoTheme.of(context).primaryColor.withOpacity(0.2)
-                      : CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(20),
-                  onPressed: () {
+                return FilterChip(
+                  label: Text(_days[i]),
+                  selected: selected,
+                  onSelected: (v) {
                     setState(() {
-                      if (selected) {
-                        _weekDays.remove(i);
-                      } else {
-                        _weekDays.add(i);
-                      }
+                      if (v) _weekDays.add(i);
+                      else _weekDays.remove(i);
                     });
                   },
-                  child: Text(
-                    _days[i],
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: selected
-                          ? CupertinoTheme.of(context).primaryColor
-                          : CupertinoColors.label,
-                    ),
-                  ),
+                  showCheckmark: selected,
                 );
               }),
             ),
-            const SizedBox(height: 24),
-            const Text('Color & Grade', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 20),
+            Text('Color & Grade', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey6,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      const Text('Color'),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: _colors.map((c) {
-                              final selected = _colorValue == c.value;
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _colorValue = c.value),
-                                  child: Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      color: c,
-                                      shape: BoxShape.circle,
-                                      border: selected
-                                          ? Border.all(color: CupertinoColors.label, width: 2.5)
+            Card(
+              elevation: 0,
+              color: cs.surfaceContainerLow,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const Text('Color'),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: _colors.map((c) {
+                                final selected = _colorValue == c.value;
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _colorValue = c.value),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      width: 32, height: 32,
+                                      decoration: BoxDecoration(
+                                        color: c, shape: BoxShape.circle,
+                                        border: selected ? Border.all(color: cs.onSurface, width: 2.5) : null,
+                                      ),
+                                      child: selected
+                                          ? Icon(Icons.check, size: 16, color: cs.surface)
                                           : null,
                                     ),
-                                    child: selected
-                                        ? const Icon(CupertinoIcons.check_mark, color: CupertinoColors.white, size: 14)
-                                        : null,
                                   ),
-                                ),
-                              );
-                            }).toList(),
+                                );
+                              }).toList(),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Text('Target Grade'),
-                      Expanded(
-                        child: CupertinoSlider(
-                          value: _targetGrade,
-                          min: 2.0,
-                          max: 4.0,
-                          divisions: 20,
-                          onChanged: (v) => setState(() => _targetGrade = v),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Text('Target Grade'),
+                        Expanded(
+                          child: Slider(
+                            value: _targetGrade,
+                            min: 2.0, max: 4.0, divisions: 20,
+                            onChanged: (v) => setState(() => _targetGrade = v),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 32,
-                        child: Text(
-                          _targetGrade.toStringAsFixed(1),
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                          textAlign: TextAlign.right,
+                        SizedBox(
+                          width: 36,
+                          child: Text(_targetGrade.toStringAsFixed(1),
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.right,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
-            GradientButton(
-              label: widget.course != null ? 'Save Changes' : 'Add Course',
-              icon: CupertinoIcons.book,
+            FilledButton.icon(
               onPressed: _save,
+              icon: const Icon(Icons.menu_book_outlined),
+              label: Text(widget.course != null ? 'Save Changes' : 'Add Course'),
             ),
             const SizedBox(height: 24),
           ],

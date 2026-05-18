@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import '../theme/design_tokens.dart';
+import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'circular_progress_ring.dart';
 
 class DashboardCard extends StatelessWidget {
@@ -24,23 +24,27 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final card = Container(
       width: width,
       height: height,
-      padding: padding ?? const EdgeInsets.all(DesignTokens.spacingMD),
+      padding: padding ?? const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: backgroundColor ?? DesignTokens.surface,
-        borderRadius: BorderRadius.circular(borderRadius ?? DesignTokens.radiusMD),
-        boxShadow: DesignTokens.cardShadow,
+        color: backgroundColor ?? (isDark ? AppTheme.surfaceDark : AppTheme.surface),
+        borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusCard),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: child,
     );
 
     if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: card,
-      );
+      return GestureDetector(onTap: onTap, child: card);
     }
     return card;
   }
@@ -66,6 +70,8 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return DashboardCard(
       backgroundColor: backgroundColor,
       onTap: onTap,
@@ -83,20 +89,20 @@ class InfoCard extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: DesignTokens.textPrimary,
+              color: cs.onSurface,
               height: 1.1,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: DesignTokens.textSecondary,
+              color: cs.onSurfaceVariant,
             ),
           ),
         ],
@@ -121,6 +127,8 @@ class CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return DashboardCard(
       backgroundColor: color.withValues(alpha: 0.1),
       width: 120,
@@ -134,15 +142,15 @@ class CourseCard extends StatelessWidget {
               color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(CupertinoIcons.book, size: 18, color: color),
+            child: Icon(Icons.menu_book_rounded, size: 18, color: color),
           ),
           const Spacer(),
           Text(
             code,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: DesignTokens.textPrimary,
+              color: cs.onSurface,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -150,10 +158,10 @@ class CourseCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: DesignTokens.textSecondary,
+              color: cs.onSurfaceVariant,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -186,9 +194,9 @@ class NextClassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DashboardCard(
       backgroundColor: color,
-      borderRadius: DesignTokens.radiusLG,
+      borderRadius: AppTheme.radiusCard,
       onTap: onTap,
-      padding: const EdgeInsets.all(DesignTokens.spacingLG),
+      padding: const EdgeInsets.all(24),
       child: Row(
         children: [
           Expanded(
@@ -200,7 +208,7 @@ class NextClassCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: DesignTokens.textWhite.withValues(alpha: 0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -210,7 +218,7 @@ class NextClassCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: DesignTokens.textWhite,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -219,7 +227,7 @@ class NextClassCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: DesignTokens.textWhite.withValues(alpha: 0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -228,7 +236,7 @@ class NextClassCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: DesignTokens.textWhite.withValues(alpha: 0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -239,8 +247,8 @@ class NextClassCard extends StatelessWidget {
             progress: progress,
             size: 72,
             strokeWidth: 6,
-            progressColor: DesignTokens.textWhite,
-            backgroundColor: DesignTokens.textWhite.withValues(alpha: 0.2),
+            progressColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.2),
             label: '${(progress * 100).toInt()}%',
           ),
         ],
@@ -267,9 +275,9 @@ class BlobBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DesignTokens.blobOrange.withValues(alpha: 0.15),
-                    DesignTokens.blobOrange.withValues(alpha: 0.02),
-                    CupertinoColors.transparent,
+                    AppTheme.primary.withValues(alpha: 0.12),
+                    AppTheme.primary.withValues(alpha: 0.02),
+                    Colors.transparent,
                   ],
                 ),
               ),
@@ -285,9 +293,9 @@ class BlobBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DesignTokens.blobPurple.withValues(alpha: 0.1),
-                    DesignTokens.blobPurple.withValues(alpha: 0.02),
-                    CupertinoColors.transparent,
+                    AppTheme.secondary.withValues(alpha: 0.10),
+                    AppTheme.secondary.withValues(alpha: 0.02),
+                    Colors.transparent,
                   ],
                 ),
               ),
@@ -303,9 +311,9 @@ class BlobBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DesignTokens.blobPink.withValues(alpha: 0.08),
-                    DesignTokens.blobPink.withValues(alpha: 0.01),
-                    CupertinoColors.transparent,
+                    AppTheme.warningRed.withValues(alpha: 0.08),
+                    AppTheme.warningRed.withValues(alpha: 0.01),
+                    Colors.transparent,
                   ],
                 ),
               ),

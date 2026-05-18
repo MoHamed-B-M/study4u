@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
   final Widget nextPage;
@@ -13,7 +13,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   static const _bgColor = Color(0xFF111625);
-  static const _glowColor = Color(0xFFE8927C);
+  static const _glowColor = Color(0xFF4ADE80);
 
   late final AnimationController _controller;
   late final Animation<double> _fadeIn;
@@ -58,7 +58,12 @@ class _SplashScreenState extends State<SplashScreen>
     _navigated = true;
     Navigator.pushReplacement(
       context,
-      CupertinoPageRoute(builder: (_) => widget.nextPage),
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => widget.nextPage,
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
     );
   }
 
@@ -72,9 +77,9 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 
-    return CupertinoPageScaffold(
+    return Scaffold(
       backgroundColor: _bgColor,
-      child: Stack(
+      body: Stack(
         children: [
           AnimatedBuilder(
             animation: _glowIn,
@@ -90,9 +95,9 @@ class _SplashScreenState extends State<SplashScreen>
                       center: const Alignment(0, 0.9),
                       radius: 0.9,
                       colors: [
-                        _glowColor.withOpacity(0.35),
-                        _glowColor.withOpacity(0.08),
-                        CupertinoColors.transparent,
+                        _glowColor.withAlpha(90),
+                        _glowColor.withAlpha(20),
+                        Colors.transparent,
                       ],
                     ),
                   ),
@@ -114,13 +119,13 @@ class _SplashScreenState extends State<SplashScreen>
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: CupertinoColors.white.withOpacity(0.06),
+                          color: Colors.white.withAlpha(15),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
-                          CupertinoIcons.book,
+                          Icons.menu_book_rounded,
                           size: 52,
-                          color: CupertinoColors.white,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -129,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen>
                         style: TextStyle(
                           fontSize: 38,
                           fontWeight: FontWeight.w800,
-                          color: CupertinoColors.white,
+                          color: Colors.white,
                           letterSpacing: -1.2,
                           height: 1,
                         ),
@@ -140,7 +145,7 @@ class _SplashScreenState extends State<SplashScreen>
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: CupertinoColors.white.withOpacity(0.45),
+                          color: Colors.white.withAlpha(115),
                           letterSpacing: 3.5,
                         ),
                       ),
