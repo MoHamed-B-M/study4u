@@ -1,7 +1,8 @@
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../theme/app_theme.dart';
 
 class FloatingNavBar extends StatefulWidget {
   final int currentIndex;
@@ -20,49 +21,49 @@ class FloatingNavBar extends StatefulWidget {
 class _FloatingNavBarState extends State<FloatingNavBar> {
   final List<_NavDestination> _destinations = const [
     _NavDestination(
-      icon: CupertinoIcons.home,
-      activeIcon: CupertinoIcons.house_fill,
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home,
       label: 'Home',
     ),
     _NavDestination(
-      icon: CupertinoIcons.calendar,
-      activeIcon: CupertinoIcons.calendar_circle_fill,
+      icon: Icons.calendar_today_outlined,
+      activeIcon: Icons.calendar_today,
       label: 'Tracker',
     ),
     _NavDestination(
-      icon: CupertinoIcons.chart_bar_alt_fill,
-      activeIcon: CupertinoIcons.chart_bar_alt_fill,
+      icon: Icons.analytics_outlined,
+      activeIcon: Icons.analytics,
       label: 'Stats',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: EdgeInsets.only(
-        left: 48,
-        right: 48,
+        left: 24,
+        right: 24,
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
-            height: 56,
+            height: 64,
             decoration: BoxDecoration(
               color: isDark
-                  ? CupertinoColors.white.withOpacity(0.08)
-                  : CupertinoColors.black.withOpacity(0.06),
+                  ? AppTheme.surfaceDark.withValues(alpha: 0.95)
+                  : Colors.white.withValues(alpha: 0.9),
               border: Border.all(
                 color: isDark
-                    ? CupertinoColors.white.withOpacity(0.12)
-                    : CupertinoColors.black.withOpacity(0.08),
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
                 width: 0.5,
               ),
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -70,29 +71,52 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                 final destination = _destinations[index];
                 final isActive = index == widget.currentIndex;
 
-                return GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    widget.onDestinationSelected(index);
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? CupertinoTheme.of(context).primaryColor.withOpacity(0.25)
-                          : CupertinoColors.transparent,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(
-                      isActive ? destination.activeIcon : destination.icon,
-                      color: isActive
-                          ? CupertinoTheme.of(context).primaryColor
-                          : isDark
-                              ? CupertinoColors.white.withOpacity(0.45)
-                              : CupertinoColors.black.withOpacity(0.45),
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.onDestinationSelected(index);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isActive ? destination.activeIcon : destination.icon,
+                            size: 22,
+                            color: isActive
+                                ? Theme.of(context).colorScheme.primary
+                                : (isDark
+                                    ? Colors.white.withValues(alpha: 0.45)
+                                    : Colors.black.withValues(alpha: 0.45)),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            destination.label,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                              color: isActive
+                                  ? Theme.of(context).colorScheme.primary
+                                  : (isDark
+                                      ? Colors.white.withValues(alpha: 0.45)
+                                      : Colors.black.withValues(alpha: 0.45)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

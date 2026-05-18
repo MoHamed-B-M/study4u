@@ -1,14 +1,14 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/entities/task.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
-import '../../widgets/pill_chip.dart';
 import '../../widgets/add_course_sheet.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -20,175 +20,91 @@ class HomeScreen extends ConsumerWidget {
     final tasks = ref.watch(taskListProvider);
     final pendingCount = ref.watch(pendingTaskCountProvider);
     final upNext = ref.watch(upNextProvider);
-    final primaryColor = CupertinoTheme.of(context).primaryColor;
+    final greeting = ref.watch(greetingProvider);
 
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
-        border: const Border(bottom: BorderSide.none),
-        leading: Text(
-          'stdy4u',
-          style: TextStyle(
-            color: primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.gear, size: 24),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                context.push('/settings');
-              },
-            ),
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.bell, size: 24),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                _showNotificationHistory(context);
-              },
-            ),
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: Stack(
-          children: [
-            CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                CupertinoSliverNavigationBar(
-                  largeTitle: Text('Home'),
-                  border: const Border(bottom: BorderSide.none),
-                  backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 16),
-                        Text(
-                          'Good morning!',
-                          style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
-                        ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.2),
-                        const SizedBox(height: 4),
-                        Text(
-                          'You have $pendingCount pending tasks.',
-                          style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                            color: CupertinoColors.systemGrey2,
-                          ),
-                        ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideX(begin: 0.2),
-                        const SizedBox(height: 24),
-                        if (upNext.hasNext && upNext.course != null)
-                          _buildUpNextCard(context, upNext.course!, primaryColor)
-                              .animate().fadeIn(duration: 500.ms).slideY(begin: 0.3),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader(context, 'Current Courses'),
-                        const SizedBox(height: 16),
-                        _buildCoursesList(context, courses, ref),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader(context, 'Due Tasks'),
-                        const SizedBox(height: 16),
-                        _buildTasksList(context, ref, tasks),
-                        const SizedBox(height: 120),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              right: 20,
-              bottom: 20,
-              child: SafeArea(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    showCupertinoModalPopup<void>(
-                      context: context,
-                      builder: (modalCtx) => CupertinoPageScaffold(
-                        backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                        child: SafeArea(
-                          child: AddCourseSheet(),
-                        ),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryColor.withValues(alpha: 0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.add,
-                      color: CupertinoColors.white,
-                      size: 28,
-                    ),
-                  ),
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: false,
+            pinned: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              title: Text(
+                'stdy4u',
+                style: GoogleFonts.outfit(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showNotificationHistory(BuildContext context) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext modalCtx) => CupertinoActionSheet(
-        title: const Text('Notifications'),
-        message: const Text(
-          'Enable notifications in Settings to get reminded about classes, tasks, and pomodoro sessions.',
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.of(modalCtx).pop();
-              context.push('/settings');
-            },
-            child: const Text('Open Notification Settings'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/settings');
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Text(
+                    greeting,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'You have $pendingCount pending tasks.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 24),
+                  if (upNext.hasNext && upNext.course != null)
+                    _buildUpNextCard(context, upNext.course!),
+                  const SizedBox(height: 32),
+                  _buildSectionHeader(context, 'Current Courses', 'View all'),
+                  const SizedBox(height: 16),
+                  _buildCoursesList(context, courses, ref),
+                  const SizedBox(height: 32),
+                  _buildSectionHeader(context, 'Due Tasks', null),
+                  const SizedBox(height: 16),
+                  _buildTasksList(context, ref, tasks),
+                  const SizedBox(height: 120),
+                ],
+              ),
+            ),
           ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          isDestructiveAction: true,
-          onPressed: () => Navigator.of(modalCtx).pop(),
-          child: const Text('Close'),
-        ),
       ),
+      floatingActionButton: _buildFAB(context),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-      ),
+  Widget _buildSectionHeader(BuildContext context, String title, String? action) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        if (action != null)
+          TextButton(
+            onPressed: () => HapticFeedback.lightImpact(),
+            child: Text(action, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
+          ),
+      ],
     );
   }
 
-  Widget _buildUpNextCard(BuildContext context, CourseEntity course, Color primaryColor) {
+  Widget _buildUpNextCard(BuildContext context, CourseEntity course) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
@@ -197,18 +113,11 @@ class HomeScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              primaryColor,
-              AppTheme.secondary,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppTheme.radiusXXL),
+          color: const Color(0xFF4ADE80),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withOpacity(0.3),
+              color: const Color(0xFF4ADE80).withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -223,45 +132,45 @@ class HomeScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: CupertinoColors.white.withOpacity(0.24),
+                    color: Colors.black.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
                     'UP NEXT',
                     style: TextStyle(
-                      color: CupertinoColors.white,
+                      color: Colors.black87,
                       fontWeight: FontWeight.bold,
                       fontSize: 10,
                       letterSpacing: 1,
                     ),
                   ),
                 ),
-                const Icon(CupertinoIcons.bolt_fill, color: CupertinoColors.white),
+                const Icon(Icons.bolt, color: Colors.black87),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Text(
               course.name,
-              style: const TextStyle(
-                color: CupertinoColors.white,
-                fontSize: 24,
+              style: GoogleFonts.outfit(
+                color: Colors.black87,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              '${course.code} • ${course.room}',
-              style: const TextStyle(color: CupertinoColors.systemGrey5),
+              '${course.code} \u2022 ${course.room}',
+              style: const TextStyle(color: Colors.black54),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(CupertinoIcons.clock, color: CupertinoColors.white, size: 18),
+                const Icon(Icons.access_time, color: Colors.black87, size: 18),
                 const SizedBox(width: 8),
                 Text(
                   '${course.startTime} - ${course.endTime}',
                   style: const TextStyle(
-                    color: CupertinoColors.white,
+                    color: Colors.black87,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -275,179 +184,189 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildCoursesList(BuildContext context, List<CourseEntity> courses, WidgetRef ref) {
     if (courses.isEmpty) {
-      return Text(
-        'No courses added yet.',
-        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-          color: CupertinoColors.systemGrey2,
-        ),
-      );
+      return Text('No courses added yet.', style: Theme.of(context).textTheme.bodyMedium);
     }
     return SizedBox(
-      height: 200,
+      height: 180,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
         itemCount: courses.length,
         itemBuilder: (context, index) {
           final course = courses[index];
-          final isDark = CupertinoTheme.of(context).brightness == Brightness.dark;
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           return Container(
-            width: 170,
+            width: 150,
             margin: const EdgeInsets.only(right: 14),
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.lightImpact();
                 context.push('/course/${course.id}');
               },
-              onLongPress: () {
-                HapticFeedback.heavyImpact();
-                showCupertinoModalPopup(
-                  context: context,
-                  builder: (ctx) => CupertinoActionSheet(
-                    title: Text(course.name),
-                    message: Text(course.code),
-                    actions: [
-                      CupertinoActionSheetAction(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          HapticFeedback.lightImpact();
-                          showCupertinoModalPopup(
-                            context: context,
-                            builder: (_) => CupertinoPageScaffold(
-                              backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                              child: SafeArea(
-                                child: AddCourseSheet(course: course),
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Text('Edit Course'),
-                      ),
-                      CupertinoActionSheetAction(
-                        isDestructiveAction: true,
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          HapticFeedback.mediumImpact();
-                          showCupertinoDialog(
-                            context: context,
-                            builder: (dCtx) => CupertinoAlertDialog(
-                              title: Text('Delete ${course.name}?'),
-                              content: const Text('This will also remove all related attendance records.'),
-                              actions: [
-                                CupertinoDialogAction(
-                                  child: const Text('Cancel'),
-                                  onPressed: () => Navigator.pop(dCtx),
-                                ),
-                                CupertinoDialogAction(
-                                  isDestructiveAction: true,
-                                  child: const Text('Delete'),
-                                  onPressed: () {
-                                    ref.read(courseRepositoryProvider).deleteCourse(course.id);
-                                    ref.read(dataRefreshProvider.notifier).state++;
-                                    Navigator.pop(dCtx);
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Text('Delete Course'),
-                      ),
-                    ],
-                    cancelButton: CupertinoActionSheetAction(
-                      isDefaultAction: true,
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? CupertinoColors.systemGrey6.withOpacity(0.3)
-                      : CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+              onLongPress: () => _showCourseOptions(context, course, ref),
+              child: AppCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                color: isDark ? AppTheme.surfaceDark : Colors.white,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 4,
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
+                        color: Color(course.colorValue).withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.book,
                         color: Color(course.colorValue),
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                        size: 22,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Color(course.colorValue).withOpacity(0.12),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              CupertinoIcons.book,
-                              color: Color(course.colorValue),
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            course.code,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            course.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              const Icon(CupertinoIcons.clock, size: 12, color: CupertinoColors.systemGrey2),
-                              const SizedBox(width: 4),
-                              Text(
-                                course.startTime,
-                                style: const TextStyle(fontSize: 11, color: CupertinoColors.systemGrey2),
-                              ),
-                            ],
-                          ),
-                        ],
+                    const SizedBox(height: 12),
+                    Text(
+                      course.code,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: isDark ? Colors.white : AppTheme.textPrimary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      course.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 12,
+                          color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          course.startTime,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
-          ).animate().fadeIn(duration: 400.ms, delay: (index * 100).ms).slideX(begin: 0.2);
+          );
         },
+      ),
+    );
+  }
+
+  void _showCourseOptions(BuildContext context, CourseEntity course, WidgetRef ref) {
+    HapticFeedback.heavyImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(course.name, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(course.code, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
+              const SizedBox(height: 24),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: const Text('Edit Course'),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  HapticFeedback.lightImpact();
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
+                    ),
+                    builder: (_) => AddCourseSheet(course: course),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete_outlined, color: Theme.of(context).colorScheme.error),
+                title: Text('Delete Course', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _confirmDeleteCourse(context, course, ref);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteCourse(BuildContext context, CourseEntity course, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dCtx) => AlertDialog(
+        backgroundColor: AppTheme.surfaceDark,
+        title: Text('Delete ${course.name}?'),
+        content: const Text('This will also remove all related attendance records.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dCtx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              ref.read(courseRepositoryProvider).deleteCourse(course.id);
+              ref.read(dataRefreshProvider.notifier).state++;
+              Navigator.pop(dCtx);
+            },
+            child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTasksList(BuildContext context, WidgetRef ref, List<TaskEntity> tasks) {
     if (tasks.isEmpty) {
-      return Text(
-        'Hooray! No pending tasks.',
-        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-          color: CupertinoColors.systemGrey2,
-        ),
-      );
+      return Text('Hooray! No pending tasks.', style: Theme.of(context).textTheme.bodyMedium);
     }
     return Column(
       children: List.generate(tasks.length, (index) {
         final task = tasks[index];
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: AppCard(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            color: isDark ? AppTheme.surfaceDark : Colors.white,
             child: Row(
               children: [
                 GestureDetector(
@@ -457,24 +376,20 @@ class HomeScreen extends ConsumerWidget {
                     ref.read(dataRefreshProvider.notifier).state++;
                   },
                   child: AnimatedContainer(
-                    duration: 300.ms,
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: task.isCompleted
-                          ? CupertinoTheme.of(context).primaryColor
-                          : CupertinoColors.transparent,
+                      color: task.isCompleted ? Theme.of(context).colorScheme.primary : Colors.transparent,
                       border: Border.all(
-                        color: task.isCompleted
-                            ? CupertinoTheme.of(context).primaryColor
-                            : CupertinoColors.systemGrey3,
+                        color: task.isCompleted ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
                         width: 2,
                       ),
                     ),
                     child: task.isCompleted
-                        ? const Icon(CupertinoIcons.check_mark, size: 16, color: CupertinoColors.white)
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
                         : null,
                   ),
                 ),
@@ -487,33 +402,94 @@ class HomeScreen extends ConsumerWidget {
                         task.title,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : AppTheme.textPrimary,
                           decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${task.dueDate.month}/${task.dueDate.day} ${task.dueDate.hour}:${task.dueDate.minute.toString().padLeft(2, '0')}',
+                        DateFormat('MMM dd, hh:mm a').format(task.dueDate),
                         style: TextStyle(
                           fontSize: 12,
                           color: task.urgency == TaskUrgency.urgent
-                              ? CupertinoColors.systemRed
-                              : CupertinoColors.systemGrey2,
+                              ? AppTheme.warningRed
+                              : (isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5)),
                         ),
                       ),
                     ],
                   ),
                 ),
-                PillChip(
-                  label: task.urgency == TaskUrgency.urgent ? 'URGENT' : 'NORMAL',
-                  color: task.urgency == TaskUrgency.urgent
-                      ? CupertinoColors.systemRed
-                      : AppTheme.primary,
-                ),
+                if (task.urgency == TaskUrgency.urgent)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.warningRed.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'URGENT',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.warningRed,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'NORMAL',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-        ).animate().fadeIn(duration: 300.ms, delay: (index * 80).ms).slideX(begin: 0.2);
+        );
       }),
+    );
+  }
+
+  Widget _buildFAB(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 0),
+      child: FloatingActionButton.extended(
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
+            ),
+            builder: (_) => const AddCourseSheet(),
+          );
+        },
+        backgroundColor: AppTheme.surfaceDark,
+        foregroundColor: Colors.white,
+        elevation: 8,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Add Course',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+        ),
+      ),
     );
   }
 }
