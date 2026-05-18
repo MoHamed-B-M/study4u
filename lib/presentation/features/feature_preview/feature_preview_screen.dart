@@ -61,19 +61,14 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
         child: Column(
           children: [
             const Spacer(flex: 1),
-            AspectRatio(
-              aspectRatio: 9 / 19.5,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 40),
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: const Color(0xFF4ADE80).withValues(alpha: 0.5), width: 1.5),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(26),
-                  child: Container(
-                    color: const Color(0xFF0D1320),
+            Transform.scale(
+              scale: 1.3,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 220,
+                    height: 330,
                     child: AnimatedBuilder(
                       animation: _ctrl,
                       builder: (_, _) => Stack(
@@ -85,51 +80,63 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                       ),
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  Text(
+                    sceneLabel.label,
+                    style: TextStyle(
+                      color: const Color(0xFF4ADE80).withValues(alpha: 0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(3, (i) {
+                      final active = sceneLabel.index == i;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: active ? 24 : 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: active
+                              ? const Color(0xFF4ADE80)
+                              : const Color(0xFF4ADE80).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(flex: 1),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: ElevatedButton(
+                    onPressed: _continue,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: const StadiumBorder(),
+                      textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    child: const Text('START APPLICATION'),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              sceneLabel.label,
-              style: TextStyle(
-                color: const Color(0xFF4ADE80).withValues(alpha: 0.7),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (i) {
-                final active = sceneLabel.index == i;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: active ? 24 : 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: active
-                        ? const Color(0xFF4ADE80)
-                        : const Color(0xFF4ADE80).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _continue,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4ADE80),
-                foregroundColor: const Color(0xFF111625),
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                shape: const StadiumBorder(),
-                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-              ),
-              child: const Text('Continue to stdy4u'),
-            ),
-            const Spacer(flex: 1),
           ],
         ),
       ),
