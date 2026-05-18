@@ -11,8 +11,8 @@ final settingsProvider = StateNotifierProvider<SettingsNotifier, AppSettings>((r
 });
 
 final themeModeProvider = Provider<ThemeMode>((ref) {
-  final s = ref.watch(settingsProvider);
-  switch (s.themeMode) {
+  final s = ref.watch(settingsProvider.select((s) => s.themeMode));
+  switch (s) {
     case 'dark':
       return ThemeMode.dark;
     case 'light':
@@ -20,6 +20,10 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
     default:
       return ThemeMode.system;
   }
+});
+
+final primaryColorProvider = Provider<int>((ref) {
+  return ref.watch(settingsProvider.select((s) => s.primaryColorValue));
 });
 
 class SettingsNotifier extends StateNotifier<AppSettings> {
@@ -75,9 +79,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {
-  return ref.watch(settingsProvider).useFloatingNavBar;
+  return ref.watch(settingsProvider.select((s) => s.useFloatingNavBar));
 });
 
 final useHapticFeedbackProvider = Provider<bool>((ref) {
-  return ref.watch(settingsProvider).hapticFeedback;
+  return ref.watch(settingsProvider.select((s) => s.hapticFeedback));
 });

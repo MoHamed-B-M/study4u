@@ -33,14 +33,16 @@ class LocalStorage {
       Hive.registerAdapter(AppSettingsAdapter());
       Hive.registerAdapter(CourseMaterialAdapter());
 
-      await Hive.openBox<Course>('courses');
-      await Hive.openBox<StudyTask>('tasks');
-      await Hive.openBox<AttendanceRecord>('attendance');
-      await Hive.openBox<PomodoroSettings>('settings');
-      await Hive.openBox<ScreenTimeLog>('screenTime');
-      await Hive.openBox<AppSettings>('appSettings');
-      await Hive.openBox<String>('pomodoroSessions');
-      await Hive.openBox<CourseMaterial>('materials');
+      await Future.wait([
+        Hive.openBox<Course>('courses'),
+        Hive.openBox<StudyTask>('tasks'),
+        Hive.openBox<AttendanceRecord>('attendance'),
+        Hive.openBox<PomodoroSettings>('settings'),
+        Hive.openBox<ScreenTimeLog>('screenTime'),
+        Hive.openBox<AppSettings>('appSettings'),
+        Hive.openBox<String>('pomodoroSessions'),
+        Hive.openBox<CourseMaterial>('materials'),
+      ]);
 
       final settingsBox = Hive.box<AppSettings>('appSettings');
       if (settingsBox.isEmpty) {

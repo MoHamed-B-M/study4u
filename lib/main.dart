@@ -148,10 +148,9 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
 
   @override
   Widget build(BuildContext context) {
-    final s = ref.watch(settingsProvider);
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
-    final seedColor = Color(s.primaryColorValue);
+    final seedColor = Color(ref.watch(primaryColorProvider));
 
     final theme = AppTheme.lightTheme(seedColor);
     final darkTheme = AppTheme.darkTheme(seedColor);
@@ -183,42 +182,46 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final useFloating = ref.watch(useFloatingNavBarProvider);
 
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-        child: widget.child,
+      body: RepaintBoundary(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+          child: widget.child,
+        ),
       ),
-      bottomNavigationBar: useFloating
-          ? FloatingNavBar(
-              currentIndex: _currentIndex,
-              onDestinationSelected: (index) {
-                HapticFeedback.lightImpact();
-                setState(() => _currentIndex = index);
-                if (index == 0) context.go('/');
-                if (index == 1) context.go('/tracker');
-                if (index == 2) context.go('/stats');
-              },
-            )
-          : NavigationBar(
-              selectedIndex: _currentIndex,
-              onDestinationSelected: (index) {
-                HapticFeedback.lightImpact();
-                setState(() => _currentIndex = index);
-                if (index == 0) context.go('/');
-                if (index == 1) context.go('/tracker');
-                if (index == 2) context.go('/stats');
-              },
-              labelTextStyle: WidgetStateProperty.all(
-                const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      bottomNavigationBar: RepaintBoundary(
+        child: useFloating
+            ? FloatingNavBar(
+                currentIndex: _currentIndex,
+                onDestinationSelected: (index) {
+                  HapticFeedback.lightImpact();
+                  setState(() => _currentIndex = index);
+                  if (index == 0) context.go('/');
+                  if (index == 1) context.go('/tracker');
+                  if (index == 2) context.go('/stats');
+                },
+              )
+            : NavigationBar(
+                selectedIndex: _currentIndex,
+                onDestinationSelected: (index) {
+                  HapticFeedback.lightImpact();
+                  setState(() => _currentIndex = index);
+                  if (index == 0) context.go('/');
+                  if (index == 1) context.go('/tracker');
+                  if (index == 2) context.go('/stats');
+                },
+                labelTextStyle: WidgetStateProperty.all(
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                destinations: const [
+                  NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
+                  NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Tracker'),
+                  NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Stats'),
+                ],
               ),
-              destinations: const [
-                NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-                NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Tracker'),
-                NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Stats'),
-              ],
-            ),
+      ),
     );
   }
 }
