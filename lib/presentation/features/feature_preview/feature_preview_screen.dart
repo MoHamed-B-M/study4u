@@ -66,7 +66,7 @@ class _FeaturePreviewScreenState extends ConsumerState<FeaturePreviewScreen>
                     height: 330,
                     child: AnimatedBuilder(
                       animation: _ctrl,
-                      builder: (_, _) => Stack(
+                      builder: (context, child) => Stack(
                         children: [
                           _SceneAPomodoro(value: _ctrl.value),
                           _SceneBSchedule(value: _ctrl.value),
