@@ -1,52 +1,80 @@
-name: Build APK
+name: Build Release APK
 
 on:
   push:
+    tags:
+      - "v*.*.*"
     branches:
-      - '**'
+      - main
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-apk:
     name: Build Release APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
-          channel: 'stable'
+          flutter-version: "3.41.9"
+          channel: "stable"
           cache: true
 
-      - name: Get dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Decode keystore
+      # ====================== FIX FOR UPDATE PROBLEM ======================
+      - name: Extract version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          echo "Building version: ${{ env.VERSION }}"
+
+      - name: Update version in pubspec.yaml
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          sed -i "s/version: .*/version: ${{ env.VERSION }}/" pubspec.yaml
+          echo "Updated pubspec version to:"
+          grep "version:" pubspec.yaml
+
+      # ===================================================================
+
+      # ==================== ADDED SIGNING CONFIGURATION ====================
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
 
       - name: Create key.properties
         run: |
-          echo "storeFile=keystore.jks" > android/key.properties
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=upload-keystore.jks" >> android/key.properties
+      # ===================================================================
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build Release APK
+        run: flutter build apk --release --split-per-abi
 
-      - name: Upload APK artifact
+      - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 14
+          name: stdy4u-release-apks
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+          retention-days: 30
+
+      - name: Show APK sizes
+        run: |
+          echo "APK Sizes:"
+          ls -lh build/app/outputs/flutter-apk/
