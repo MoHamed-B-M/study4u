@@ -38,6 +38,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     super.dispose();
   }
 
+  void _handleEditCourse() {}
+
+  void _handleDeleteCourse() {}
+
   @override
   Widget build(BuildContext context) {
     final course = ref.watch(courseDetailProvider(widget.courseId));
@@ -56,6 +60,46 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(course.name, style: Theme.of(context).textTheme.titleLarge),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              switch (value) {
+                case 'edit':
+                  _handleEditCourse();
+                case 'delete':
+                  _handleDeleteCourse();
+              }
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            color: AppTheme.surfaceDark,
+            elevation: 4,
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_outlined, size: 20, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Text('Edit', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, size: 20, color: AppTheme.warningRed),
+                    const SizedBox(width: 12),
+                    Text('Delete', style: TextStyle(color: AppTheme.warningRed)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
