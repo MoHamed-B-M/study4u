@@ -139,9 +139,13 @@ class AppTheme {
   static NavigationBarThemeData _navigationBarTheme() => NavigationBarThemeData(
     backgroundColor: Colors.white.withValues(alpha: 0.9),
     indicatorColor: primary.withValues(alpha: 0.2),
-    labelTextStyle: WidgetStateProperty.all(
-      TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-    ),
+    indicatorShape: const StadiumBorder(),
+    labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
+        return const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: primary);
+      }
+      return const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B));
+    }),
     elevation: 0,
     shadowColor: Colors.transparent,
   );
@@ -149,9 +153,13 @@ class AppTheme {
   static NavigationBarThemeData _navigationBarThemeDark() => NavigationBarThemeData(
     backgroundColor: surfaceDark.withValues(alpha: 0.95),
     indicatorColor: primary.withValues(alpha: 0.2),
-    labelTextStyle: WidgetStateProperty.all(
-      TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70),
-    ),
+    indicatorShape: const StadiumBorder(),
+    labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
+        return const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: primary);
+      }
+      return TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.45));
+    }),
     elevation: 0,
     shadowColor: Colors.transparent,
   );

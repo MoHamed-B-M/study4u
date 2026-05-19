@@ -175,7 +175,7 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
         final currentTop = srcRect.top * (1.0 - exp);
         final currentLeft = srcRect.left * (1.0 - exp);
         final radius = AppTheme.radiusCard * (1.0 - _cornerRadius.value);
-        final blurSigma = 12.0 * (1.0 - _blur.value);
+        final blurSigma = (12.0 * (1.0 - _blur.value) / 2).round() * 2.0;
 
         final contentOpacity = 1.0 - _contentFadeOut.value;
         final placeholderOpacity = _contentFadeOut.value * (1.0 - _placeholderFadeOut.value);
@@ -188,7 +188,8 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
               left: currentLeft,
               width: currentW,
               height: currentH,
-              child: ClipRRect(
+              child: RepaintBoundary(
+                child: ClipRRect(
                 borderRadius: BorderRadius.circular(radius),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
@@ -209,7 +210,7 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                'SEARCHING FOR INSPIRATION...',
+                                'STRUCTURING YOUR FOCUS BLOCK...',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.black54,
@@ -229,6 +230,7 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
                     ),
                   ),
                 ),
+              ),
               ),
             ),
             Positioned(

@@ -195,6 +195,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final useFloating = ref.watch(useFloatingNavBarProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ));
 
     return Scaffold(
       body: RepaintBoundary(
@@ -227,12 +235,23 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   if (index == 1) context.go('/tracker');
                   if (index == 2) context.go('/stats');
                 },
-                labelTextStyle: WidgetStateProperty.all(
-                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                ),
+                backgroundColor: isDark
+                    ? AppTheme.surfaceDark.withValues(alpha: 0.95)
+                    : Colors.white.withValues(alpha: 0.92),
+                indicatorColor: AppTheme.primary.withValues(alpha: isDark ? 0.25 : 0.15),
                 indicatorShape: const StadiumBorder(),
-                indicatorColor: AppTheme.primary.withValues(alpha: 0.25),
-                backgroundColor: AppTheme.surfaceDark.withValues(alpha: 0.95),
+                labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.primary);
+                  }
+                  return TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.45)
+                        : const Color(0xFF64748B),
+                  );
+                }),
                 shadowColor: Colors.transparent,
                 elevation: 0,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
