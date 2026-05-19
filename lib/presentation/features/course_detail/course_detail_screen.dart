@@ -51,6 +51,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
         title: Text(course.name, style: Theme.of(context).textTheme.titleLarge),
         bottom: TabBar(
           controller: _tabController,
