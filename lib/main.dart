@@ -21,7 +21,16 @@ import 'data/models/app_settings.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationService.instance.init();
+  NotificationService.instance.init(
+    onNotificationTap: (payload) {
+      if (payload != 'app_update') return;
+      final update = UpdateService.lastKnownUpdate;
+      if (update == null) return;
+      final ctx = rootNavigatorKey.currentContext;
+      if (ctx == null) return;
+      UpdateDialog.show(context: ctx, update: update);
+    },
+  );
   LocalStorage.init();
   runApp(const StartupApp());
 }
@@ -87,13 +96,13 @@ class _StartupAppState extends State<StartupApp> {
   }
 }
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: '/',
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: rootNavigatorKey,
     routes: [
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -158,7 +167,11 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
     final service = UpdateService();
     final update = await service.checkForUpdate();
     if (!mounted || update == null || !update.isNewer) return;
-    await UpdateDialog.show(context: context, update: update);
+    UpdateService.lastKnownUpdate = update;
+    NotificationService.instance.triggerUpdateNotification(update.latestVersion);
+    if (mounted) {
+      await UpdateDialog.show(context: context, update: update);
+    }
   }
 
   @override
