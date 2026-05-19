@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:animations/animations.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/entities/task.dart';
@@ -12,6 +13,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/add_course_sheet.dart';
 import '../../widgets/squish_button.dart';
+import '../course_detail/course_detail_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -536,71 +538,85 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return Container(
             width: 150,
             margin: const EdgeInsets.only(right: 14),
-            child: SquishButton(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                context.push('/course/${course.id}');
-              },
-              restingRadius: 24,
-              pressedRadius: 14,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              backgroundColor: isDark ? AppTheme.surfaceDark : Colors.white,
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Color(course.colorValue).withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.book,
-                      color: Color(course.colorValue),
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    course.code,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: isDark ? Colors.white : AppTheme.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    course.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            child: OpenContainer(
+              closedColor: isDark ? AppTheme.surfaceDark : Colors.white,
+              closedElevation: 0,
+              closedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : AppTheme.outline.withValues(alpha: 0.3),
+                ),
+              ),
+              openColor: Theme.of(context).scaffoldBackgroundColor,
+              openElevation: 0,
+              openShape: const RoundedRectangleBorder(),
+              transitionDuration: const Duration(milliseconds: 400),
+              closedBuilder: (context, action) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Column(
                     children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 12,
-                        color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        course.startTime,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Color(course.colorValue).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
                         ),
+                        child: Icon(
+                          Icons.book,
+                          color: Color(course.colorValue),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        course.code,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: isDark ? Colors.white : AppTheme.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        course.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 12,
+                            color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            course.startTime,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                );
+              },
+              openBuilder: (context, closeContainer) {
+                return CourseDetailScreen(courseId: course.id);
+              },
             ),
           );
         },
