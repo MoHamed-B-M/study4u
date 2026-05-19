@@ -20,6 +20,7 @@ class UpdateInfo {
 }
 
 class UpdateService {
+  static UpdateInfo? lastKnownUpdate;
   static const _apiUrl = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases/latest';
 
   Future<UpdateInfo?> checkForUpdate() async {

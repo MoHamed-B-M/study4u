@@ -1,3 +1,5 @@
+import 'dart:ui' show Color;
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -9,7 +11,9 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
-  Future<void> init() async {
+  Future<void> init({
+    void Function(String? payload)? onNotificationTap,
+  }) async {
     if (_initialized) return;
     _initialized = true;
 
@@ -25,10 +29,16 @@ class NotificationService {
       android: androidSettings,
       iOS: iosSettings,
     );
-    await _plugin.initialize(initSettings);
+    await _plugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (response) {
+        onNotificationTap?.call(response.payload);
+      },
+    );
 
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
+
     await androidPlugin?.createNotificationChannel(
       const AndroidNotificationChannel(
         'general',
@@ -48,6 +58,41 @@ class NotificationService {
         playSound: true,
         enableVibration: true,
       ),
+    );
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'app_updates_channel',
+        'App Updates',
+        description: 'Notifications for new application features and version updates.',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+      ),
+    );
+  }
+
+  Future<void> triggerUpdateNotification(String version) async {
+    final androidDetails = AndroidNotificationDetails(
+      'app_updates_channel',
+      'App Updates',
+      importance: Importance.max,
+      priority: Priority.high,
+      color: const Color(0xFF4ADE80),
+      playSound: true,
+      enableVibration: true,
+    );
+    const iosDetails = DarwinNotificationDetails();
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _plugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
+      'New Update Available!',
+      'Version v$version is now ready to download. Tap to view release notes and upgrade.',
+      details,
+      payload: 'app_update',
     );
   }
 
