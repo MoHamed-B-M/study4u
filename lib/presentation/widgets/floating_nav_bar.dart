@@ -98,7 +98,7 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                                 ? AppTheme.primary
                                 : (isDark
                                     ? Colors.white.withValues(alpha: 0.45)
-                                    : Colors.black.withValues(alpha: 0.45)),
+                                    : const Color(0xFF64748B)),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -110,7 +110,7 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                                   ? AppTheme.primary
                                   : (isDark
                                       ? Colors.white.withValues(alpha: 0.45)
-                                      : Colors.black.withValues(alpha: 0.45)),
+                                      : const Color(0xFF64748B)),
                             ),
                           ),
                         ],
