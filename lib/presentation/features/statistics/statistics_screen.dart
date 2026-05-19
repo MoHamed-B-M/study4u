@@ -50,41 +50,61 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Performance', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            FadeTransition(
-              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.0, 0.3, curve: Curves.easeOut))),
-              child: _buildCGPACard(context, cgpa, isDark),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 56, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Performance',
+                    style: GoogleFonts.outfit(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Your grades & focus sessions',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(CurveTween(curve: const Interval(0.0, 0.3, curve: Curves.easeOut))),
+                    child: _buildCGPACard(context, cgpa, isDark),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(CurveTween(curve: const Interval(0.15, 0.45, curve: Curves.easeOut))),
+                    child: _buildPomodoroControl(context, ref, pomodoro, isDark),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(CurveTween(curve: const Interval(0.3, 0.6, curve: Curves.easeOut))),
+                    child: _buildPomodoroChart(context, sessions, isDark),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(CurveTween(curve: const Interval(0.45, 0.75, curve: Curves.easeOut))),
+                    child: _buildGradeDistribution(context, courses, isDark),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(CurveTween(curve: const Interval(0.6, 0.9, curve: Curves.easeOut))),
+                    child: _buildPerformanceOverview(context, courses, isDark),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
-            FadeTransition(
-              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.15, 0.45, curve: Curves.easeOut))),
-              child: _buildPomodoroControl(context, ref, pomodoro, isDark),
-            ),
-            const SizedBox(height: 24),
-            FadeTransition(
-              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.3, 0.6, curve: Curves.easeOut))),
-              child: _buildPomodoroChart(context, sessions, isDark),
-            ),
-            const SizedBox(height: 24),
-            FadeTransition(
-              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.45, 0.75, curve: Curves.easeOut))),
-              child: _buildGradeDistribution(context, courses, isDark),
-            ),
-            const SizedBox(height: 24),
-            FadeTransition(
-              opacity: _fadeController.drive(CurveTween(curve: const Interval(0.6, 0.9, curve: Curves.easeOut))),
-              child: _buildPerformanceOverview(context, courses, isDark),
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -104,10 +124,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white60 : Theme.of(context).textTheme.bodyMedium?.color,
+                  color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.6),
                 ),
               ),
-              Icon(Icons.show_chart, color: Theme.of(context).colorScheme.primary),
+              Icon(Icons.show_chart, color: AppTheme.primary),
             ],
           ),
           const SizedBox(height: 12),
@@ -130,7 +150,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white60 : Theme.of(context).textTheme.bodyMedium?.color,
+                  color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -138,13 +158,14 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.arrow_upward, color: AppTheme.primary, size: 16),
+              Icon(Icons.trending_up, color: AppTheme.primary, size: 18),
               const SizedBox(width: 4),
               Text(
                 '${cgpa.letterGrade} \u2022 ${cgpa.percentage.toStringAsFixed(1)}%',
                 style: TextStyle(
                   color: AppTheme.primary,
                   fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -168,7 +189,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white60 : Theme.of(context).textTheme.bodyMedium?.color,
+                  color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.6),
                 ),
               ),
               Row(
@@ -177,7 +198,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                   const SizedBox(width: 8),
                   InkWell(
                     onTap: () => _showDurationSettings(context, ref, state),
-                    child: Icon(Icons.settings, size: 18, color: Theme.of(context).colorScheme.primary),
+                    child: Icon(Icons.settings, size: 18, color: AppTheme.primary),
                   ),
                   const SizedBox(width: 8),
                   InkWell(
@@ -186,8 +207,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                       Icons.music_note,
                       size: 18,
                       color: state.musicFilePath != null
-                          ? Theme.of(context).colorScheme.primary
-                          : (isDark ? Colors.white38 : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
+                          ? AppTheme.primary
+                          : (isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4)),
                     ),
                   ),
                 ],
@@ -200,9 +221,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
               state.timerString,
               key: ValueKey(state.timerString),
               style: GoogleFonts.outfit(
-                fontSize: 56,
+                fontSize: 64,
                 fontWeight: FontWeight.w800,
-                color: isDark ? Colors.white : AppTheme.textPrimary,
+                color: Colors.white,
               ),
             ),
           ),
@@ -212,7 +233,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.6),
+              color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 24),
@@ -220,9 +241,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildIconButton(Icons.replay, () => ref.read(pomodoroProvider.notifier).resetTimer(), context, isDark),
-              const SizedBox(width: 24),
+              const SizedBox(width: 32),
               _buildPlayPauseButton(ref, state, context, isDark),
-              const SizedBox(width: 24),
+              const SizedBox(width: 32),
               _buildIconButton(Icons.skip_next, () => ref.read(pomodoroProvider.notifier).skipSession(), context, isDark),
             ],
           ),
@@ -231,17 +252,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                color: AppTheme.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.music_note, size: 16, color: Theme.of(context).colorScheme.primary),
+                  Icon(Icons.music_note, size: 16, color: AppTheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Focus Music',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppTheme.primary),
                     ),
                   ),
                   InkWell(
@@ -249,7 +270,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                     child: Icon(
                       state.isMusicPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
                       size: 24,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppTheme.primary,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -258,7 +279,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                     child: Icon(
                       Icons.close,
                       size: 18,
-                      color: isDark ? Colors.white38 : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                      color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4),
                     ),
                   ),
                 ],
@@ -272,6 +293,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             onPressed: state.isActive
                 ? () => ref.read(pomodoroProvider.notifier).pauseTimer()
                 : () => ref.read(pomodoroProvider.notifier).startTimer(),
+            colors: const [Color(0xFF059669), AppTheme.primary],
           ),
         ],
       ),
@@ -307,12 +329,13 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
         HapticFeedback.lightImpact();
         onTap();
       },
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withValues(alpha: 0.08)
-              : Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
+              : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           shape: BoxShape.circle,
           border: Border.all(
             color: isDark ? Colors.white12 : Colors.transparent,
@@ -333,14 +356,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
           ref.read(pomodoroProvider.notifier).startTimer();
         }
       },
+      borderRadius: BorderRadius.circular(32),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
+          color: Colors.white,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -348,7 +372,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
         ),
         child: Icon(
           state.isActive ? Icons.pause : Icons.play_arrow,
-          color: Colors.white,
+          color: AppTheme.surfaceDark,
           size: 36,
         ),
       ),
@@ -363,7 +387,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: AppTheme.surfaceDark,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
       ),
@@ -382,39 +406,52 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
+                    child: Container(
+                      width: 40, height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
                     child: Text(
                       'Timer Settings',
-                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('Focus Duration', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Focus Duration', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
                   Slider(
                     value: focus,
                     min: 1,
                     max: 60,
                     divisions: 59,
                     label: '${focus.round()} min',
+                    activeColor: AppTheme.primary,
                     onChanged: (v) => setSheetState(() => focus = v),
                   ),
                   const SizedBox(height: 8),
-                  Text('Short Break', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Short Break', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
                   Slider(
                     value: shortBreak,
                     min: 1,
                     max: 30,
                     divisions: 29,
                     label: '${shortBreak.round()} min',
+                    activeColor: AppTheme.secondary,
                     onChanged: (v) => setSheetState(() => shortBreak = v),
                   ),
                   const SizedBox(height: 8),
-                  Text('Long Break', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Long Break', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
                   Slider(
                     value: longBreak,
                     min: 1,
                     max: 60,
                     divisions: 59,
                     label: '${longBreak.round()} min',
+                    activeColor: AppTheme.tertiary,
                     onChanged: (v) => setSheetState(() => longBreak = v),
                   ),
                   const SizedBox(height: 24),
@@ -485,7 +522,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                   color: isDark ? Colors.white : AppTheme.textPrimary,
                 ),
               ),
-              Icon(Icons.timer_outlined, color: scheme.primary, size: 20),
+              Icon(Icons.timer_outlined, color: AppTheme.primary, size: 20),
             ],
           ),
           const SizedBox(height: 4),
@@ -493,7 +530,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             'Minutes focused per day',
             style: TextStyle(
               fontSize: 12,
-              color: isDark ? Colors.white38 : scheme.onSurface.withValues(alpha: 0.5),
+              color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 24),
@@ -502,7 +539,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text('Complete focus sessions to see your weekly chart',
-                  style: TextStyle(color: isDark ? Colors.white38 : scheme.onSurface.withValues(alpha: 0.4), fontSize: 13),
+                  style: TextStyle(color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4), fontSize: 13),
                 ),
               ),
             )
@@ -540,7 +577,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                               label,
                               style: TextStyle(
                                 fontSize: 9,
-                                color: isDark ? Colors.white38 : scheme.onSurface.withValues(alpha: 0.5),
+                                color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5),
                               ),
                             ),
                           );
@@ -558,10 +595,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                         BarChartRodData(
                           toY: d.minutes.toDouble().clamp(0.5, double.infinity),
                           color: d.minutes > 0
-                              ? scheme.primary
+                              ? AppTheme.primary
                               : (isDark
                                   ? Colors.white.withValues(alpha: 0.06)
-                                  : scheme.surfaceContainerHighest.withValues(alpha: 0.3)),
+                                  : AppTheme.textPrimary.withValues(alpha: 0.1)),
                           width: 18,
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                         ),
@@ -685,7 +722,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
           ),
           const SizedBox(height: 24),
           if (courses.isEmpty)
-            Text('Add courses to see progress.', style: Theme.of(context).textTheme.bodyMedium),
+            Text('Add courses to see progress.', style: TextStyle(
+              color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+            )),
           ...courses.map((course) => _buildSubjectProgress(context, course, isDark)),
         ],
       ),
@@ -728,7 +767,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             value: percentage / 100,
             backgroundColor: isDark
                 ? Colors.white.withValues(alpha: 0.08)
-                : Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                : AppTheme.textPrimary.withValues(alpha: 0.08),
             valueColor: AlwaysStoppedAnimation<Color>(
               percentage >= 80
                   ? AppTheme.primary
