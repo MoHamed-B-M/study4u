@@ -15,6 +15,7 @@ import '../../widgets/app_card.dart';
 import '../../widgets/gradient_button.dart';
 import '../../widgets/pill_chip.dart';
 import '../../widgets/animated_counter.dart';
+import '../../widgets/squish_button.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -25,6 +26,7 @@ class StatisticsScreen extends ConsumerStatefulWidget {
 class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
+  bool _isPomodoroPanelOpen = false;
 
   @override
   void initState() {
@@ -39,6 +41,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
   void dispose() {
     _fadeController.dispose();
     super.dispose();
+  }
+
+  void _togglePomodoroPanel() {
+    setState(() => _isPomodoroPanelOpen = !_isPomodoroPanelOpen);
   }
 
   @override
@@ -58,21 +64,38 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Performance',
-                    style: GoogleFonts.outfit(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : AppTheme.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Your grades & focus sessions',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Performance',
+                            style: GoogleFonts.outfit(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Your grades & focus sessions',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SquishButton(
+                        onTap: () => _togglePomodoroPanel(),
+                        restingRadius: 12,
+                        pressedRadius: 8,
+                        padding: const EdgeInsets.all(10),
+                        child: Icon(Icons.more_vert, color: isDark ? Colors.white54 : AppTheme.textPrimary),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   FadeTransition(
@@ -196,19 +219,41 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 children: [
                   _buildStatusBadge(state.status, isDark),
                   const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () => _showDurationSettings(context, ref, state),
-                    child: Icon(Icons.settings, size: 18, color: AppTheme.primary),
-                  ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () => _pickMusicFile(ref, state),
-                    child: Icon(
-                      Icons.music_note,
-                      size: 18,
-                      color: state.musicFilePath != null
-                          ? AppTheme.primary
-                          : (isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4)),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 320),
+                    curve: Curves.fastOutSlowIn,
+                    width: _isPomodoroPanelOpen ? 96 : 0,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : AppTheme.outline.withValues(alpha: 0.1),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SquishButton(
+                          onTap: () => _showDurationSettings(context, ref, state),
+                          restingRadius: 8,
+                          pressedRadius: 4,
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(Icons.settings, size: 18, color: AppTheme.primary),
+                        ),
+                        SquishButton(
+                          onTap: () => _pickMusicFile(ref, state),
+                          restingRadius: 8,
+                          pressedRadius: 4,
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.music_note,
+                            size: 18,
+                            color: state.musicFilePath != null
+                                ? AppTheme.primary
+                                : (isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4)),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -287,13 +332,19 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             ),
           ],
           const SizedBox(height: 16),
-          GradientButton(
-            label: state.isActive ? 'Pause Focus Session' : 'Start Focus Session',
-            icon: state.isActive ? Icons.pause : Icons.play_arrow,
-            onPressed: state.isActive
+          SquishButton(
+            onTap: state.isActive
                 ? () => ref.read(pomodoroProvider.notifier).pauseTimer()
                 : () => ref.read(pomodoroProvider.notifier).startTimer(),
-            colors: const [Color(0xFF059669), AppTheme.primary],
+            restingRadius: 9999,
+            pressedRadius: 16,
+            backgroundColor: Colors.transparent,
+            child: GradientButton(
+              label: state.isActive ? 'Pause Focus Session' : 'Start Focus Session',
+              icon: state.isActive ? Icons.pause : Icons.play_arrow,
+              onPressed: null,
+              colors: const [Color(0xFF059669), AppTheme.primary],
+            ),
           ),
         ],
       ),
@@ -324,30 +375,23 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
   }
 
   Widget _buildIconButton(IconData icon, VoidCallback onTap, BuildContext context, bool isDark) {
-    return InkWell(
+    return SquishButton(
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();
       },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isDark ? Colors.white12 : Colors.transparent,
-          ),
-        ),
-        child: Icon(icon, color: isDark ? Colors.white60 : null),
-      ),
+      restingRadius: 24,
+      pressedRadius: 12,
+      padding: const EdgeInsets.all(14),
+      backgroundColor: isDark
+          ? Colors.white.withValues(alpha: 0.08)
+          : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      child: Icon(icon, color: isDark ? Colors.white60 : null),
     );
   }
 
   Widget _buildPlayPauseButton(WidgetRef ref, PomodoroState state, BuildContext context, bool isDark) {
-    return InkWell(
+    return SquishButton(
       onTap: () {
         HapticFeedback.mediumImpact();
         if (state.isActive) {
@@ -356,25 +400,21 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
           ref.read(pomodoroProvider.notifier).startTimer();
         }
       },
-      borderRadius: BorderRadius.circular(32),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
+      restingRadius: 32,
+      pressedRadius: 18,
+      padding: const EdgeInsets.all(24),
+      backgroundColor: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.white.withValues(alpha: 0.3),
+          blurRadius: 16,
+          offset: const Offset(0, 6),
         ),
-        child: Icon(
-          state.isActive ? Icons.pause : Icons.play_arrow,
-          color: AppTheme.surfaceDark,
-          size: 36,
-        ),
+      ],
+      child: Icon(
+        state.isActive ? Icons.pause : Icons.play_arrow,
+        color: AppTheme.surfaceDark,
+        size: 36,
       ),
     );
   }
