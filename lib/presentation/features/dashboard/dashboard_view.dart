@@ -10,6 +10,7 @@ import '../../../../domain/entities/task.dart';
 import '../../theme/design_tokens.dart';
 import '../../widgets/dashboard_card.dart';
 import '../../widgets/quote_expansion_route.dart';
+import '../../../core/animation/page_scale.dart' show PageScaleProvider;
 
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
@@ -453,9 +454,11 @@ class _NextClassCardWrapperState extends ConsumerState<_NextClassCardWrapper> {
               position.dx, position.dy,
               renderBox.size.width, renderBox.size.height,
             );
+            final scaleNotifier = PageScaleProvider.of(context);
             Navigator.of(context).push(QuoteExpansionRoute(
               sourceRect: rect,
               sourceColor: Color(course.colorValue),
+              pageScaleNotifier: scaleNotifier,
             ));
           }
         },

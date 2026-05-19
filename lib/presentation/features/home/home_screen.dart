@@ -5,16 +5,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animations/animations.dart';
-import '../../../shared/providers/logic_providers.dart';
-import '../../../domain/entities/course.dart';
-import '../../../domain/entities/task.dart';
-import '../../../domain/usecases/schedule_optimizer.dart';
+import '../../../../shared/providers/logic_providers.dart';
+import '../../../../domain/entities/course.dart';
+import '../../../../domain/entities/task.dart';
+import '../../../../domain/usecases/schedule_optimizer.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/add_course_sheet.dart';
 import '../../widgets/squish_button.dart';
 import '../../widgets/quote_expansion_route.dart';
 import '../course_detail/course_detail_screen.dart';
+import '../../../core/animation/page_scale.dart' show PageScaleProvider;
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -458,9 +459,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               position.dx, position.dy,
               renderBox.size.width, renderBox.size.height,
             );
+            final scaleNotifier = PageScaleProvider.of(context);
             Navigator.of(context).push(QuoteExpansionRoute(
               sourceRect: rect,
               sourceColor: AppTheme.mintGreenLight,
+              pageScaleNotifier: scaleNotifier,
             ));
           }
         },
@@ -568,7 +571,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               openColor: Theme.of(context).scaffoldBackgroundColor,
               openElevation: 0,
               openShape: const RoundedRectangleBorder(),
-              transitionDuration: const Duration(milliseconds: 400),
+              transitionDuration: const Duration(milliseconds: 280),
               closedBuilder: (context, action) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
