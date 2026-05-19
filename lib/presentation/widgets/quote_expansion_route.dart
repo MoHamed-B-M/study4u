@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
@@ -83,7 +81,6 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _driver;
   late Animation<double> _expansion;
-  late Animation<double> _blur;
   late Animation<double> _cornerRadius;
   late Animation<double> _contentFadeOut;
   late Animation<double> _placeholderFadeOut;
@@ -104,11 +101,6 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
     _expansion = CurvedAnimation(
       parent: _driver,
       curve: Curves.fastOutSlowIn,
-    );
-
-    _blur = CurvedAnimation(
-      parent: _driver,
-      curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
     );
 
     _cornerRadius = CurvedAnimation(
@@ -175,7 +167,6 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
         final currentTop = srcRect.top * (1.0 - exp);
         final currentLeft = srcRect.left * (1.0 - exp);
         final radius = AppTheme.radiusCard * (1.0 - _cornerRadius.value);
-        final blurSigma = (12.0 * (1.0 - _blur.value) / 2).round() * 2.0;
 
         final contentOpacity = 1.0 - _contentFadeOut.value;
         final placeholderOpacity = _contentFadeOut.value * (1.0 - _placeholderFadeOut.value);
@@ -188,17 +179,14 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
               left: currentLeft,
               width: currentW,
               height: currentH,
-              child: RepaintBoundary(
-                child: ClipRRect(
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(radius),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: widget.sourceColor,
-                      borderRadius: BorderRadius.circular(radius),
-                    ),
-                    child: Stack(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: widget.sourceColor,
+                    borderRadius: BorderRadius.circular(radius),
+                  ),
+                  child: Stack(
                       children: [
                         Opacity(
                           opacity: contentOpacity.clamp(0.0, 1.0),
@@ -231,8 +219,6 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
                   ),
                 ),
               ),
-              ),
-            ),
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
               right: 20,
