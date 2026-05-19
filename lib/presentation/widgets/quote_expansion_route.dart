@@ -1,0 +1,349 @@
+import 'dart:ui' show ImageFilter;
+
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
+
+const List<String> _quotes = [
+  'Success is the sum of small efforts, repeated day in and day out. - R. Collier',
+  'The secret of getting ahead is getting started. - Mark Twain',
+  'It does not matter how slowly you go as long as you do not stop. - Confucius',
+  'Believe you can and you are halfway there. - Theodore Roosevelt',
+  'The only way to do great work is to love what you do. - Steve Jobs',
+  'Your time is limited, do not waste it living someone else life. - Steve Jobs',
+  'Strive not to be a success, but rather to be of value. - Albert Einstein',
+  'The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt',
+];
+
+String _randomQuote() => _quotes[DateTime.now().microsecondsSinceEpoch % _quotes.length];
+
+class QuoteExpansionRoute extends PageRoute<void> {
+  QuoteExpansionRoute({
+    required this.sourceRect,
+    required this.sourceColor,
+  });
+
+  final Rect sourceRect;
+  final Color sourceColor;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 700);
+
+  @override
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 600);
+
+  @override
+  bool get opaque => false;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return _QuoteModalPage(
+      sourceRect: sourceRect,
+      sourceColor: sourceColor,
+      routeAnimation: animation,
+    );
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return child;
+  }
+}
+
+class _QuoteModalPage extends StatefulWidget {
+  final Rect sourceRect;
+  final Color sourceColor;
+  final Animation<double> routeAnimation;
+
+  const _QuoteModalPage({
+    required this.sourceRect,
+    required this.sourceColor,
+    required this.routeAnimation,
+  });
+
+  @override
+  State<_QuoteModalPage> createState() => _QuoteModalPageState();
+}
+
+class _QuoteModalPageState extends State<_QuoteModalPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _driver;
+  late Animation<double> _expansion;
+  late Animation<double> _blur;
+  late Animation<double> _cornerRadius;
+  late Animation<double> _contentFadeOut;
+  late Animation<double> _placeholderFadeOut;
+  late Animation<double> _quoteFadeIn;
+  late Animation<double> _bouncySettle;
+
+  String _quote = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _quote = _randomQuote();
+
+    _driver = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+
+    final settleCurve = Cubic(0.34, 1.4, 0.64, 1.0);
+
+    _expansion = CurvedAnimation(
+      parent: _driver,
+      curve: const Interval(0.0, 0.5, curve: Curves.easeInOutCubic),
+    );
+
+    _blur = CurvedAnimation(
+      parent: _driver,
+      curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+    );
+
+    _cornerRadius = CurvedAnimation(
+      parent: _driver,
+      curve: const Interval(0.0, 0.5, curve: Curves.easeInOutCubic),
+    );
+
+    _contentFadeOut = CurvedAnimation(
+      parent: _driver,
+      curve: const Interval(0.0, 0.12, curve: Curves.easeOut),
+    );
+
+    _placeholderFadeOut = CurvedAnimation(
+      parent: _driver,
+      curve: const Interval(0.35, 0.55, curve: Curves.easeOut),
+    );
+
+    _quoteFadeIn = CurvedAnimation(
+      parent: _driver,
+      curve: const Interval(0.5, 0.75, curve: Curves.easeIn),
+    );
+
+    _bouncySettle = CurvedAnimation(
+      parent: _driver,
+      curve: Interval(0.45, 1.0, curve: settleCurve),
+    );
+
+    widget.routeAnimation.addListener(_sync);
+    if (widget.routeAnimation.isCompleted) {
+      _driver.value = 1.0;
+    }
+  }
+
+  void _sync() {
+    if (_driver.value != widget.routeAnimation.value) {
+      _driver.value = widget.routeAnimation.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.routeAnimation.removeListener(_sync);
+    _driver.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return AnimatedBuilder(
+      animation: _driver,
+      builder: (context, _) {
+        final exp = _expansion.value;
+        final srcH = widget.sourceRect.height;
+        final srcW = widget.sourceRect.width;
+        final dstH = size.height;
+        final dstW = size.width;
+        final srcTop = widget.sourceRect.top;
+        final srcLeft = widget.sourceRect.left;
+
+        final currentH = srcH + (dstH - srcH) * exp;
+        final currentW = srcW + (dstW - srcW) * exp;
+        final currentTop = srcTop - (dstH - srcH) * exp * (srcTop / dstH);
+        final radius = AppTheme.radiusCard * (1.0 - _cornerRadius.value);
+        final blurSigma = 12.0 * (1.0 - _blur.value);
+
+        final contentOpacity = 1.0 - _contentFadeOut.value;
+        final placeholderOpacity = _contentFadeOut.value * (1.0 - _placeholderFadeOut.value);
+        final quoteOpacity = _quoteFadeIn.value;
+        final settleScale = 1.0 + (0.03 * (1.0 - _bouncySettle.value));
+
+        return Stack(
+          children: [
+            Positioned(
+              top: currentTop,
+              left: srcLeft - (dstW - srcW) * exp * (srcLeft / dstW),
+              width: currentW * settleScale,
+              height: currentH * settleScale,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.mintGreenLight,
+                      borderRadius: BorderRadius.circular(radius),
+                    ),
+                    child: Stack(
+                      children: [
+                        Opacity(
+                          opacity: contentOpacity.clamp(0.0, 1.0),
+                          child: _buildOriginalContent(),
+                        ),
+                        Opacity(
+                          opacity: placeholderOpacity.clamp(0.0, 1.0),
+                          child: const Center(
+                            child: Text(
+                              'SEARCHING FOR INSPIRATION...',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                letterSpacing: 4,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Opacity(
+                          opacity: quoteOpacity.clamp(0.0, 1.0),
+                          child: _buildQuoteContent(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              right: 20,
+              child: Opacity(
+                opacity: quoteOpacity.clamp(0.0, 1.0),
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Material(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: const Icon(Icons.close, color: Colors.black87, size: 22),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildOriginalContent() {
+    return const Padding(
+      padding: EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'UP NEXT',
+            style: TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+              letterSpacing: 1,
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Course Name',
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Course Code',
+            style: TextStyle(color: Colors.black54, fontSize: 14),
+          ),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Icons.access_time_rounded, color: Colors.black87, size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Time',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuoteContent() {
+    final isDone = _quoteFadeIn.value >= 1.0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Spacer(flex: 2),
+          Text(
+            'STUDY QUOTE:',
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.black54,
+              letterSpacing: 4,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            isDone ? _quote : '',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+              height: 1.5,
+            ),
+          ),
+          const Spacer(flex: 2),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 48, right: 24),
+              child: Icon(
+                Icons.auto_awesome,
+                color: Colors.black54,
+                size: 28,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

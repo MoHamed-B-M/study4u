@@ -13,6 +13,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/add_course_sheet.dart';
 import '../../widgets/squish_button.dart';
+import '../../widgets/quote_expansion_route.dart';
 import '../course_detail/course_detail_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -444,77 +445,92 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildUpNextCard(BuildContext context, CourseEntity course) {
-    return SquishButton(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        context.push('/course/${course.id}');
-      },
-      padding: const EdgeInsets.all(24),
-      backgroundColor: AppTheme.mintGreenLight,
-      restingRadius: AppTheme.radiusCard,
-      pressedRadius: 14,
-      boxShadow: [
-        BoxShadow(
-          color: AppTheme.mintGreenLight.withValues(alpha: 0.3),
-          blurRadius: 20,
-          offset: const Offset(0, 10),
-        ),
-      ],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'UP NEXT',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-              Icon(Icons.bolt, color: Colors.black87, size: 22),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            course.name,
-            style: GoogleFonts.outfit(
-              color: Colors.black87,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${course.code} \u2022 ${course.room}',
-            style: const TextStyle(color: Colors.black54, fontSize: 14),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(Icons.access_time_rounded, color: Colors.black87, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                '${course.startTime} - ${course.endTime}',
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
+    final upNextKey = GlobalKey();
+    return RepaintBoundary(
+      key: upNextKey,
+      child: SquishButton(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          final renderBox = upNextKey.currentContext?.findRenderObject() as RenderBox?;
+          if (renderBox != null && renderBox.hasSize) {
+            final position = renderBox.localToGlobal(Offset.zero);
+            final rect = Rect.fromLTWH(
+              position.dx, position.dy,
+              renderBox.size.width, renderBox.size.height,
+            );
+            Navigator.of(context).push(QuoteExpansionRoute(
+              sourceRect: rect,
+              sourceColor: AppTheme.mintGreenLight,
+            ));
+          }
+        },
+        padding: const EdgeInsets.all(24),
+        backgroundColor: AppTheme.mintGreenLight,
+        restingRadius: AppTheme.radiusCard,
+        pressedRadius: 14,
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.mintGreenLight.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'UP NEXT',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+                Icon(Icons.bolt, color: Colors.black87, size: 22),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              course.name,
+              style: GoogleFonts.outfit(
+                color: Colors.black87,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${course.code} \u2022 ${course.room}',
+              style: const TextStyle(color: Colors.black54, fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.access_time_rounded, color: Colors.black87, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  '${course.startTime} - ${course.endTime}',
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
