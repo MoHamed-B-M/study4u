@@ -215,6 +215,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 labelTextStyle: WidgetStateProperty.all(
                   const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
+                indicatorShape: const StadiumBorder(),
+                indicatorColor: AppTheme.primary.withValues(alpha: 0.25),
+                backgroundColor: AppTheme.surfaceDark.withValues(alpha: 0.95),
+                shadowColor: Colors.transparent,
+                elevation: 0,
+                overlayColor: WidgetStateProperty.all(Colors.transparent),
                 destinations: const [
                   NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
                   NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Tracker'),

@@ -14,6 +14,9 @@ class AppTheme {
   static const Color error = Color(0xFFBA1A1A);
   static const Color warningRed = Color(0xFFEF4444);
   static const Color outline = Color(0xFFCBD5E1);
+  static const Color activeBlue = Color(0xFF38BDF8);
+  static const Color mintGreenLight = Color(0xFFA7F3D0);
+  static const Color amberYellow = Color(0xFFF59E0B);
 
   static const double radiusXXL = 32.0;
   static const double radiusMD = 16.0;

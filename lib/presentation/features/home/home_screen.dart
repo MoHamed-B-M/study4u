@@ -21,52 +21,49 @@ class HomeScreen extends ConsumerWidget {
     final pendingCount = ref.watch(pendingTaskCountProvider);
     final upNext = ref.watch(upNextProvider);
     final greeting = ref.watch(greetingProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: false,
-            pinned: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              title: Text(
-                'stdy4u',
-                style: GoogleFonts.outfit(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  context.push('/settings');
-                },
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(24, 56, 24, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    greeting,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'You have $pendingCount pending tasks.',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            greeting,
+                            style: GoogleFonts.outfit(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'You have $pendingCount pending tasks.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.settings_outlined, color: isDark ? Colors.white54 : AppTheme.textPrimary),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/settings');
+                        },
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   if (upNext.hasNext && upNext.course != null)
@@ -91,14 +88,19 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildSectionHeader(BuildContext context, String title, String? action) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        Text(title, style: GoogleFonts.outfit(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: isDark ? Colors.white : AppTheme.textPrimary,
+        )),
         if (action != null)
           TextButton(
             onPressed: () => HapticFeedback.lightImpact(),
-            child: Text(action, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
+            child: Text(action, style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600, fontSize: 13)),
           ),
       ],
     );
@@ -113,11 +115,11 @@ class HomeScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: const Color(0xFF4ADE80),
+          color: AppTheme.mintGreenLight,
           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF4ADE80).withValues(alpha: 0.3),
+              color: AppTheme.mintGreenLight.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -130,7 +132,7 @@ class HomeScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
@@ -145,7 +147,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.bolt, color: Colors.black87),
+                Icon(Icons.bolt, color: Colors.black87, size: 22),
               ],
             ),
             const SizedBox(height: 16),
@@ -153,25 +155,26 @@ class HomeScreen extends ConsumerWidget {
               course.name,
               style: GoogleFonts.outfit(
                 color: Colors.black87,
-                fontSize: 22,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               '${course.code} \u2022 ${course.room}',
-              style: const TextStyle(color: Colors.black54),
+              style: const TextStyle(color: Colors.black54, fontSize: 14),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.access_time, color: Colors.black87, size: 18),
+                Icon(Icons.access_time_rounded, color: Colors.black87, size: 18),
                 const SizedBox(width: 8),
                 Text(
                   '${course.startTime} - ${course.endTime}',
                   style: const TextStyle(
                     color: Colors.black87,
                     fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -184,7 +187,10 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildCoursesList(BuildContext context, List<CourseEntity> courses, WidgetRef ref) {
     if (courses.isEmpty) {
-      return Text('No courses added yet.', style: Theme.of(context).textTheme.bodyMedium);
+      return Text('No courses added yet.', style: TextStyle(
+        fontSize: 14,
+        color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+      ));
     }
     return SizedBox(
       height: 180,
@@ -274,7 +280,7 @@ class HomeScreen extends ConsumerWidget {
     HapticFeedback.heavyImpact();
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: AppTheme.surfaceDark,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
       ),
@@ -288,19 +294,19 @@ class HomeScreen extends ConsumerWidget {
                 child: Container(
                   width: 40, height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.outlineVariant,
+                    color: Colors.white24,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
-              Text(course.name, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(course.name, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
               const SizedBox(height: 4),
-              Text(course.code, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
+              Text(course.code, style: TextStyle(color: Colors.white54)),
               const SizedBox(height: 24),
               ListTile(
-                leading: const Icon(Icons.edit_outlined),
-                title: const Text('Edit Course'),
+                leading: const Icon(Icons.edit_outlined, color: Colors.white70),
+                title: const Text('Edit Course', style: TextStyle(color: Colors.white)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -308,7 +314,7 @@ class HomeScreen extends ConsumerWidget {
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    backgroundColor: AppTheme.surfaceDark,
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
                     ),
@@ -317,8 +323,8 @@ class HomeScreen extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete_outlined, color: Theme.of(context).colorScheme.error),
-                title: Text('Delete Course', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                leading: const Icon(Icons.delete_outlined, color: AppTheme.warningRed),
+                title: const Text('Delete Course', style: TextStyle(color: AppTheme.warningRed)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -337,17 +343,17 @@ class HomeScreen extends ConsumerWidget {
       context: context,
       builder: (dCtx) => AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
-        title: Text('Delete ${course.name}?'),
-        content: const Text('This will also remove all related attendance records.'),
+        title: Text('Delete ${course.name}?', style: const TextStyle(color: Colors.white)),
+        content: const Text('This will also remove all related attendance records.', style: TextStyle(color: Colors.white60)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dCtx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dCtx), child: const Text('Cancel', style: TextStyle(color: Colors.white60))),
           TextButton(
             onPressed: () {
               ref.read(courseRepositoryProvider).deleteCourse(course.id);
               ref.read(dataRefreshProvider.notifier).state++;
               Navigator.pop(dCtx);
             },
-            child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: const Text('Delete', style: TextStyle(color: AppTheme.warningRed)),
           ),
         ],
       ),
@@ -356,7 +362,10 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildTasksList(BuildContext context, WidgetRef ref, List<TaskEntity> tasks) {
     if (tasks.isEmpty) {
-      return Text('Hooray! No pending tasks.', style: Theme.of(context).textTheme.bodyMedium);
+      return Text('Hooray! No pending tasks.', style: TextStyle(
+        fontSize: 14,
+        color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+      ));
     }
     return Column(
       children: List.generate(tasks.length, (index) {
@@ -382,9 +391,9 @@ class HomeScreen extends ConsumerWidget {
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: task.isCompleted ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                      color: task.isCompleted ? AppTheme.primary : Colors.transparent,
                       border: Border.all(
-                        color: task.isCompleted ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
+                        color: task.isCompleted ? AppTheme.primary : Colors.grey.shade400,
                         width: 2,
                       ),
                     ),
@@ -461,14 +470,14 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildFAB(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 0),
+      margin: const EdgeInsets.only(bottom: 16),
       child: FloatingActionButton.extended(
         onPressed: () {
           HapticFeedback.lightImpact();
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: AppTheme.surfaceDark,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
             ),
@@ -487,7 +496,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD),
+          borderRadius: BorderRadius.circular(24),
         ),
       ),
     );

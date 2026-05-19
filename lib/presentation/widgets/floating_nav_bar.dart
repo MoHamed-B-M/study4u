@@ -54,9 +54,7 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
           child: Container(
             height: 64,
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppTheme.surfaceDark.withValues(alpha: 0.95)
-                  : Colors.white.withValues(alpha: 0.9),
+              color: (isDark ? AppTheme.surfaceDark : Colors.white).withValues(alpha: 0.95),
               border: Border.all(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.08)
@@ -86,7 +84,7 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                       ),
                       decoration: BoxDecoration(
                         color: isActive
-                            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                            ? AppTheme.primary.withValues(alpha: 0.2)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -97,7 +95,7 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                             isActive ? destination.activeIcon : destination.icon,
                             size: 22,
                             color: isActive
-                                ? Theme.of(context).colorScheme.primary
+                                ? AppTheme.primary
                                 : (isDark
                                     ? Colors.white.withValues(alpha: 0.45)
                                     : Colors.black.withValues(alpha: 0.45)),
@@ -109,7 +107,7 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
                               fontSize: 10,
                               fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                               color: isActive
-                                  ? Theme.of(context).colorScheme.primary
+                                  ? AppTheme.primary
                                   : (isDark
                                       ? Colors.white.withValues(alpha: 0.45)
                                       : Colors.black.withValues(alpha: 0.45)),

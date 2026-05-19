@@ -22,7 +22,7 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradientColors = colors ?? [AppTheme.primary, AppTheme.secondary];
+    final gradientColors = colors ?? [const Color(0xFF059669), AppTheme.primary];
     return GestureDetector(
       onTap: onPressed != null
           ? () {
@@ -38,7 +38,7 @@ class GradientButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppTheme.radiusPill),
           boxShadow: [
             BoxShadow(
-              color: gradientColors.first.withOpacity(0.3),
+              color: gradientColors.first.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),

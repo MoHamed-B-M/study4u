@@ -41,24 +41,45 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
   Widget build(BuildContext context) {
     final analytics = ref.watch(attendanceAnalyticsResultProvider);
     final courses = ref.watch(courseListProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tracker', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            _buildAttendanceStats(context, analytics),
-            const SizedBox(height: 24),
-            _buildCalendarCard(context),
-            const SizedBox(height: 32),
-            _buildDailySchedule(context, courses),
-            const SizedBox(height: 40),
-          ],
-        ),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 56, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Attendance',
+                    style: GoogleFonts.outfit(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Track your class attendance',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildAttendanceStats(context, analytics),
+                  const SizedBox(height: 24),
+                  _buildCalendarCard(context),
+                  const SizedBox(height: 32),
+                  _buildDailySchedule(context, courses),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -85,14 +106,14 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
             const SizedBox(height: 16),
             Text(
               'No classes tracked yet!',
-              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppTheme.textPrimary),
             ),
             const SizedBox(height: 4),
             Text(
               'Start marking attendance to see your stats here.',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+                color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -112,14 +133,14 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
             center: Text(
               '${analytics.percentage.toInt()}%',
               style: GoogleFonts.outfit(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
                 color: isDark ? Colors.white : AppTheme.textPrimary,
               ),
             ),
             progressColor: analytics.isBelowThreshold
                 ? AppTheme.warningRed
-                : Theme.of(context).colorScheme.primary,
+                : AppTheme.primary,
             backgroundColor: isDark
                 ? Colors.white.withValues(alpha: 0.08)
                 : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
@@ -135,23 +156,23 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
               color: isDark ? Colors.white : AppTheme.textPrimary,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: analytics.isBelowThreshold
-                  ? AppTheme.warningRed.withValues(alpha: 0.15)
+                  ? AppTheme.warningRed
                   : AppTheme.primary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Text(
               analytics.isBelowThreshold
                   ? 'Warning: Below 75% threshold!'
                   : 'You are doing great! Keep it up.',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: analytics.isBelowThreshold
-                    ? AppTheme.warningRed
-                    : AppTheme.primary,
+                color: analytics.isBelowThreshold ? Colors.white : AppTheme.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -163,7 +184,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
             children: [
               _buildStatItem('Present', analytics.present, AppTheme.primary, isDark),
               _buildStatItem('Absent', analytics.absent, AppTheme.warningRed, isDark),
-              _buildStatItem('Late', analytics.late, AppTheme.tertiary, isDark),
+              _buildStatItem('Late', analytics.late, AppTheme.amberYellow, isDark),
             ],
           ),
         ],
@@ -177,17 +198,18 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
         Text(
           count.toString(),
           style: GoogleFonts.outfit(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
             color: color,
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.6),
+            color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
           ),
         ),
       ],
@@ -213,17 +235,45 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
         },
         calendarStyle: CalendarStyle(
           todayDecoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
+            color: AppTheme.primary.withValues(alpha: 0.3),
             shape: BoxShape.circle,
           ),
           selectedDecoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.secondary,
+            color: AppTheme.primary,
             shape: BoxShape.circle,
           ),
+          defaultTextStyle: TextStyle(
+            color: isDark ? Colors.white70 : AppTheme.textPrimary,
+          ),
+          weekendTextStyle: TextStyle(
+            color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5),
+          ),
+          outsideTextStyle: TextStyle(
+            color: isDark ? Colors.white24 : AppTheme.textPrimary.withValues(alpha: 0.2),
+          ),
         ),
-        headerStyle: const HeaderStyle(
+        headerStyle: HeaderStyle(
           formatButtonVisible: false,
           titleCentered: true,
+          titleTextStyle: GoogleFonts.outfit(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppTheme.textPrimary,
+          ),
+          leftChevronIcon: Icon(Icons.chevron_left, color: isDark ? Colors.white54 : AppTheme.textPrimary),
+          rightChevronIcon: Icon(Icons.chevron_right, color: isDark ? Colors.white54 : AppTheme.textPrimary),
+        ),
+        daysOfWeekStyle: DaysOfWeekStyle(
+          weekdayStyle: TextStyle(
+            color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+          weekendStyle: TextStyle(
+            color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -236,15 +286,17 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
       children: [
         Text(
           "Today's Schedule",
-          style: TextStyle(
+          style: GoogleFonts.outfit(
             fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: isDark ? Colors.white : AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 16),
         if (courses.isEmpty)
-          Text('No classes scheduled for today.', style: Theme.of(context).textTheme.bodyMedium),
+          Text('No classes scheduled for today.', style: TextStyle(
+            color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
+          )),
         ...List.generate(courses.length, (index) {
           final course = courses[index];
           return Padding(
@@ -258,7 +310,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Color(course.colorValue).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(Icons.school, color: Color(course.colorValue)),
                   ),
@@ -279,7 +331,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
                           '${course.startTime} - ${course.endTime}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? Colors.white60 : Theme.of(context).textTheme.bodyMedium?.color,
+                            color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -290,7 +342,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
                     children: [
                       _buildActionChip('Present', Icons.check_circle, AppTheme.primary, () => _markAttendance(course.id, AttendanceStatus.present)),
                       const SizedBox(height: 6),
-                      _buildActionChip('Late', Icons.access_time, AppTheme.tertiary, () => _markAttendance(course.id, AttendanceStatus.late)),
+                      _buildActionChip('Late', Icons.access_time, AppTheme.amberYellow, () => _markAttendance(course.id, AttendanceStatus.late)),
                     ],
                   ),
                 ],
