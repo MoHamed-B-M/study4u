@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../presentation/theme/theme_provider.dart';
+import '../../../../domain/entities/course.dart';
 import '../../../../domain/entities/task.dart';
 import '../../theme/design_tokens.dart';
 import '../../widgets/dashboard_card.dart';
+import '../../widgets/quote_expansion_route.dart';
 
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
@@ -131,16 +133,9 @@ class DashboardView extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         if (nextCourse != null)
-                          NextClassCard(
-                            courseName: nextCourse.name,
-                            courseCode: nextCourse.code,
-                            time: '${nextCourse.startTime} - ${nextCourse.endTime}',
-                            progress: nextProgress,
-                            color: Color(nextCourse.colorValue),
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              context.push('/course/${nextCourse.id}');
-                            },
+                          _NextClassCardWrapper(
+                            course: nextCourse,
+                            nextProgress: nextProgress,
                           ).animate().fadeIn(duration: 500.ms, delay: 200.ms).slideY(begin: 0.15),
                         const SizedBox(height: 24),
                         Row(
@@ -418,6 +413,53 @@ class DashboardView extends ConsumerWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+class _NextClassCardWrapper extends ConsumerStatefulWidget {
+  final CourseEntity course;
+  final double nextProgress;
+
+  const _NextClassCardWrapper({
+    required this.course,
+    required this.nextProgress,
+  });
+
+  @override
+  ConsumerState<_NextClassCardWrapper> createState() => _NextClassCardWrapperState();
+}
+
+class _NextClassCardWrapperState extends ConsumerState<_NextClassCardWrapper> {
+  final _key = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final course = widget.course;
+    return RepaintBoundary(
+      key: _key,
+      child: NextClassCard(
+        courseName: course.name,
+        courseCode: course.code,
+        time: '${course.startTime} - ${course.endTime}',
+        progress: widget.nextProgress,
+        color: Color(course.colorValue),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
+          if (renderBox != null && renderBox.hasSize) {
+            final position = renderBox.localToGlobal(Offset.zero);
+            final rect = Rect.fromLTWH(
+              position.dx, position.dy,
+              renderBox.size.width, renderBox.size.height,
+            );
+            Navigator.of(context).push(QuoteExpansionRoute(
+              sourceRect: rect,
+              sourceColor: Color(course.colorValue),
+            ));
+          }
+        },
+      ),
     );
   }
 }
