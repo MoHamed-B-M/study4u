@@ -2,7 +2,7 @@
   <br>
   <h1>📚 stdy4u</h1>
   <h3><em>STUDY SMARTER</em></h3>
-  <p><strong>v1.1.2</strong> — Local-first student productivity companion</p>
+  <p><strong>v1.2.0</strong> — Local-first student productivity companion</p>
   <br>
 </div>
 
@@ -76,6 +76,74 @@
 - On-launch GitHub OTA update check
 - Download progress dialog with auto-install
 - Manual check in Settings → About → Check for Updates
+
+---
+
+## 📖 How to Use
+
+### 1. Getting Started
+
+On first launch, you'll see an animated splash screen followed by a short **onboarding carousel**. Swipe through the intro pages, then tap **START** to begin.
+
+The app works completely offline — all your data (courses, tasks, attendance, notes) is stored locally on your device. No sign-up, no account needed.
+
+### 2. Adding Your First Course
+
+- Tap the **Home** tab and press the **+** button to open the Add Course form
+- Fill in the course name, code, professor, and schedule
+- Pick a **color** to identify the course on your dashboard
+- Set your **target grade** and credit hours (used for CGPA calculations)
+- Save — the course appears on your dashboard immediately
+
+> **Tip:** Long-press any course card to edit or delete it.
+
+### 3. Daily Dashboard
+
+Your **Home** screen shows at a glance:
+- A personalized greeting with your study streak
+- **Up Next** — your next class today with a countdown
+- **Quote Cards** — tap the "UP NEXT" card to expand a full-screen motivational quote with a smooth animated transition. Swipe or tap the close button to dismiss
+- Course progress rings showing attendance rate
+- Pending tasks and quick action buttons
+
+### 4. Marking Attendance
+
+- Go to the **Tracker** tab to see a monthly calendar
+- Tap any date to view all courses scheduled that day
+- Tap **Present / Late / Absent / Excused** to mark attendance
+- The tracker calculates your attendance percentage and warns if you're below the threshold
+
+### 5. Using the Pomodoro Timer
+
+- Navigate to the **Pomodoro** section from the Home screen
+- Tap the gear icon to adjust Focus, Short Break, and Long Break durations
+- Press **Play** to start a focus session
+- Optionally pick calming music to play during focus time
+- View your weekly focus stats on the **Stats** screen
+
+### 6. Tracking Grades & Statistics
+
+- The **Stats** screen shows your overall **CGPA** with a bar chart breakdown per course
+- Each course displays its grade, credits, and contribution to your GPA
+- The weekly focus time chart shows your Pomodoro productivity
+
+### 7. Managing Materials, Tasks & Notes
+
+Tap any course card to open its detail screen with three tabs:
+- **Materials** — Add links, written notes, or upload files (PDFs, images). Tap to open, swipe to delete
+- **Tasks** — Create tasks with due dates and urgency. Check them off when done
+- **Notes** — Course-specific notes that stay with the course
+
+### 8. Customizing the App
+
+- Open **Settings** to switch between Light, Dark, or System theme
+- Pick from **8 accent colors** to personalize the look
+- Toggle the **Floating Navigation Bar** for a glassmorphism effect
+- Enable or disable haptic feedback
+
+### 9. App Updates
+
+When a new version is available, a **native system notification** pops up in your status bar. Tap the notification to open the update dialog, view release notes, and download the latest APK. You can also manually check for updates in **Settings → About → Check for Updates**.
 
 ---
 

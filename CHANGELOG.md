@@ -4,6 +4,33 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
+## [1.2.0] - 2026-05-19
+
+### Added
+- **Expanding Quote Card** — Tap the next-class card to see a full-screen animated quote card with a randomized motivational quote, backdrop expansion, and cross-fade typography.
+- **Local Push Notifications for Updates** — When a new version is detected, a native system notification (`Importance.max` / `Priority.high`) fires immediately with the version string. Tapping it opens the update dialog.
+- **Slide-Out Panel** — New reusable `SlideOutPanel` widget for smooth reveal interactions.
+- **Squish Buttons** — Tactile press-feedback button component with scale-down animation used across the update dialog.
+
+### Changed
+- **Blur removed from quote card** — `BackdropFilter` eliminated for a jank-free 280ms expansion transition.
+- **Transition performance** — Expansion route uses `fastOutSlowIn` easing, discrete blur stepping, and `RepaintBoundary` isolation.
+- **Background page scale** — Shell pages scale to 0.96 during quote expansion via `PageScaleProvider`/`pageScaleNotifier`.
+- **Light-mode nav bar fixes** — `NavigationBar` and `FloatingNavBar` now show proper `#64748B` slate inactive colors instead of hardcoded dark; `SystemChrome.setSystemUIOverlayStyle` adapts status bar icons.
+- **Update dialog redesigned** — Custom dark card layout with scrollable changelog, squish action buttons, and download progress.
+- **Home screen** — Major rework with new card layouts, dashboard integration, and theme-aware styling.
+- **Tracker screen** — Updated visuals, consistent spacing and color tokens.
+- **Statistics screen** — Refactored chart layouts and theme alignment.
+- **Dashboard** — Quote card trigger integrated via `_NextClassCardWrapper` with GlobalKey.
+
+### Dependencies
+- `flutter_local_notifications` — Channel setup expanded with `app_updates_channel`.
+
+### Docs
+- README refreshed with new screenshots.
+
+---
+
 ## [1.1.2] - 2026-05-18
 
 ### Added
