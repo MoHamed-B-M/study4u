@@ -36,10 +36,10 @@ class QuoteExpansionRoute extends PageRoute<void> {
   bool get maintainState => false;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 700);
+  Duration get transitionDuration => const Duration(milliseconds: 400);
 
   @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 600);
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 400);
 
   @override
   bool get opaque => false;
@@ -83,7 +83,6 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
   late Animation<double> _contentFadeOut;
   late Animation<double> _placeholderFadeOut;
   late Animation<double> _quoteFadeIn;
-  late Animation<double> _bouncySettle;
 
   String _quote = '';
 
@@ -94,44 +93,37 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
 
     _driver = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 400),
     );
-
-    final settleCurve = Cubic(0.34, 1.4, 0.64, 1.0);
 
     _expansion = CurvedAnimation(
       parent: _driver,
-      curve: const Interval(0.0, 0.5, curve: Curves.easeInOutCubic),
+      curve: Curves.fastOutSlowIn,
     );
 
     _blur = CurvedAnimation(
       parent: _driver,
-      curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+      curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
     );
 
     _cornerRadius = CurvedAnimation(
       parent: _driver,
-      curve: const Interval(0.0, 0.5, curve: Curves.easeInOutCubic),
+      curve: Curves.fastOutSlowIn,
     );
 
     _contentFadeOut = CurvedAnimation(
       parent: _driver,
-      curve: const Interval(0.0, 0.12, curve: Curves.easeOut),
+      curve: const Interval(0.0, 0.15, curve: Curves.easeOut),
     );
 
     _placeholderFadeOut = CurvedAnimation(
       parent: _driver,
-      curve: const Interval(0.35, 0.55, curve: Curves.easeOut),
+      curve: const Interval(0.25, 0.5, curve: Curves.easeOut),
     );
 
     _quoteFadeIn = CurvedAnimation(
       parent: _driver,
-      curve: const Interval(0.5, 0.75, curve: Curves.easeIn),
-    );
-
-    _bouncySettle = CurvedAnimation(
-      parent: _driver,
-      curve: Interval(0.45, 1.0, curve: settleCurve),
+      curve: const Interval(0.35, 0.6, curve: Curves.easeIn),
     );
 
     widget.routeAnimation.addListener(_sync);
@@ -161,38 +153,35 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
       animation: _driver,
       builder: (context, _) {
         final exp = _expansion.value;
-        final srcH = widget.sourceRect.height;
-        final srcW = widget.sourceRect.width;
+        final srcRect = widget.sourceRect;
         final dstH = size.height;
         final dstW = size.width;
-        final srcTop = widget.sourceRect.top;
-        final srcLeft = widget.sourceRect.left;
 
-        final currentH = srcH + (dstH - srcH) * exp;
-        final currentW = srcW + (dstW - srcW) * exp;
-        final currentTop = srcTop - (dstH - srcH) * exp * (srcTop / dstH);
+        final currentH = srcRect.height + (dstH - srcRect.height) * exp;
+        final currentW = srcRect.width + (dstW - srcRect.width) * exp;
+        final currentTop = srcRect.top * (1.0 - exp);
+        final currentLeft = srcRect.left * (1.0 - exp);
         final radius = AppTheme.radiusCard * (1.0 - _cornerRadius.value);
         final blurSigma = 12.0 * (1.0 - _blur.value);
 
         final contentOpacity = 1.0 - _contentFadeOut.value;
         final placeholderOpacity = _contentFadeOut.value * (1.0 - _placeholderFadeOut.value);
         final quoteOpacity = _quoteFadeIn.value;
-        final settleScale = 1.0 + (0.03 * (1.0 - _bouncySettle.value));
 
         return Stack(
           children: [
             Positioned(
               top: currentTop,
-              left: srcLeft - (dstW - srcW) * exp * (srcLeft / dstW),
-              width: currentW * settleScale,
-              height: currentH * settleScale,
+              left: currentLeft,
+              width: currentW,
+              height: currentH,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(radius),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.mintGreenLight,
+                      color: widget.sourceColor,
                       borderRadius: BorderRadius.circular(radius),
                     ),
                     child: Stack(
@@ -204,14 +193,17 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
                         Opacity(
                           opacity: placeholderOpacity.clamp(0.0, 1.0),
                           child: const Center(
-                            child: Text(
-                              'SEARCHING FOR INSPIRATION...',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                letterSpacing: 4,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'SEARCHING FOR INSPIRATION...',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  letterSpacing: 4,
+                                ),
                               ),
                             ),
                           ),

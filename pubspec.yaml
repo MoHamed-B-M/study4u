@@ -2,7 +2,7 @@ name: stdy4u
 description: "A production-ready student productivity tool with local persistence."
 publish_to: "none"
 
-version: 1.1.2
+version: 1.2.0
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
