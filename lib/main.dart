@@ -16,6 +16,7 @@ import 'presentation/features/course_detail/course_detail_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
+import 'core/animation/page_scale.dart';
 import 'data/models/app_settings.dart';
 
 void main() {
@@ -96,7 +97,21 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => MainScreen(child: child),
+        builder: (context, state, child) => ValueListenableBuilder<double>(
+          valueListenable: pageScaleNotifier,
+          builder: (context, scale, child) {
+            return Transform.scale(
+              scale: scale,
+              alignment: Alignment.center,
+              transformHitTests: false,
+              child: PageScaleProvider(
+                notifier: pageScaleNotifier,
+                child: MainScreen(child: child!),
+              ),
+            );
+          },
+          child: child,
+        ),
         routes: [
           GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
           GoRoute(path: '/tracker', builder: (context, state) => const TrackerScreen()),

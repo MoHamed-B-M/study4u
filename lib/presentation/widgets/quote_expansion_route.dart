@@ -21,10 +21,12 @@ class QuoteExpansionRoute extends PageRoute<void> {
   QuoteExpansionRoute({
     required this.sourceRect,
     required this.sourceColor,
+    this.pageScaleNotifier,
   });
 
   final Rect sourceRect;
   final Color sourceColor;
+  final ValueNotifier<double>? pageScaleNotifier;
 
   @override
   Color? get barrierColor => null;
@@ -36,10 +38,10 @@ class QuoteExpansionRoute extends PageRoute<void> {
   bool get maintainState => false;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 400);
+  Duration get transitionDuration => const Duration(milliseconds: 280);
 
   @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 400);
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 280);
 
   @override
   bool get opaque => false;
@@ -50,6 +52,7 @@ class QuoteExpansionRoute extends PageRoute<void> {
       sourceRect: sourceRect,
       sourceColor: sourceColor,
       routeAnimation: animation,
+      pageScaleNotifier: pageScaleNotifier,
     );
   }
 
@@ -63,11 +66,13 @@ class _QuoteModalPage extends StatefulWidget {
   final Rect sourceRect;
   final Color sourceColor;
   final Animation<double> routeAnimation;
+  final ValueNotifier<double>? pageScaleNotifier;
 
   const _QuoteModalPage({
     required this.sourceRect,
     required this.sourceColor,
     required this.routeAnimation,
+    this.pageScaleNotifier,
   });
 
   @override
@@ -93,7 +98,7 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
 
     _driver = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 280),
     );
 
     _expansion = CurvedAnimation(
@@ -126,6 +131,7 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
       curve: const Interval(0.35, 0.6, curve: Curves.easeIn),
     );
 
+    _driver.addListener(_updatePageScale);
     widget.routeAnimation.addListener(_sync);
     if (widget.routeAnimation.isCompleted) {
       _driver.value = 1.0;
@@ -138,9 +144,16 @@ class _QuoteModalPageState extends State<_QuoteModalPage>
     }
   }
 
+  void _updatePageScale() {
+    final t = _driver.value;
+    widget.pageScaleNotifier?.value = 1.0 - (0.04 * t);
+  }
+
   @override
   void dispose() {
+    widget.pageScaleNotifier?.value = 1.0;
     widget.routeAnimation.removeListener(_sync);
+    _driver.removeListener(_updatePageScale);
     _driver.dispose();
     super.dispose();
   }
