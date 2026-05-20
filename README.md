@@ -18,6 +18,16 @@
   <img src="screenshot/Skreenup_1779140469510.png" width="180" alt="Course Detail">
 </p>
 
+### 🎬 App Preview
+<p align="center">
+  <video src="videos/preview.mp4" type="video/mp4" controls width="300" height="500"></video>
+</p>
+
+### 📖 App Explanation
+<p align="center">
+  <video src="videos/study4u__Master_Focus.mp4" type="video/mp4" controls width="300"></video>
+</p>
+
 ---
 
 ## ✨ Features
