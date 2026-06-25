@@ -1,0 +1,131 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+
+env:
+  IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+jobs:
+  build:
+    name: Build and Release APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.0"
+          channel: "stable"
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Decode keystore
+        if: env.IS_RELEASE == 'true'
+        env:
+          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$ENCODED_KEYSTORE" | base64 --decode > android/upload-keystore.jks
+          if [ ! -s android/upload-keystore.jks ]; then
+            echo "ERROR: decoded keystore is empty — check that KEYSTORE_BASE64 secret is set"
+            exit 1
+          fi
+          echo "Keystore decoded ($(wc -c < android/upload-keystore.jks) bytes)"
+
+      - name: Convert keystore to compatible format
+        if: env.IS_RELEASE == 'true'
+        run: |
+          keytool -importkeystore \
+            -srckeystore android/upload-keystore.jks \
+            -destkeystore android/upload-keystore-converted.jks \
+            -srcstorepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -deststorepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -srcalias "${{ secrets.KEY_ALIAS }}" \
+            -destalias "${{ secrets.KEY_ALIAS }}" \
+            -srckeypass "${{ secrets.KEY_PASSWORD }}" \
+            -destkeypass "${{ secrets.KEY_PASSWORD }}" \
+            -deststoretype JKS \
+            -noprompt 2>&1
+
+          mv android/upload-keystore-converted.jks android/upload-keystore.jks
+
+      - name: Verify keystore
+        if: env.IS_RELEASE == 'true'
+        run: |
+          keytool -list -keystore android/upload-keystore.jks \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -alias "${{ secrets.KEY_ALIAS }}" \
+            -keypass "${{ secrets.KEY_PASSWORD }}" \
+            -noprompt
+
+      - name: Create key.properties
+        if: env.IS_RELEASE == 'true'
+        run: |
+          echo "storeFile=upload-keystore.jks" > android/key.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+
+      - name: Extract version from tag
+        if: env.IS_RELEASE == 'true'
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      - name: Update pubspec version
+        if: env.IS_RELEASE == 'true'
+        run: |
+          sed -i "s/version: .*/version: $VERSION+${{ github.run_number }}/" pubspec.yaml
+
+      - name: Build APK (signed release — universal arm64+v7a)
+        if: env.IS_RELEASE == 'true'
+        run: flutter build apk --release --target-platform android-arm64,android-arm --build-number=${{ github.run_number }}
+
+      - name: Build APK (release — universal arm64+v7a)
+        if: env.IS_RELEASE != 'true'
+        run: flutter build apk --release --target-platform android-arm64,android-arm
+
+      - name: Upload APK as artifact (PR / branch push)
+        if: env.IS_RELEASE != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stdy4u-app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Extract release notes from CHANGELOG
+        if: env.IS_RELEASE == 'true'
+        run: |
+          awk '
+            /^## \['"$VERSION"'\]/ { found=1; print; next }
+            found { print }
+            /^## \[/ && found { exit }
+          ' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "No CHANGELOG entry found for version $VERSION — using auto-generated notes."
+            echo "" > release_notes.md
+          fi
+
+      - name: Create GitHub Release
+        if: env.IS_RELEASE == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: stdy4u ${{ github.ref_name }}
+          body_path: release_notes.md
+          files: build/app/outputs/flutter-apk/app-release.apk
