@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
 import 'package:animations/animations.dart';
+import 'package:toolbar_m3e/toolbar_m3e.dart';
+import 'package:m3e_buttons/m3e_buttons.dart';
+import 'package:fab_m3e/fab_m3e.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../domain/entities/course.dart';
 import '../../../../domain/entities/task.dart';
@@ -12,7 +15,6 @@ import '../../../../domain/usecases/schedule_optimizer.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/add_course_sheet.dart';
-import '../../widgets/squish_button.dart';
 import '../../widgets/quote_expansion_route.dart';
 import '../course_detail/course_detail_screen.dart';
 import '../../../core/animation/page_scale.dart' show PageScaleProvider;
@@ -44,55 +46,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      appBar: ToolbarM3E(
+        titleText: greeting,
+        subtitleText: 'You have $pendingCount pending tasks.',
+        variant: ToolbarM3EVariant.surface,
+        size: ToolbarM3ESize.large,
+        actions: [
+          ToolbarActionM3E(
+            icon: Icons.settings_outlined,
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.push('/settings');
+            },
+          ),
+        ],
+      ),
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 56, 24, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            greeting,
-                            style: GoogleFonts.outfit(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : AppTheme.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'You have $pendingCount pending tasks.',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SquishButton(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          context.push('/settings');
-                        },
-                        restingRadius: 12,
-                        pressedRadius: 8,
-                        padding: const EdgeInsets.all(10),
-                        child: Icon(Icons.settings_outlined, color: isDark ? Colors.white54 : AppTheme.textPrimary),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 320,
@@ -135,7 +105,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildUpNextPage(BuildContext context, UpNextResult upNext, List<CourseEntity> courses, WidgetRef ref) {
+  Widget _buildUpNextPage(BuildContext context, UpNextResult upNext,
+      List<CourseEntity> courses, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -151,15 +122,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Expanded(
                   child: AppCard(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 16),
                     color: isDark ? AppTheme.surfaceDark : Colors.white,
                     child: Column(
                       children: [
                         Icon(Icons.book, color: AppTheme.primary, size: 24),
                         const SizedBox(height: 8),
-                        Text('${courses.length}', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.textPrimary)),
+                        Text('${courses.length}',
+                            style: GoogleFonts.outfit(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppTheme.textPrimary)),
                         const SizedBox(height: 2),
-                        Text('Courses', style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6))),
+                        Text('Courses',
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: isDark
+                                    ? Colors.white54
+                                    : AppTheme.textPrimary
+                                        .withValues(alpha: 0.6))),
                       ],
                     ),
                   ),
@@ -167,15 +151,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: AppCard(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 16),
                     color: isDark ? AppTheme.surfaceDark : Colors.white,
                     child: Column(
                       children: [
                         Icon(Icons.task_alt, color: AppTheme.primary, size: 24),
                         const SizedBox(height: 8),
-                        Text('${ref.watch(pendingTaskCountProvider)}', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.textPrimary)),
+                        Text('${ref.watch(pendingTaskCountProvider)}',
+                            style: GoogleFonts.outfit(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppTheme.textPrimary)),
                         const SizedBox(height: 2),
-                        Text('Pending', style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6))),
+                        Text('Pending',
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: isDark
+                                    ? Colors.white54
+                                    : AppTheme.textPrimary
+                                        .withValues(alpha: 0.6))),
                       ],
                     ),
                   ),
@@ -188,7 +185,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildTasksPage(BuildContext context, WidgetRef ref, List<TaskEntity> tasks) {
+  Widget _buildTasksPage(
+      BuildContext context, WidgetRef ref, List<TaskEntity> tasks) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -202,10 +200,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Center(
-                  child: Text('Hooray! No pending tasks.', style: TextStyle(
-                    fontSize: 14,
-                    color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
-                  )),
+                  child: Text('Hooray! No pending tasks.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark
+                            ? Colors.white54
+                            : AppTheme.textPrimary.withValues(alpha: 0.6),
+                      )),
                 ),
               )
             else
@@ -214,14 +215,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: AppCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 14),
                     color: isDark ? AppTheme.surfaceDark : Colors.white,
                     child: Row(
                       children: [
                         GestureDetector(
                           onTap: () {
                             HapticFeedback.selectionClick();
-                            ref.read(taskRepositoryProvider).toggleTask(task.id);
+                            ref
+                                .read(taskRepositoryProvider)
+                                .toggleTask(task.id);
                             ref.read(dataRefreshProvider.notifier).state++;
                           },
                           child: AnimatedContainer(
@@ -231,14 +235,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             height: 22,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: task.isCompleted ? AppTheme.primary : Colors.transparent,
+                              color: task.isCompleted
+                                  ? AppTheme.primary
+                                  : Colors.transparent,
                               border: Border.all(
-                                color: task.isCompleted ? AppTheme.primary : Colors.grey.shade400,
+                                color: task.isCompleted
+                                    ? AppTheme.primary
+                                    : Colors.grey.shade400,
                                 width: 2,
                               ),
                             ),
                             child: task.isCompleted
-                                ? const Icon(Icons.check, size: 14, color: Colors.white)
+                                ? const Icon(Icons.check,
+                                    size: 14, color: Colors.white)
                                 : null,
                           ),
                         ),
@@ -252,27 +261,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
-                                  color: isDark ? Colors.white : AppTheme.textPrimary,
-                                  decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppTheme.textPrimary,
+                                  decoration: task.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                DateFormat('MMM dd, hh:mm a').format(task.dueDate),
-                                style: TextStyle(fontSize: 11, color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5)),
+                                DateFormat('MMM dd, hh:mm a')
+                                    .format(task.dueDate),
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark
+                                        ? Colors.white38
+                                        : AppTheme.textPrimary
+                                            .withValues(alpha: 0.5)),
                               ),
                             ],
                           ),
                         ),
                         if (task.urgency == TaskUrgency.urgent)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppTheme.warningRed.withValues(alpha: 0.15),
+                              color:
+                                  AppTheme.warningRed.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Text('URGENT', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppTheme.warningRed)),
+                            child: Text('URGENT',
+                                style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.warningRed)),
                           ),
                       ],
                     ),
@@ -283,7 +308,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Center(
-                  child: Text('+${tasks.length - 3} more tasks', style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600)),
+                  child: Text('+${tasks.length - 3} more tasks',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.w600)),
                 ),
               ),
           ],
@@ -318,18 +347,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           width: 72,
                           height: 72,
                           child: CircularProgressIndicator(
-                            value: analytics.hasRecords ? analytics.percentage / 100 : 0,
+                            value: analytics.hasRecords
+                                ? analytics.percentage / 100
+                                : 0,
                             strokeWidth: 6,
-                            backgroundColor: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.textPrimary.withValues(alpha: 0.08),
+                            backgroundColor: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : AppTheme.textPrimary.withValues(alpha: 0.08),
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              analytics.isBelowThreshold ? AppTheme.warningRed : AppTheme.primary,
+                              analytics.isBelowThreshold
+                                  ? AppTheme.warningRed
+                                  : AppTheme.primary,
                             ),
                             strokeCap: StrokeCap.round,
                           ),
                         ),
                         Text(
-                          analytics.hasRecords ? '${analytics.percentage.toInt()}%' : '--',
-                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w800, color: isDark ? Colors.white : AppTheme.textPrimary),
+                          analytics.hasRecords
+                              ? '${analytics.percentage.toInt()}%'
+                              : '--',
+                          style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color:
+                                  isDark ? Colors.white : AppTheme.textPrimary),
                         ),
                       ],
                     ),
@@ -341,22 +382,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         Row(
                           children: [
-                            _miniStat(Colors.green, '${analytics.present}', isDark),
+                            _miniStat(
+                                Colors.green, '${analytics.present}', isDark),
                             const SizedBox(width: 16),
-                            _miniStat(AppTheme.warningRed, '${analytics.absent}', isDark),
+                            _miniStat(AppTheme.warningRed,
+                                '${analytics.absent}', isDark),
                             const SizedBox(width: 16),
-                            _miniStat(AppTheme.amberYellow, '${analytics.late}', isDark),
+                            _miniStat(AppTheme.amberYellow, '${analytics.late}',
+                                isDark),
                           ],
                         ),
                         if (analytics.isBelowThreshold) ...[
                           const SizedBox(height: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: AppTheme.warningRed.withValues(alpha: 0.15),
+                              color:
+                                  AppTheme.warningRed.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text('Below 75%!', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.warningRed)),
+                            child: Text('Below 75%!',
+                                style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.warningRed)),
                           ),
                         ],
                       ],
@@ -379,12 +429,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Focus Timer', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppTheme.textPrimary)),
-                        Text('Start a session to track focus', style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6))),
+                        Text('Focus Timer',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppTheme.textPrimary)),
+                        Text('Start a session to track focus',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? Colors.white54
+                                    : AppTheme.textPrimary
+                                        .withValues(alpha: 0.6))),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4)),
+                  Icon(Icons.chevron_right,
+                      color: isDark
+                          ? Colors.white38
+                          : AppTheme.textPrimary.withValues(alpha: 0.4)),
                 ],
               ),
             ),
@@ -397,11 +461,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _miniStat(Color color, String value, bool isDark) {
     return Column(
       children: [
-        Text(value, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w800, color: color)),
+        Text(value,
+            style: GoogleFonts.outfit(
+                fontSize: 16, fontWeight: FontWeight.w800, color: color)),
         SizedBox(
           width: 8,
           height: 8,
-          child: Container(decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          child: Container(
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         ),
       ],
     );
@@ -421,7 +488,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             decoration: BoxDecoration(
               color: _currentPage == index
                   ? AppTheme.primary
-                  : (isDark ? Colors.white24 : AppTheme.textPrimary.withValues(alpha: 0.2)),
+                  : (isDark
+                      ? Colors.white24
+                      : AppTheme.textPrimary.withValues(alpha: 0.2)),
               borderRadius: BorderRadius.circular(4),
             ),
           );
@@ -430,20 +499,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, String? action) {
+  Widget _buildSectionHeader(
+      BuildContext context, String title, String? action) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: GoogleFonts.outfit(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: isDark ? Colors.white : AppTheme.textPrimary,
-        )),
+        Text(title,
+            style: GoogleFonts.outfit(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : AppTheme.textPrimary,
+            )),
         if (action != null)
           TextButton(
             onPressed: () => HapticFeedback.lightImpact(),
-            child: Text(action, style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600, fontSize: 13)),
+            child: Text(action,
+                style: TextStyle(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13)),
           ),
       ],
     );
@@ -453,15 +528,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final upNextKey = GlobalKey();
     return RepaintBoundary(
       key: upNextKey,
-      child: SquishButton(
-        onTap: () {
+      child: M3EButton(
+        onPressed: () {
           HapticFeedback.lightImpact();
-          final renderBox = upNextKey.currentContext?.findRenderObject() as RenderBox?;
+          final renderBox =
+              upNextKey.currentContext?.findRenderObject() as RenderBox?;
           if (renderBox != null && renderBox.hasSize) {
             final position = renderBox.localToGlobal(Offset.zero);
             final rect = Rect.fromLTWH(
-              position.dx, position.dy,
-              renderBox.size.width, renderBox.size.height,
+              position.dx,
+              position.dy,
+              renderBox.size.width,
+              renderBox.size.height,
             );
             final scaleNotifier = PageScaleProvider.of(context);
             Navigator.of(context).push(QuoteExpansionRoute(
@@ -471,17 +549,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ));
           }
         },
-        padding: const EdgeInsets.all(24),
-        backgroundColor: AppTheme.mintGreenLight,
-        restingRadius: AppTheme.radiusCard,
-        pressedRadius: 14,
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.mintGreenLight.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+        style: M3EButtonStyle.elevated,
+        size: M3EButtonSize.md,
+        decoration: M3EButtonDecoration(
+          backgroundColor:
+              const WidgetStatePropertyAll<Color?>(AppTheme.mintGreenLight),
+          elevation: const WidgetStatePropertyAll<double?>(0.0),
+          shadowColor: WidgetStatePropertyAll<Color?>(
+            AppTheme.mintGreenLight.withValues(alpha: 0.3),
           ),
-        ],
+          padding: const EdgeInsets.all(24),
+          borderRadius: AppTheme.radiusCard,
+          pressedRadius: 14,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -489,7 +569,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
@@ -524,7 +605,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                Icon(Icons.access_time_rounded, color: Colors.black87, size: 18),
+                Icon(Icons.access_time_rounded,
+                    color: Colors.black87, size: 18),
                 const SizedBox(width: 8),
                 Text(
                   '${course.startTime} - ${course.endTime}',
@@ -542,12 +624,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildCoursesList(BuildContext context, List<CourseEntity> courses, WidgetRef ref) {
+  Widget _buildCoursesList(
+      BuildContext context, List<CourseEntity> courses, WidgetRef ref) {
     if (courses.isEmpty) {
-      return Text('No courses added yet.', style: TextStyle(
-        fontSize: 14,
-        color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : AppTheme.textPrimary.withValues(alpha: 0.6),
-      ));
+      return Text('No courses added yet.',
+          style: TextStyle(
+            fontSize: 14,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white54
+                : AppTheme.textPrimary.withValues(alpha: 0.6),
+          ));
     }
     return SizedBox(
       height: 180,
@@ -578,13 +664,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               transitionDuration: const Duration(milliseconds: 280),
               closedBuilder: (context, action) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   child: Column(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Color(course.colorValue).withValues(alpha: 0.15),
+                          color:
+                              Color(course.colorValue).withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -611,7 +699,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? Colors.white60 : AppTheme.textPrimary.withValues(alpha: 0.7),
+                          color: isDark
+                              ? Colors.white60
+                              : AppTheme.textPrimary.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -621,14 +711,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Icon(
                             Icons.access_time,
                             size: 12,
-                            color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.4),
+                            color: isDark
+                                ? Colors.white38
+                                : AppTheme.textPrimary.withValues(alpha: 0.4),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             course.startTime,
                             style: TextStyle(
                               fontSize: 11,
-                              color: isDark ? Colors.white38 : AppTheme.textPrimary.withValues(alpha: 0.5),
+                              color: isDark
+                                  ? Colors.white38
+                                  : AppTheme.textPrimary.withValues(alpha: 0.5),
                             ),
                           ),
                         ],
@@ -650,7 +744,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildFAB(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      child: FloatingActionButton.extended(
+      child: ExtendedFabM3E(
+        icon: const Icon(Icons.add),
+        label: const Text('Add Course'),
         onPressed: () {
           HapticFeedback.lightImpact();
           showModalBottomSheet(
@@ -658,25 +754,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             isScrollControlled: true,
             backgroundColor: AppTheme.surfaceDark,
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
+              borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppTheme.radiusCard)),
             ),
             builder: (_) => const AddCourseSheet(),
           );
         },
-        backgroundColor: AppTheme.surfaceDark,
-        foregroundColor: Colors.white,
-        elevation: 8,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Course',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shapeFamily: FabM3EShapeFamily.square,
       ),
     );
   }

@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:toolbar_m3e/toolbar_m3e.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../presentation/theme/theme_provider.dart';
 import '../../../../domain/entities/course.dart';
@@ -27,216 +29,160 @@ class DashboardView extends ConsumerWidget {
     final nextCourse = upNext.hasNext ? upNext.course : null;
     final nextProgress = nextCourse != null ? nextCourse.percentage / 100 : 0.0;
 
-    return CupertinoPageScaffold(
-      backgroundColor: context.background,
-      child: Stack(
+    return Scaffold(
+      appBar: ToolbarM3E(
+        title: Text('Hi! $userName')
+            .animate()
+            .fadeIn(duration: 300.ms, delay: 100.ms),
+        subtitleText: greeting,
+        variant: ToolbarM3EVariant.surface,
+        size: ToolbarM3ESize.large,
+        actions: [
+          ToolbarActionM3E(
+            icon: CupertinoIcons.bell,
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.push('/settings');
+            },
+          ),
+        ],
+      ),
+      body: Stack(
         children: [
           const BlobBackground(),
-          SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      DesignTokens.spacingLG,
-                      DesignTokens.spacingMD,
-                      DesignTokens.spacingLG,
-                      0,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'STUDY4U',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: context.textTertiary,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    HapticFeedback.lightImpact();
-                                    context.push('/settings');
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: context.surface,
-                                      shape: BoxShape.circle,
-                                      boxShadow: DesignTokens.cardShadow,
-                                    ),
-                                    child: Icon(
-                                      CupertinoIcons.bell,
-                                      size: 18,
-                                      color: context.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          greeting,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: context.textSecondary,
-                          ),
-                        ).animate().fadeIn(duration: 300.ms),
-                        Text(
-                          'Hi! $userName',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: context.textPrimary,
-                            height: 1.2,
-                          ),
-                        ).animate().fadeIn(duration: 300.ms, delay: 100.ms),
-                      ],
-                    ),
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: const SizedBox(height: 24)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DesignTokens.spacingLG,
                   ),
-                ),
-                SliverToBoxAdapter(child: const SizedBox(height: 24)),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: DesignTokens.spacingLG,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: InfoCard(
-                                icon: CupertinoIcons.checkmark_seal,
-                                iconColor: DesignTokens.cardBlueAccent,
-                                backgroundColor: DesignTokens.cardBlue,
-                                value: pendingCount.toString(),
-                                label: 'Pending Tasks',
-                              )
-                                  .animate()
-                                  .fadeIn(duration: 400.ms)
-                                  .slideY(begin: 0.1),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: InfoCard(
+                              icon: CupertinoIcons.checkmark_seal,
+                              iconColor: DesignTokens.cardBlueAccent,
+                              backgroundColor: DesignTokens.cardBlue,
+                              value: pendingCount.toString(),
+                              label: 'Pending Tasks',
+                            )
+                                .animate()
+                                .fadeIn(duration: 400.ms)
+                                .slideY(begin: 0.1),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child:
+                                _buildTotalCoursesCard(context, courses.length)
+                                    .animate()
+                                    .fadeIn(duration: 400.ms, delay: 100.ms)
+                                    .slideY(begin: 0.1),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (nextCourse != null)
+                        _NextClassCardWrapper(
+                          course: nextCourse,
+                          nextProgress: nextProgress,
+                        )
+                            .animate()
+                            .fadeIn(duration: 500.ms, delay: 200.ms)
+                            .slideY(begin: 0.15),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'My Courses',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: context.textPrimary,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildTotalCoursesCard(
-                                      context, courses.length)
-                                  .animate()
-                                  .fadeIn(duration: 400.ms, delay: 100.ms)
-                                  .slideY(begin: 0.1),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        if (nextCourse != null)
-                          _NextClassCardWrapper(
-                            course: nextCourse,
-                            nextProgress: nextProgress,
-                          )
-                              .animate()
-                              .fadeIn(duration: 500.ms, delay: 200.ms)
-                              .slideY(begin: 0.15),
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'My Courses',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: context.textPrimary,
+                          ),
+                          if (courses.length > 3)
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                              },
+                              child: Text(
+                                'See All',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: DesignTokens.primaryLavender,
+                                ),
                               ),
                             ),
-                            if (courses.length > 3)
-                              GestureDetector(
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                },
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 140,
+                        child: courses.isEmpty
+                            ? Center(
                                 child: Text(
-                                  'See All',
+                                  'No courses yet. Tap + to add one.',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: DesignTokens.primaryLavender,
+                                    color: context.textTertiary,
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          height: 140,
-                          child: courses.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    'No courses yet. Tap + to add one.',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: context.textTertiary,
+                              )
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: courses.length,
+                                itemBuilder: (context, index) {
+                                  final course = courses[index];
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      right:
+                                          index < courses.length - 1 ? 12 : 0,
                                     ),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const BouncingScrollPhysics(),
-                                  itemCount: courses.length,
-                                  itemBuilder: (context, index) {
-                                    final course = courses[index];
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        right:
-                                            index < courses.length - 1 ? 12 : 0,
-                                      ),
-                                      child: CourseCard(
-                                        code: course.code,
-                                        name: course.name,
-                                        color: Color(course.colorValue),
-                                        onTap: () {
-                                          HapticFeedback.lightImpact();
-                                          context.push('/course/${course.id}');
-                                        },
-                                      )
-                                          .animate()
-                                          .fadeIn(
-                                            duration: 300.ms,
-                                            delay: (300 + index * 80).ms,
-                                          )
-                                          .slideX(begin: 0.15),
-                                    );
-                                  },
-                                ),
+                                    child: CourseCard(
+                                      code: course.code,
+                                      name: course.name,
+                                      color: Color(course.colorValue),
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        context.push('/course/${course.id}');
+                                      },
+                                    )
+                                        .animate()
+                                        .fadeIn(
+                                          duration: 300.ms,
+                                          delay: (300 + index * 80).ms,
+                                        )
+                                        .slideX(begin: 0.15),
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Today\'s Tasks',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: context.textPrimary,
                         ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Today\'s Tasks',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: context.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTasksList(context, ref),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTasksList(context, ref),
+                      const SizedBox(height: 100),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

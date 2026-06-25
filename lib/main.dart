@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'presentation/widgets/bubble_nav_bar.dart';
+import 'package:navigation_bar_m3e/navigation_bar_m3e.dart';
+import 'package:expressive_loading_indicator/expressive_loading_indicator.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
 import 'data/datasources/local_storage.dart';
@@ -66,7 +67,8 @@ class _StartupAppState extends State<StartupApp> {
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(32),
-              child: Text('Init error: $initError', textAlign: TextAlign.center),
+              child:
+                  Text('Init error: $initError', textAlign: TextAlign.center),
             ),
           ),
         ),
@@ -76,21 +78,24 @@ class _StartupAppState extends State<StartupApp> {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+          body: Center(child: ExpressiveLoadingIndicator()),
         ),
       );
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: AppTheme.scaffoldDark),
+      theme: ThemeData.dark()
+          .copyWith(scaffoldBackgroundColor: AppTheme.scaffoldDark),
       home: SplashScreen(nextPage: _getNextPage()),
     );
   }
 
   Widget _getNextPage() {
     try {
-      final settings = LocalStorage.appSettingsBox.get('default') ?? AppSettings();
-      if (!settings.onboardingComplete) return const ProviderScope(child: FeaturePreviewScreen());
+      final settings =
+          LocalStorage.appSettingsBox.get('default') ?? AppSettings();
+      if (!settings.onboardingComplete)
+        return const ProviderScope(child: FeaturePreviewScreen());
     } catch (_) {}
     return const ProviderScope(child: Stdy4uApp());
   }
@@ -123,20 +128,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
         routes: [
           GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
-          GoRoute(path: '/tracker', builder: (context, state) => const TrackerScreen()),
-          GoRoute(path: '/stats', builder: (context, state) => const StatisticsScreen()),
-          GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+          GoRoute(
+              path: '/tracker',
+              builder: (context, state) => const TrackerScreen()),
+          GoRoute(
+              path: '/stats',
+              builder: (context, state) => const StatisticsScreen()),
+          GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen()),
           GoRoute(
             path: '/course/:id',
             pageBuilder: (context, state) => CustomTransitionPage(
               key: state.pageKey,
               child: CourseDetailScreen(courseId: state.pathParameters['id']!),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
                 return SlideTransition(
                   position: Tween<Offset>(
                     begin: const Offset(1, 0),
                     end: Offset.zero,
-                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic)),
+                  ).animate(CurvedAnimation(
+                      parent: animation, curve: Curves.easeInOutCubic)),
                   child: child,
                 );
               },
@@ -168,7 +181,8 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
     final update = await service.checkForUpdate();
     if (!mounted || update == null || !update.isNewer) return;
     UpdateService.lastKnownUpdate = update;
-    NotificationService.instance.triggerUpdateNotification(update.latestVersion);
+    NotificationService.instance
+        .triggerUpdateNotification(update.latestVersion);
     if (mounted) {
       await UpdateDialog.show(context: context, update: update);
     }
@@ -207,7 +221,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final useFloating = ref.watch(useFloatingNavBarProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -223,57 +236,34 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           duration: const Duration(milliseconds: 200),
           switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
           child: widget.child,
         ),
       ),
-      bottomNavigationBar: RepaintBoundary(
-        child: useFloating
-            ? BubbleNavBar(
-                currentIndex: _currentIndex,
-                onDestinationSelected: (index) {
-                  HapticFeedback.lightImpact();
-                  setState(() => _currentIndex = index);
-                  if (index == 0) context.go('/');
-                  if (index == 1) context.go('/tracker');
-                  if (index == 2) context.go('/stats');
-                },
-              )
-            : NavigationBar(
-                selectedIndex: _currentIndex,
-                onDestinationSelected: (index) {
-                  HapticFeedback.lightImpact();
-                  setState(() => _currentIndex = index);
-                  if (index == 0) context.go('/');
-                  if (index == 1) context.go('/tracker');
-                  if (index == 2) context.go('/stats');
-                },
-                backgroundColor: isDark
-                    ? AppTheme.surfaceDark.withValues(alpha: 0.95)
-                    : Colors.white.withValues(alpha: 0.92),
-                indicatorColor: AppTheme.primary.withValues(alpha: isDark ? 0.25 : 0.15),
-                indicatorShape: const StadiumBorder(),
-                labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.primary);
-                  }
-                  return TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.45)
-                        : const Color(0xFF64748B),
-                  );
-                }),
-                shadowColor: Colors.transparent,
-                elevation: 0,
-                overlayColor: WidgetStateProperty.all(Colors.transparent),
-                destinations: const [
-                  NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-                  NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Tracker'),
-                  NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Stats'),
-                ],
-              ),
+      bottomNavigationBar: NavigationBarM3E(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          HapticFeedback.lightImpact();
+          setState(() => _currentIndex = index);
+          if (index == 0) context.go('/');
+          if (index == 1) context.go('/tracker');
+          if (index == 2) context.go('/stats');
+        },
+        destinations: const [
+          NavigationDestinationM3E(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home'),
+          NavigationDestinationM3E(
+              icon: Icon(Icons.calendar_today_outlined),
+              selectedIcon: Icon(Icons.calendar_today),
+              label: 'Tracker'),
+          NavigationDestinationM3E(
+              icon: Icon(Icons.analytics_outlined),
+              selectedIcon: Icon(Icons.analytics),
+              label: 'Stats'),
+        ],
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toolbar_m3e/toolbar_m3e.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../domain/entities/course.dart';
@@ -42,68 +44,38 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
     final analytics = ref.watch(attendanceAnalyticsResultProvider);
     final courses = ref.watch(courseListProvider);
 
-    return CupertinoPageScaffold(
-      backgroundColor: context.background,
-      child: Stack(
+    return Scaffold(
+      appBar: ToolbarM3E(
+        titleText: 'Attendance',
+        subtitleText: 'STUDY4U',
+        variant: ToolbarM3EVariant.surface,
+        size: ToolbarM3ESize.large,
+      ),
+      body: Stack(
         children: [
           const BlobBackground(),
-          SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      DesignTokens.spacingLG,
-                      DesignTokens.spacingMD,
-                      DesignTokens.spacingLG,
-                      0,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'STUDY4U',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: context.textTertiary,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Attendance',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: context.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: const SizedBox(height: 24)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DesignTokens.spacingLG,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildAttendanceOverview(analytics),
+                      const SizedBox(height: 24),
+                      _buildCalendarCard(context),
+                      const SizedBox(height: 24),
+                      _buildDailySchedule(context, courses),
+                      const SizedBox(height: 100),
+                    ],
                   ),
                 ),
-                SliverToBoxAdapter(child: const SizedBox(height: 24)),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: DesignTokens.spacingLG,
-                    ),
-                    child: Column(
-                      children: [
-                        _buildAttendanceOverview(analytics),
-                        const SizedBox(height: 24),
-                        _buildCalendarCard(context),
-                        const SizedBox(height: 24),
-                        _buildDailySchedule(context, courses),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -239,7 +211,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
             ),
           ),
           const SizedBox(width: 6),
-          const Text(
+          Text(
             '$count',
             style: TextStyle(
               fontSize: 13,

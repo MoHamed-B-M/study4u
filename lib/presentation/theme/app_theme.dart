@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:m3e_design/m3e_design.dart';
 
 class AppTheme {
   AppTheme._();
@@ -32,7 +33,7 @@ class AppTheme {
       surface: surface,
       error: error,
     );
-    return ThemeData(
+    final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: scheme,
@@ -54,6 +55,7 @@ class AppTheme {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
+    return withM3ETheme(base, override: M3ETheme.defaults(scheme));
   }
 
   static ThemeData darkTheme(Color seed) {
@@ -63,7 +65,7 @@ class AppTheme {
       surface: surfaceDark,
       error: warningRed,
     );
-    return ThemeData(
+    final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: scheme,
@@ -85,157 +87,211 @@ class AppTheme {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
+    return withM3ETheme(base, override: M3ETheme.defaults(scheme));
   }
 
   static TextTheme _textTheme() => TextTheme(
-    displayLarge: GoogleFonts.fredoka(fontSize: 48, fontWeight: FontWeight.w800, color: textPrimary),
-    displayMedium: GoogleFonts.fredoka(fontSize: 32, fontWeight: FontWeight.w700, color: textPrimary),
-    headlineLarge: GoogleFonts.fredoka(fontSize: 28, fontWeight: FontWeight.w700, color: textPrimary),
-    headlineMedium: GoogleFonts.fredoka(fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
-    headlineSmall: GoogleFonts.fredoka(fontSize: 20, fontWeight: FontWeight.w700, color: textPrimary),
-    titleLarge: GoogleFonts.fredoka(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
-    bodyLarge: GoogleFonts.fredoka(fontSize: 16, fontWeight: FontWeight.w400, color: textPrimary),
-    bodyMedium: GoogleFonts.fredoka(fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary.withValues(alpha: 0.7)),
-    bodySmall: GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w400, color: textPrimary.withValues(alpha: 0.6)),
-    labelLarge: GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-    labelSmall: GoogleFonts.fredoka(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-  );
+        displayLarge: GoogleFonts.fredoka(
+            fontSize: 48, fontWeight: FontWeight.w800, color: textPrimary),
+        displayMedium: GoogleFonts.fredoka(
+            fontSize: 32, fontWeight: FontWeight.w700, color: textPrimary),
+        headlineLarge: GoogleFonts.fredoka(
+            fontSize: 28, fontWeight: FontWeight.w700, color: textPrimary),
+        headlineMedium: GoogleFonts.fredoka(
+            fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
+        headlineSmall: GoogleFonts.fredoka(
+            fontSize: 20, fontWeight: FontWeight.w700, color: textPrimary),
+        titleLarge: GoogleFonts.fredoka(
+            fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
+        bodyLarge: GoogleFonts.fredoka(
+            fontSize: 16, fontWeight: FontWeight.w400, color: textPrimary),
+        bodyMedium: GoogleFonts.fredoka(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: textPrimary.withValues(alpha: 0.7)),
+        bodySmall: GoogleFonts.fredoka(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: textPrimary.withValues(alpha: 0.6)),
+        labelLarge: GoogleFonts.fredoka(
+            fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+        labelSmall: GoogleFonts.fredoka(
+            fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+      );
 
   static TextTheme _textThemeDark() => TextTheme(
-    displayLarge: GoogleFonts.fredoka(fontSize: 48, fontWeight: FontWeight.w800, color: Colors.white),
-    displayMedium: GoogleFonts.fredoka(fontSize: 32, fontWeight: FontWeight.w700, color: Colors.white),
-    headlineLarge: GoogleFonts.fredoka(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
-    headlineMedium: GoogleFonts.fredoka(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
-    headlineSmall: GoogleFonts.fredoka(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
-    titleLarge: GoogleFonts.fredoka(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
-    bodyLarge: GoogleFonts.fredoka(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white70),
-    bodyMedium: GoogleFonts.fredoka(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white60),
-    bodySmall: GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white54),
-    labelLarge: GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: Colors.white70),
-    labelSmall: GoogleFonts.fredoka(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: Colors.white60),
-  );
+        displayLarge: GoogleFonts.fredoka(
+            fontSize: 48, fontWeight: FontWeight.w800, color: Colors.white),
+        displayMedium: GoogleFonts.fredoka(
+            fontSize: 32, fontWeight: FontWeight.w700, color: Colors.white),
+        headlineLarge: GoogleFonts.fredoka(
+            fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
+        headlineMedium: GoogleFonts.fredoka(
+            fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+        headlineSmall: GoogleFonts.fredoka(
+            fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+        titleLarge: GoogleFonts.fredoka(
+            fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+        bodyLarge: GoogleFonts.fredoka(
+            fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white70),
+        bodyMedium: GoogleFonts.fredoka(
+            fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white60),
+        bodySmall: GoogleFonts.fredoka(
+            fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white54),
+        labelLarge: GoogleFonts.fredoka(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: Colors.white70),
+        labelSmall: GoogleFonts.fredoka(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: Colors.white60),
+      );
 
   static CardThemeData _cardTheme() => CardThemeData(
-    elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusCard)),
-    color: Colors.white,
-    surfaceTintColor: Colors.transparent,
-  );
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusCard)),
+        color: Colors.white,
+        surfaceTintColor: Colors.transparent,
+      );
 
   static CardThemeData _cardThemeDark() => CardThemeData(
-    elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusCard)),
-    color: surfaceDark,
-    surfaceTintColor: Colors.transparent,
-  );
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusCard)),
+        color: surfaceDark,
+        surfaceTintColor: Colors.transparent,
+      );
 
-  static ElevatedButtonThemeData _elevatedButtonTheme() => ElevatedButtonThemeData(
-    style: ElevatedButton.styleFrom(
-      minimumSize: const Size(double.infinity, 56),
-      shape: const StadiumBorder(),
-      textStyle: GoogleFonts.fredoka(fontSize: 16, fontWeight: FontWeight.bold),
-    ),
-  );
+  static ElevatedButtonThemeData _elevatedButtonTheme() =>
+      ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(double.infinity, 56),
+          shape: const StadiumBorder(),
+          textStyle:
+              GoogleFonts.fredoka(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
 
   static NavigationBarThemeData _navigationBarTheme() => NavigationBarThemeData(
-    backgroundColor: Colors.white.withValues(alpha: 0.9),
-    indicatorColor: primary.withValues(alpha: 0.2),
-    indicatorShape: const StadiumBorder(),
-    labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) {
-        return GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w700, color: primary);
-      }
-      return GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B));
-    }),
-    elevation: 0,
-    shadowColor: Colors.transparent,
-  );
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        indicatorColor: primary.withValues(alpha: 0.2),
+        indicatorShape: const StadiumBorder(),
+        labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.fredoka(
+                fontSize: 12, fontWeight: FontWeight.w700, color: primary);
+          }
+          return GoogleFonts.fredoka(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF64748B));
+        }),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+      );
 
-  static NavigationBarThemeData _navigationBarThemeDark() => NavigationBarThemeData(
-    backgroundColor: surfaceDark.withValues(alpha: 0.95),
-    indicatorColor: primary.withValues(alpha: 0.2),
-    indicatorShape: const StadiumBorder(),
-    labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) {
-        return GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w700, color: primary);
-      }
-      return GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.45));
-    }),
-    elevation: 0,
-    shadowColor: Colors.transparent,
-  );
+  static NavigationBarThemeData _navigationBarThemeDark() =>
+      NavigationBarThemeData(
+        backgroundColor: surfaceDark.withValues(alpha: 0.95),
+        indicatorColor: primary.withValues(alpha: 0.2),
+        indicatorShape: const StadiumBorder(),
+        labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.fredoka(
+                fontSize: 12, fontWeight: FontWeight.w700, color: primary);
+          }
+          return GoogleFonts.fredoka(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.45));
+        }),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+      );
 
   static InputDecorationTheme _inputDecorationTheme() => InputDecorationTheme(
-    filled: true,
-    fillColor: Colors.white,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(radiusMD),
-      borderSide: const BorderSide(color: outline),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(radiusMD),
-      borderSide: BorderSide(color: outline.withValues(alpha: 0.5)),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(radiusMD),
-      borderSide: const BorderSide(color: primary, width: 2),
-    ),
-    labelStyle: GoogleFonts.fredoka(fontSize: 14, color: textPrimary.withValues(alpha: 0.6)),
-  );
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMD),
+          borderSide: const BorderSide(color: outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMD),
+          borderSide: BorderSide(color: outline.withValues(alpha: 0.5)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMD),
+          borderSide: const BorderSide(color: primary, width: 2),
+        ),
+        labelStyle: GoogleFonts.fredoka(
+            fontSize: 14, color: textPrimary.withValues(alpha: 0.6)),
+      );
 
-  static InputDecorationTheme _inputDecorationThemeDark() => InputDecorationTheme(
-    filled: true,
-    fillColor: surfaceDark,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(radiusMD),
-      borderSide: const BorderSide(color: Colors.white24),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(radiusMD),
-      borderSide: BorderSide(color: Colors.white24),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(radiusMD),
-      borderSide: BorderSide(color: primary.withValues(alpha: 0.8), width: 2),
-    ),
-    labelStyle: GoogleFonts.fredoka(fontSize: 14, color: Colors.white60),
-  );
+  static InputDecorationTheme _inputDecorationThemeDark() =>
+      InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceDark,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMD),
+          borderSide: const BorderSide(color: Colors.white24),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMD),
+          borderSide: BorderSide(color: Colors.white24),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMD),
+          borderSide:
+              BorderSide(color: primary.withValues(alpha: 0.8), width: 2),
+        ),
+        labelStyle: GoogleFonts.fredoka(fontSize: 14, color: Colors.white60),
+      );
 
-  static ProgressIndicatorThemeData _progressIndicatorTheme() => ProgressIndicatorThemeData(
-    linearMinHeight: 8,
-    borderRadius: BorderRadius.circular(10),
-  );
+  static ProgressIndicatorThemeData _progressIndicatorTheme() =>
+      ProgressIndicatorThemeData(
+        linearMinHeight: 8,
+        borderRadius: BorderRadius.circular(10),
+      );
 
   static BottomSheetThemeData _bottomSheetTheme() => const BottomSheetThemeData(
-    showDragHandle: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(radiusCard)),
-    ),
-  );
+        showDragHandle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(radiusCard)),
+        ),
+      );
 
   static BottomSheetThemeData _bottomSheetThemeDark() => BottomSheetThemeData(
-    showDragHandle: true,
-    backgroundColor: surfaceDark,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(radiusCard)),
-    ),
-  );
+        showDragHandle: true,
+        backgroundColor: surfaceDark,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(radiusCard)),
+        ),
+      );
 
   static AppBarTheme _appBarTheme() => AppBarTheme(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    scrolledUnderElevation: 0,
-    centerTitle: false,
-    titleTextStyle: GoogleFonts.fredoka(fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
-  );
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.fredoka(
+            fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
+      );
 
   static AppBarTheme _appBarThemeDark() => AppBarTheme(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    scrolledUnderElevation: 0,
-    centerTitle: false,
-    titleTextStyle: GoogleFonts.fredoka(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
-  );
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.fredoka(
+            fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+      );
 }

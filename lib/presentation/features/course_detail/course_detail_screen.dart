@@ -81,7 +81,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 value: 'edit',
                 child: Row(
                   children: [
-                    const Icon(Icons.edit_outlined, size: 20, color: Colors.white),
+                    const Icon(Icons.edit_outlined,
+                        size: 20, color: Colors.white),
                     const SizedBox(width: 12),
                     Text('Edit', style: TextStyle(color: Colors.white)),
                   ],
@@ -91,9 +92,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_outline, size: 20, color: AppTheme.warningRed),
+                    Icon(Icons.delete_outline,
+                        size: 20, color: AppTheme.warningRed),
                     const SizedBox(width: 12),
-                    Text('Delete', style: TextStyle(color: AppTheme.warningRed)),
+                    Text('Delete',
+                        style: TextStyle(color: AppTheme.warningRed)),
                   ],
                 ),
               ),
@@ -135,13 +138,27 @@ class _InfoTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _InfoCard(icon: Icons.person_outline, label: 'Professor', value: course.professor.isEmpty ? 'Not assigned' : course.professor),
+        _InfoCard(
+            icon: Icons.person_outline,
+            label: 'Professor',
+            value:
+                course.professor.isEmpty ? 'Not assigned' : course.professor),
         const SizedBox(height: 12),
-        _InfoCard(icon: Icons.schedule_outlined, label: 'Schedule', value: '${course.startTime} - ${course.endTime}'),
+        _InfoCard(
+            icon: Icons.schedule_outlined,
+            label: 'Schedule',
+            value: '${course.startTime} - ${course.endTime}'),
         const SizedBox(height: 12),
-        _InfoCard(icon: Icons.location_on_outlined, label: 'Room', value: course.room.isEmpty ? 'Not set' : course.room),
+        _InfoCard(
+            icon: Icons.location_on_outlined,
+            label: 'Room',
+            value: course.room.isEmpty ? 'Not set' : course.room),
         const SizedBox(height: 12),
-        _InfoCard(icon: Icons.menu_book_outlined, label: 'Credits', value: '${course.creditHours.toStringAsFixed(0)} ${course.creditHours == 1 ? 'Credit' : 'Credits'}'),
+        _InfoCard(
+            icon: Icons.menu_book_outlined,
+            label: 'Credits',
+            value:
+                '${course.creditHours.toStringAsFixed(0)} ${course.creditHours == 1 ? 'Credit' : 'Credits'}'),
         const SizedBox(height: 24),
         Text('Grade Progress', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
@@ -159,7 +176,8 @@ class _InfoTab extends ConsumerWidget {
     return Card(
       elevation: 0,
       color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -172,9 +190,12 @@ class _InfoTab extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: percentage >= 80 ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                    color: percentage >= 80
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -205,16 +226,21 @@ class _InfoTab extends ConsumerWidget {
   Widget _buildAttendanceQuickView(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final records = ref.watch(attendanceRecordsProvider);
-    final courseRecords = records.where((r) => r.courseId == course.id).toList();
-    final present = courseRecords.where((r) => r.status == AttendanceStatus.present).length;
-    final total = courseRecords.where((r) => r.status != AttendanceStatus.upcoming).length;
+    final courseRecords =
+        records.where((r) => r.courseId == course.id).toList();
+    final present =
+        courseRecords.where((r) => r.status == AttendanceStatus.present).length;
+    final total = courseRecords
+        .where((r) => r.status != AttendanceStatus.upcoming)
+        .length;
     final rate = total > 0 ? present / total * 100 : 0.0;
 
     if (total == 0) {
       return Card(
         elevation: 0,
         color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
         child: const Padding(
           padding: EdgeInsets.all(20),
           child: Center(child: Text('No attendance records yet')),
@@ -225,17 +251,21 @@ class _InfoTab extends ConsumerWidget {
     return Card(
       elevation: 0,
       color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStat(Icons.check_circle_outline, 'Present', '$present', Colors.green),
+            _buildStat(Icons.check_circle_outline, 'Present', '$present',
+                Colors.green),
             Container(width: 1, height: 40, color: cs.outlineVariant),
-            _buildStat(Icons.cancel_outlined, 'Absent', '${total - present}', AppTheme.warningRed),
+            _buildStat(Icons.cancel_outlined, 'Absent', '${total - present}',
+                AppTheme.warningRed),
             Container(width: 1, height: 40, color: cs.outlineVariant),
-            _buildStat(Icons.trending_up, 'Rate', '${rate.toStringAsFixed(0)}%', cs.primary),
+            _buildStat(Icons.trending_up, 'Rate', '${rate.toStringAsFixed(0)}%',
+                cs.primary),
           ],
         ),
       ),
@@ -247,8 +277,10 @@ class _InfoTab extends ConsumerWidget {
       children: [
         Icon(icon, color: color, size: 22),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: TextStyle(fontSize: 11, color: color.withOpacity(0.7))),
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label,
+            style: TextStyle(fontSize: 11, color: color.withOpacity(0.7))),
       ],
     );
   }
@@ -258,7 +290,8 @@ class _InfoCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _InfoCard({required this.icon, required this.label, required this.value});
+  const _InfoCard(
+      {required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +299,8 @@ class _InfoCard extends StatelessWidget {
     return Card(
       elevation: 0,
       color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -283,9 +317,12 @@ class _InfoCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+                Text(label,
+                    style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
                 const SizedBox(height: 2),
-                Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                Text(value,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 15)),
               ],
             ),
           ],
@@ -314,15 +351,28 @@ class _MaterialsTab extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerLow,
+                          color:
+                              Theme.of(context).colorScheme.surfaceContainerLow,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.folder_outlined, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        child: Icon(Icons.folder_outlined,
+                            size: 48,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 16),
-                      Text('No materials yet', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      Text('No materials yet',
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
                       const SizedBox(height: 4),
-                      Text('Tap + to add PDFs, images or links', style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      Text('Tap + to add PDFs, images or links',
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
                     ],
                   ),
                 )
@@ -334,7 +384,9 @@ class _MaterialsTab extends ConsumerWidget {
                     return _MaterialTile(
                       material: m,
                       onDelete: () {
-                        ref.read(materialRepositoryProvider).deleteMaterial(m.id);
+                        ref
+                            .read(materialRepositoryProvider)
+                            .deleteMaterial(m.id);
                         ref.read(dataRefreshProvider.notifier).state++;
                       },
                     );
@@ -386,7 +438,8 @@ class _MaterialTile extends StatelessWidget {
         return Icons.link;
       case 'file':
         final ext = material.content.split('.').last.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(ext)) return Icons.image_outlined;
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(ext))
+          return Icons.image_outlined;
         if (ext == 'pdf') return Icons.picture_as_pdf;
         return Icons.description_outlined;
       default:
@@ -405,14 +458,19 @@ class _MaterialTile extends StatelessWidget {
       case 'file':
         final file = File(material.content);
         if (file.existsSync()) {
-          launchUrl(Uri.file(material.content), mode: LaunchMode.externalApplication);
+          launchUrl(Uri.file(material.content),
+              mode: LaunchMode.externalApplication);
         } else {
           showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
               title: const Text('File Not Found'),
               content: const Text('File may have been moved.'),
-              actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))],
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('OK'))
+              ],
             ),
           );
         }
@@ -428,7 +486,8 @@ class _MaterialTile extends StatelessWidget {
       child: Card(
         elevation: 0,
         color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
         child: InkWell(
           onTap: () => _open(context),
           borderRadius: BorderRadius.circular(AppTheme.radiusMD),
@@ -449,11 +508,13 @@ class _MaterialTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(material.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Text(material.title,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 2),
                       Text(
                         _subtitle(material),
-                        style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                        style:
+                            TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -463,7 +524,8 @@ class _MaterialTile extends StatelessWidget {
                 if (onDelete != null)
                   IconButton(
                     onPressed: onDelete,
-                    icon: Icon(Icons.delete_outline, size: 18, color: AppTheme.warningRed.withOpacity(0.6)),
+                    icon: Icon(Icons.delete_outline,
+                        size: 18, color: AppTheme.warningRed.withOpacity(0.6)),
                   ),
                 if (material.type == 'link' || material.type == 'file')
                   Icon(Icons.open_in_new, size: 16, color: cs.onSurfaceVariant),
@@ -503,7 +565,21 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'],
+      allowedExtensions: [
+        'pdf',
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'webp',
+        'doc',
+        'docx',
+        'ppt',
+        'pptx',
+        'xls',
+        'xlsx',
+        'txt'
+      ],
     );
     if (result == null || result.files.isEmpty) return;
 
@@ -528,21 +604,34 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
-        left: 24, right: 24, top: 16,
+        left: 24,
+        right: 24,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: Icon(Icons.horizontal_rule, color: cs.onSurfaceVariant, size: 32)),
-          Center(child: Text('Add Material', style: Theme.of(context).textTheme.titleLarge)),
+          Center(
+              child: Icon(Icons.horizontal_rule,
+                  color: cs.onSurfaceVariant, size: 32)),
+          Center(
+              child: Text('Add Material',
+                  style: Theme.of(context).textTheme.titleLarge)),
           const SizedBox(height: 20),
           SegmentedButton<String>(
             segments: const [
-              ButtonSegment(value: 'link', label: Text('Link'), icon: Icon(Icons.link)),
-              ButtonSegment(value: 'note', label: Text('Note'), icon: Icon(Icons.note_outlined)),
-              ButtonSegment(value: 'file', label: Text('File'), icon: Icon(Icons.attach_file)),
+              ButtonSegment(
+                  value: 'link', label: Text('Link'), icon: Icon(Icons.link)),
+              ButtonSegment(
+                  value: 'note',
+                  label: Text('Note'),
+                  icon: Icon(Icons.note_outlined)),
+              ButtonSegment(
+                  value: 'file',
+                  label: Text('File'),
+                  icon: Icon(Icons.attach_file)),
             ],
             selected: {_type},
             onSelectionChanged: (v) => setState(() => _type = v.first),
@@ -648,11 +737,16 @@ class _NotesTab extends ConsumerWidget {
       children: [
         Expanded(
           child: notes.isEmpty
-              ? Center(child: Text('No notes yet', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)))
+              ? Center(
+                  child: Text('No notes yet',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)))
               : ListView.builder(
                   padding: const EdgeInsets.all(20),
                   itemCount: notes.length,
-                  itemBuilder: (context, index) => _NoteTile(note: notes[index]),
+                  itemBuilder: (context, index) =>
+                      _NoteTile(note: notes[index]),
                 ),
         ),
         Padding(
@@ -688,7 +782,8 @@ class _NoteTile extends StatelessWidget {
       child: Card(
         elevation: 0,
         color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -700,22 +795,27 @@ class _NoteTile extends StatelessWidget {
                   color: AppTheme.tertiary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.article_outlined, color: Colors.orange, size: 20),
+                child: const Icon(Icons.article_outlined,
+                    color: Colors.orange, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(note.title,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
                     if (note.content.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(note.content, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+                      Text(note.content,
+                          style: TextStyle(
+                              fontSize: 13, color: cs.onSurfaceVariant)),
                     ],
                     const SizedBox(height: 6),
                     Text(
                       DateFormat('MMM dd, yyyy').format(note.dueDate),
-                      style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                      style:
+                          TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -752,15 +852,21 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
-        left: 24, right: 24, top: 16,
+        left: 24,
+        right: 24,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: Icon(Icons.horizontal_rule, color: cs.onSurfaceVariant, size: 32)),
-          Center(child: Text('Add Note', style: Theme.of(context).textTheme.titleLarge)),
+          Center(
+              child: Icon(Icons.horizontal_rule,
+                  color: cs.onSurfaceVariant, size: 32)),
+          Center(
+              child: Text('Add Note',
+                  style: Theme.of(context).textTheme.titleLarge)),
           const SizedBox(height: 20),
           TextField(
             controller: _titleController,
@@ -769,7 +875,8 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
           const SizedBox(height: 16),
           TextField(
             controller: _contentController,
-            decoration: const InputDecoration(labelText: 'Write your note...', filled: true),
+            decoration: const InputDecoration(
+                labelText: 'Write your note...', filled: true),
             maxLines: 4,
           ),
           const SizedBox(height: 24),
@@ -810,11 +917,16 @@ class _TasksTab extends ConsumerWidget {
       children: [
         Expanded(
           child: tasks.isEmpty
-              ? Center(child: Text('No tasks yet', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)))
+              ? Center(
+                  child: Text('No tasks yet',
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)))
               : ListView.builder(
                   padding: const EdgeInsets.all(20),
                   itemCount: tasks.length,
-                  itemBuilder: (context, index) => _TaskTile(task: tasks[index]),
+                  itemBuilder: (context, index) =>
+                      _TaskTile(task: tasks[index]),
                 ),
         ),
         Padding(
@@ -850,7 +962,8 @@ class _TaskTile extends ConsumerWidget {
       child: Card(
         elevation: 0,
         color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -888,8 +1001,12 @@ class _TaskTile extends ConsumerWidget {
                       task.title,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                        color: task.isCompleted ? cs.onSurfaceVariant : cs.onSurface,
+                        decoration: task.isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
+                        color: task.isCompleted
+                            ? cs.onSurfaceVariant
+                            : cs.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -897,7 +1014,9 @@ class _TaskTile extends ConsumerWidget {
                       DateFormat('MMM dd, hh:mm a').format(task.dueDate),
                       style: TextStyle(
                         fontSize: 12,
-                        color: task.urgency == TaskUrgency.urgent ? AppTheme.warningRed : cs.onSurfaceVariant,
+                        color: task.urgency == TaskUrgency.urgent
+                            ? AppTheme.warningRed
+                            : cs.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -905,14 +1024,18 @@ class _TaskTile extends ConsumerWidget {
               ),
               if (task.urgency == TaskUrgency.urgent)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppTheme.warningRed.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
                     'URGENT',
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.warningRed),
+                    style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.warningRed),
                   ),
                 ),
             ],
@@ -947,15 +1070,21 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
-        left: 24, right: 24, top: 16,
+        left: 24,
+        right: 24,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: Icon(Icons.horizontal_rule, color: cs.onSurfaceVariant, size: 32)),
-          Center(child: Text('Add Task', style: Theme.of(context).textTheme.titleLarge)),
+          Center(
+              child: Icon(Icons.horizontal_rule,
+                  color: cs.onSurfaceVariant, size: 32)),
+          Center(
+              child: Text('Add Task',
+                  style: Theme.of(context).textTheme.titleLarge)),
           const SizedBox(height: 20),
           TextField(
             controller: _titleController,
@@ -981,12 +1110,16 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
                   icon: Icon(
                     Icons.flag,
                     size: 18,
-                    color: _urgency == TaskUrgency.urgent ? AppTheme.warningRed : null,
+                    color: _urgency == TaskUrgency.urgent
+                        ? AppTheme.warningRed
+                        : null,
                   ),
                   label: Text(
                     _urgency == TaskUrgency.urgent ? 'Urgent' : 'Normal',
                     style: TextStyle(
-                      color: _urgency == TaskUrgency.urgent ? AppTheme.warningRed : null,
+                      color: _urgency == TaskUrgency.urgent
+                          ? AppTheme.warningRed
+                          : null,
                     ),
                   ),
                 ),
@@ -1018,7 +1151,9 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
 
   void _toggleUrgency() {
     setState(() {
-      _urgency = _urgency == TaskUrgency.urgent ? TaskUrgency.normal : TaskUrgency.urgent;
+      _urgency = _urgency == TaskUrgency.urgent
+          ? TaskUrgency.normal
+          : TaskUrgency.urgent;
     });
   }
 

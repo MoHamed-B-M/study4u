@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:m3e_buttons/m3e_buttons.dart';
+import 'package:icon_button_m3e/icon_button_m3e.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_card.dart';
 import 'circular_progress_ring.dart';
@@ -22,7 +24,8 @@ class StudyBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final maxVal = data.fold<double>(0, (max, d) => d.value > max ? d.value : max);
+    final maxVal =
+        data.fold<double>(0, (max, d) => d.value > max ? d.value : max);
     final effectiveMax = maxVal > 0 ? maxVal : yMax;
 
     return Column(
@@ -92,10 +95,10 @@ class StudyBarChart extends StatelessWidget {
   }
 
   static TextStyle _axisStyle(ColorScheme cs) => TextStyle(
-    fontSize: 9,
-    fontWeight: FontWeight.w500,
-    color: cs.onSurfaceVariant,
-  );
+        fontSize: 9,
+        fontWeight: FontWeight.w500,
+        color: cs.onSurfaceVariant,
+      );
 }
 
 class BarChartData {
@@ -316,7 +319,7 @@ class PomodoroCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: FilledButton.icon(
+                child: M3EFilledButton.icon(
                   onPressed: onStartPause,
                   icon: Icon(isActive ? Icons.pause : Icons.play_arrow),
                   label: Text(isActive ? 'Pause' : 'Start Focus'),
@@ -324,12 +327,10 @@ class PomodoroCard extends StatelessWidget {
               ),
               if (onReset != null) ...[
                 const SizedBox(width: 12),
-                IconButton(
+                IconButtonM3E(
                   onPressed: onReset,
                   icon: const Icon(Icons.refresh_rounded),
-                  style: IconButton.styleFrom(
-                    backgroundColor: cs.surfaceContainerHighest,
-                  ),
+                  variant: IconButtonM3EVariant.filled,
                 ),
               ],
             ],

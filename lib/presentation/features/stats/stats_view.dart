@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show LinearProgressIndicator;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toolbar_m3e/toolbar_m3e.dart';
 import '../../../../core/utils/grade_calculator.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../shared/providers/pomodoro_provider.dart';
@@ -43,123 +44,89 @@ class _StatsViewState extends ConsumerState<StatsView>
     final courses = ref.watch(courseListProvider);
     final pomodoro = ref.watch(pomodoroProvider);
 
-    return CupertinoPageScaffold(
-      backgroundColor: context.background,
-      child: Stack(
+    return Scaffold(
+      appBar: ToolbarM3E(
+        titleText: 'Statistics',
+        subtitleText: 'STUDY4U',
+        variant: ToolbarM3EVariant.surface,
+        size: ToolbarM3ESize.large,
+      ),
+      body: Stack(
         children: [
           const BlobBackground(),
-          SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      DesignTokens.spacingLG,
-                      DesignTokens.spacingMD,
-                      DesignTokens.spacingLG,
-                      0,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'STUDY4U',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: context.textTertiary,
-                            letterSpacing: 1.5,
-                          ),
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: const SizedBox(height: 24)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DesignTokens.spacingLG,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FadeTransition(
+                        opacity: _fadeController.drive(
+                          CurveTween(
+                              curve: const Interval(0.0, 0.4,
+                                  curve: Curves.easeOut)),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Statistics',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: context.textPrimary,
-                          ),
+                        child: AttendanceCard(
+                          attendanceRate: analytics.percentage,
+                          grade: cgpa.letterGrade,
+                          gradePercentage: cgpa.percentage,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 24),
+                      FadeTransition(
+                        opacity: _fadeController.drive(
+                          CurveTween(
+                              curve: const Interval(0.2, 0.6,
+                                  curve: Curves.easeOut)),
+                        ),
+                        child: _buildCgpaBreakdown(context, courses),
+                      ),
+                      const SizedBox(height: 24),
+                      FadeTransition(
+                        opacity: _fadeController.drive(
+                          CurveTween(
+                              curve: const Interval(0.4, 0.8,
+                                  curve: Curves.easeOut)),
+                        ),
+                        child: PomodoroCard(
+                          timerDisplay: pomodoro.timerString,
+                          isActive: pomodoro.isActive,
+                          completedSessions: pomodoro.completedSessions,
+                          onStartPause: () {
+                            HapticFeedback.mediumImpact();
+                            if (pomodoro.isActive) {
+                              ref.read(pomodoroProvider.notifier).pauseTimer();
+                            } else {
+                              ref.read(pomodoroProvider.notifier).startTimer();
+                            }
+                          },
+                          onReset: () {
+                            HapticFeedback.lightImpact();
+                            ref.read(pomodoroProvider.notifier).resetTimer();
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      FadeTransition(
+                        opacity: _fadeController.drive(
+                          CurveTween(
+                              curve: const Interval(0.6, 1.0,
+                                  curve: Curves.easeOut)),
+                        ),
+                        child: _buildSubjectPerformance(context, courses),
+                      ),
+                      const SizedBox(height: 100),
+                    ],
                   ),
                 ),
-                SliverToBoxAdapter(child: const SizedBox(height: 24)),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: DesignTokens.spacingLG,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FadeTransition(
-                          opacity: _fadeController.drive(
-                            CurveTween(
-                                curve: const Interval(0.0, 0.4,
-                                    curve: Curves.easeOut)),
-                          ),
-                          child: AttendanceCard(
-                            attendanceRate: analytics.percentage,
-                            grade: cgpa.letterGrade,
-                            gradePercentage: cgpa.percentage,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        FadeTransition(
-                          opacity: _fadeController.drive(
-                            CurveTween(
-                                curve: const Interval(0.2, 0.6,
-                                    curve: Curves.easeOut)),
-                          ),
-                          child: _buildCgpaBreakdown(context, courses),
-                        ),
-                        const SizedBox(height: 24),
-                        FadeTransition(
-                          opacity: _fadeController.drive(
-                            CurveTween(
-                                curve: const Interval(0.4, 0.8,
-                                    curve: Curves.easeOut)),
-                          ),
-                          child: PomodoroCard(
-                            timerDisplay: pomodoro.timerString,
-                            isActive: pomodoro.isActive,
-                            completedSessions: pomodoro.completedSessions,
-                            onStartPause: () {
-                              HapticFeedback.mediumImpact();
-                              if (pomodoro.isActive) {
-                                ref
-                                    .read(pomodoroProvider.notifier)
-                                    .pauseTimer();
-                              } else {
-                                ref
-                                    .read(pomodoroProvider.notifier)
-                                    .startTimer();
-                              }
-                            },
-                            onReset: () {
-                              HapticFeedback.lightImpact();
-                              ref.read(pomodoroProvider.notifier).resetTimer();
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        FadeTransition(
-                          opacity: _fadeController.drive(
-                            CurveTween(
-                                curve: const Interval(0.6, 1.0,
-                                    curve: Curves.easeOut)),
-                          ),
-                          child: _buildSubjectPerformance(context, courses),
-                        ),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
