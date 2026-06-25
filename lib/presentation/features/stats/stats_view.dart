@@ -49,6 +49,7 @@ class _StatsViewState extends ConsumerState<StatsView>
         top: true,
         child: Column(
           children: [
+            const SizedBox(height: 8),
             ToolbarM3E(
               titleText: 'Statistics',
               subtitleText: 'STUDY4U',
@@ -106,8 +107,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                                 child: PomodoroCard(
                                   timerDisplay: pomodoro.timerString,
                                   isActive: pomodoro.isActive,
-                                  completedSessions:
-                                      pomodoro.completedSessions,
+                                  completedSessions: pomodoro.completedSessions,
                                   onStartPause: () {
                                     HapticFeedback.mediumImpact();
                                     if (pomodoro.isActive) {

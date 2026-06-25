@@ -49,6 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         top: true,
         child: Column(
           children: [
+            const SizedBox(height: 8),
             ToolbarM3E(
               titleText: greeting,
               subtitleText: 'You have $pendingCount pending tasks.',
@@ -575,8 +576,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -750,11 +751,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildFAB(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: ExtendedFabM3E(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: FabM3E(
         icon: const Icon(Icons.add),
-        label: const Text('Add Course'),
         onPressed: () {
           HapticFeedback.lightImpact();
           showModalBottomSheet(
@@ -768,7 +768,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             builder: (_) => const AddCourseSheet(),
           );
         },
-        shapeFamily: FabM3EShapeFamily.square,
+        size: FabM3ESize.small,
+        shapeFamily: FabM3EShapeFamily.round,
+        tooltip: 'Add Course',
       ),
     );
   }

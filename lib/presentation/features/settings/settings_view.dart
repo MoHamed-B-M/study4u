@@ -37,6 +37,7 @@ class SettingsView extends ConsumerWidget {
         top: true,
         child: Column(
           children: [
+            const SizedBox(height: 8),
             ToolbarM3E(
               titleText: 'Settings',
               subtitleText: 'STUDY4U',
