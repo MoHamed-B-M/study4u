@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:m3e_design/m3e_design.dart';
+import 'm3_color_scheme_generator.dart';
 
 class AppTheme {
   AppTheme._();
@@ -27,12 +28,7 @@ class AppTheme {
   static const double standardPadding = 24.0;
 
   static ThemeData lightTheme(Color seed) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seed,
-      brightness: Brightness.light,
-      surface: surface,
-      error: error,
-    );
+    final scheme = M3ColorSchemeGenerator.generateLight(seed);
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -59,12 +55,7 @@ class AppTheme {
   }
 
   static ThemeData darkTheme(Color seed) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seed,
-      brightness: Brightness.dark,
-      surface: surfaceDark,
-      error: warningRed,
-    );
+    final scheme = M3ColorSchemeGenerator.generateDark(seed);
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,

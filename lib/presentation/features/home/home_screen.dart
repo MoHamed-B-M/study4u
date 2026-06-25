@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:animations/animations.dart';
 import 'package:toolbar_m3e/toolbar_m3e.dart';
-import 'package:m3e_buttons/m3e_buttons.dart';
 import 'package:fab_m3e/fab_m3e.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../domain/entities/course.dart';
@@ -46,60 +45,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: ToolbarM3E(
-        titleText: greeting,
-        subtitleText: 'You have $pendingCount pending tasks.',
-        variant: ToolbarM3EVariant.surface,
-        size: ToolbarM3ESize.large,
-        actions: [
-          ToolbarActionM3E(
-            icon: Icons.settings_outlined,
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              context.push('/settings');
-            },
-          ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 320,
-              child: PageView(
-                controller: _pageController,
-                physics: const BouncingScrollPhysics(),
-                onPageChanged: (index) => setState(() => _currentPage = index),
-                children: [
-                  _buildUpNextPage(context, upNext, courses, ref),
-                  _buildTasksPage(context, ref, tasks),
-                  _buildQuickStatsPage(context),
+      body: SafeArea(
+        top: true,
+        child: Column(
+          children: [
+            ToolbarM3E(
+              titleText: greeting,
+              subtitleText: 'You have $pendingCount pending tasks.',
+              variant: ToolbarM3EVariant.surface,
+              size: ToolbarM3ESize.large,
+              safeArea: false,
+              actions: [
+                ToolbarActionM3E(
+                  icon: Icons.settings_outlined,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    context.push('/settings');
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 320,
+                      child: PageView(
+                        controller: _pageController,
+                        physics: const BouncingScrollPhysics(),
+                        onPageChanged: (index) =>
+                            setState(() => _currentPage = index),
+                        children: [
+                          _buildUpNextPage(context, upNext, courses, ref),
+                          _buildTasksPage(context, ref, tasks),
+                          _buildQuickStatsPage(context),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildPageIndicator(isDark),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.04,
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          _buildSectionHeader(
+                              context, 'Current Courses', 'View all'),
+                          const SizedBox(height: 16),
+                          _buildCoursesList(context, courses, ref),
+                          const SizedBox(height: 120),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: _buildPageIndicator(isDark),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.04,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  _buildSectionHeader(context, 'Current Courses', 'View all'),
-                  const SizedBox(height: 16),
-                  _buildCoursesList(context, courses, ref),
-                  const SizedBox(height: 120),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: _buildFAB(context),
     );
@@ -528,97 +539,94 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final upNextKey = GlobalKey();
     return RepaintBoundary(
       key: upNextKey,
-      child: M3EButton(
-        onPressed: () {
-          HapticFeedback.lightImpact();
-          final renderBox =
-              upNextKey.currentContext?.findRenderObject() as RenderBox?;
-          if (renderBox != null && renderBox.hasSize) {
-            final position = renderBox.localToGlobal(Offset.zero);
-            final rect = Rect.fromLTWH(
-              position.dx,
-              position.dy,
-              renderBox.size.width,
-              renderBox.size.height,
-            );
-            final scaleNotifier = PageScaleProvider.of(context);
-            Navigator.of(context).push(QuoteExpansionRoute(
-              sourceRect: rect,
-              sourceColor: AppTheme.mintGreenLight,
-              pageScaleNotifier: scaleNotifier,
-            ));
-          }
-        },
-        style: M3EButtonStyle.elevated,
-        size: M3EButtonSize.md,
-        decoration: M3EButtonDecoration(
-          backgroundColor:
-              const WidgetStatePropertyAll<Color?>(AppTheme.mintGreenLight),
-          elevation: const WidgetStatePropertyAll<double?>(0.0),
-          shadowColor: WidgetStatePropertyAll<Color?>(
-            AppTheme.mintGreenLight.withValues(alpha: 0.3),
-          ),
-          padding: const EdgeInsets.all(24),
-          borderRadius: AppTheme.radiusCard,
-          pressedRadius: 14,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Material(
+        color: AppTheme.mintGreenLight,
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        elevation: 0,
+        shadowColor: AppTheme.mintGreenLight.withValues(alpha: 0.3),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            final renderBox =
+                upNextKey.currentContext?.findRenderObject() as RenderBox?;
+            if (renderBox != null && renderBox.hasSize) {
+              final position = renderBox.localToGlobal(Offset.zero);
+              final rect = Rect.fromLTWH(
+                position.dx,
+                position.dy,
+                renderBox.size.width,
+                renderBox.size.height,
+              );
+              final scaleNotifier = PageScaleProvider.of(context);
+              Navigator.of(context).push(QuoteExpansionRoute(
+                sourceRect: rect,
+                sourceColor: AppTheme.mintGreenLight,
+                pageScaleNotifier: scaleNotifier,
+              ));
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'UP NEXT',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                      letterSpacing: 1,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'UP NEXT',
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          letterSpacing: 1,
+                        ),
+                      ),
                     ),
-                  ),
+                    Icon(Icons.bolt, color: Colors.black87, size: 22),
+                  ],
                 ),
-                Icon(Icons.bolt, color: Colors.black87, size: 22),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              course.name,
-              style: GoogleFonts.outfit(
-                color: Colors.black87,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${course.code} \u2022 ${course.room}',
-              style: const TextStyle(color: Colors.black54, fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(Icons.access_time_rounded,
-                    color: Colors.black87, size: 18),
-                const SizedBox(width: 8),
+                const SizedBox(height: 16),
                 Text(
-                  '${course.startTime} - ${course.endTime}',
-                  style: const TextStyle(
+                  course.name,
+                  style: GoogleFonts.outfit(
                     color: Colors.black87,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
                   ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${course.code} \u2022 ${course.room}',
+                  style: const TextStyle(color: Colors.black54, fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.access_time_rounded,
+                        color: Colors.black87, size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${course.startTime} - ${course.endTime}',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
