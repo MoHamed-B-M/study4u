@@ -35,6 +35,7 @@ dependencies:
   navigation_bar_m3e: ^0.1.1
   expressive_loading_indicator: ^0.0.1
   button_group_m3e: ^0.3.1
+  m3e_card_list: ^0.1.0
   material_color_utilities: ^0.13.0
 
   # Data & Persistence
