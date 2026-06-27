@@ -736,101 +736,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showAddOptions(BuildContext context) {
-    HapticFeedback.lightImpact();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppTheme.surfaceDark,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.book, color: AppTheme.primary),
-              ),
-              title: const Text('Add Course',
-                  style: TextStyle(color: Colors.white)),
-              subtitle: Text('Create a new course',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.pop(ctx);
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: AppTheme.surfaceDark,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(AppTheme.radiusCard)),
-                  ),
-                  builder: (_) => const AddCourseSheet(),
-                );
-              },
-            ),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFA18CFF).withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.task_alt, color: Color(0xFFA18CFF)),
-              ),
-              title:
-                  const Text('Add Task', style: TextStyle(color: Colors.white)),
-              subtitle: Text('Create a new task',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.pop(ctx);
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: AppTheme.surfaceDark,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(AppTheme.radiusCard)),
-                  ),
-                  builder: (_) => const AddTaskSheet(),
-                );
-              },
-            ),
-          ],
+  Widget _buildFAB(BuildContext context) {
+    return FabMenuM3E(
+      alignment: Alignment.bottomRight,
+      direction: FabMenuDirection.up,
+      popOnItemTap: true,
+      primaryFab: Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: FabM3E(
+          icon: const Icon(Icons.add),
+          size: FabM3ESize.small,
+          shapeFamily: FabM3EShapeFamily.round,
+          tooltip: 'Add',
         ),
       ),
-    );
-  }
-
-  Widget _buildFAB(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: FabM3E(
-        icon: const Icon(Icons.add),
-        onPressed: () => _showAddOptions(context),
-        size: FabM3ESize.small,
-        shapeFamily: FabM3EShapeFamily.round,
-        tooltip: 'Add',
-      ),
+      items: [
+        FabMenuItem(
+          icon: const Icon(Icons.book),
+          label: const Text('Add Course'),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: AppTheme.surfaceDark,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(AppTheme.radiusCard)),
+              ),
+              builder: (_) => const AddCourseSheet(),
+            );
+          },
+        ),
+        FabMenuItem(
+          icon: const Icon(Icons.task_alt),
+          label: const Text('Add Task'),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: AppTheme.surfaceDark,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(AppTheme.radiusCard)),
+              ),
+              builder: (_) => const AddTaskSheet(),
+            );
+          },
+        ),
+      ],
     );
   }
 }
