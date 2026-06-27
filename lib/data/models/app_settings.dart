@@ -20,6 +20,8 @@ class AppSettings extends HiveObject {
   final bool useFloatingNavBar;
   @HiveField(7)
   final bool hapticFeedback;
+  @HiveField(8)
+  final bool showNavLabels;
 
   AppSettings({
     this.id = 'default',
@@ -30,5 +32,6 @@ class AppSettings extends HiveObject {
     this.onboardingComplete = false,
     this.useFloatingNavBar = false,
     this.hapticFeedback = true,
+    this.showNavLabels = true,
   });
 }

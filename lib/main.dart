@@ -222,6 +222,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final showLabels = ref.watch(showNavLabelsProvider);
+    final isSettings = GoRouterState.of(context).matchedLocation == '/settings';
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
@@ -241,30 +243,40 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           child: widget.child,
         ),
       ),
-      bottomNavigationBar: NavigationBarM3E(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          HapticFeedback.lightImpact();
-          setState(() => _currentIndex = index);
-          if (index == 0) context.go('/');
-          if (index == 1) context.go('/tracker');
-          if (index == 2) context.go('/stats');
-        },
-        destinations: const [
-          NavigationDestinationM3E(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Home'),
-          NavigationDestinationM3E(
-              icon: Icon(Icons.calendar_today_outlined),
-              selectedIcon: Icon(Icons.calendar_today),
-              label: 'Tracker'),
-          NavigationDestinationM3E(
-              icon: Icon(Icons.analytics_outlined),
-              selectedIcon: Icon(Icons.analytics),
-              label: 'Stats'),
-        ],
-      ),
+      bottomNavigationBar: isSettings
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: NavigationBarM3E(
+                selectedIndex: _currentIndex,
+                onDestinationSelected: (index) {
+                  HapticFeedback.lightImpact();
+                  setState(() => _currentIndex = index);
+                  if (index == 0) context.go('/');
+                  if (index == 1) context.go('/tracker');
+                  if (index == 2) context.go('/stats');
+                },
+                labelBehavior: showLabels
+                    ? NavBarM3ELabelBehavior.alwaysShow
+                    : NavBarM3ELabelBehavior.alwaysHide,
+                size: NavBarM3ESize.small,
+                elevation: 4,
+                destinations: const [
+                  NavigationDestinationM3E(
+                      icon: Icon(Icons.home_outlined),
+                      selectedIcon: Icon(Icons.home),
+                      label: 'Home'),
+                  NavigationDestinationM3E(
+                      icon: Icon(Icons.calendar_today_outlined),
+                      selectedIcon: Icon(Icons.calendar_today),
+                      label: 'Tracker'),
+                  NavigationDestinationM3E(
+                      icon: Icon(Icons.analytics_outlined),
+                      selectedIcon: Icon(Icons.analytics),
+                      label: 'Stats'),
+                ],
+              ),
+            ),
     );
   }
 }

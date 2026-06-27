@@ -6,7 +6,8 @@ import '../../data/repositories/settings_repo_impl.dart';
 
 final settingsRepositoryProvider = Provider((ref) => SettingsRepositoryImpl());
 
-final settingsProvider = StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
+final settingsProvider =
+    StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
   return SettingsNotifier();
 });
 
@@ -45,6 +46,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? onboardingComplete,
     bool? useFloatingNavBar,
     bool? hapticFeedback,
+    bool? showNavLabels,
   }) {
     return AppSettings(
       id: state.id,
@@ -55,6 +57,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       onboardingComplete: onboardingComplete ?? state.onboardingComplete,
       useFloatingNavBar: useFloatingNavBar ?? state.useFloatingNavBar,
       hapticFeedback: hapticFeedback ?? state.hapticFeedback,
+      showNavLabels: showNavLabels ?? state.showNavLabels,
     );
   }
 
@@ -67,15 +70,22 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   void setThemeMode(String mode) => _saveAndUpdate(_copy(themeMode: mode));
 
-  void setPrimaryColor(int value) => _saveAndUpdate(_copy(primaryColorValue: value));
+  void setPrimaryColor(int value) =>
+      _saveAndUpdate(_copy(primaryColorValue: value));
 
-  void setNotificationEnabled(bool enabled) => _saveAndUpdate(_copy(notificationEnabled: enabled));
+  void setNotificationEnabled(bool enabled) =>
+      _saveAndUpdate(_copy(notificationEnabled: enabled));
 
   void setUserName(String name) => _saveAndUpdate(_copy(userName: name));
 
-  void setOnboardingComplete(bool value) => _saveAndUpdate(_copy(onboardingComplete: value));
-  void setUseFloatingNavBar(bool value) => _saveAndUpdate(_copy(useFloatingNavBar: value));
-  void setHapticFeedback(bool value) => _saveAndUpdate(_copy(hapticFeedback: value));
+  void setOnboardingComplete(bool value) =>
+      _saveAndUpdate(_copy(onboardingComplete: value));
+  void setUseFloatingNavBar(bool value) =>
+      _saveAndUpdate(_copy(useFloatingNavBar: value));
+  void setHapticFeedback(bool value) =>
+      _saveAndUpdate(_copy(hapticFeedback: value));
+  void setShowNavLabels(bool value) =>
+      _saveAndUpdate(_copy(showNavLabels: value));
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {
@@ -84,4 +94,8 @@ final useFloatingNavBarProvider = Provider<bool>((ref) {
 
 final useHapticFeedbackProvider = Provider<bool>((ref) {
   return ref.watch(settingsProvider.select((s) => s.hapticFeedback));
+});
+
+final showNavLabelsProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider.select((s) => s.showNavLabels));
 });
