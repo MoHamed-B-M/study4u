@@ -4,6 +4,47 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
+## [1.3.0] - 2026-06-27
+
+### Added
+- Dynamic color support via `DynamicColorBuilder` (Android 12+), falls back to seed color from settings — `e48a4d0` by **Hamma**
+- `FabMenuM3E` for Add Course / Add Task actions, replaces old bottom sheet picker — `86c48dd` by **Hamma**
+- `m3e_card_list` integration: stats cards now use `M3ECard` widget — `d9cc8f1` by **Hamma**
+- Optional nav bar labels with floating compact `NavigationBarM3E` — `3e61894` by **Hamma**
+- `ButtonGroupM3E` bottom sheet for add options — `d7dcf6c` by **Hamma**
+- M3E widgets and custom shapes for stats view hero grid — `5a98173` by **Hamma**
+- ToolbarM3E headers replaced with `AppBarM3E` on stats, home, and settings — `d7dcf6c` by **Hamma**
+- Settings page redesigned with `M3ECardList` expressive cards — `0f724ec` by **Hamma**
+
+### Changed
+- Theme system refactored to M3E Expressive design (`m3e_design`), `AppTheme.lightTheme` / `darkTheme` now accept `ColorScheme` directly — `52b1a9f`, `e48a4d0` by **Hamma**
+- Nav bar hiding on settings: passes `currentLocation` from `ShellRoute.builder` instead of `GoRouterState.of(context)` to fix scope resolution — `e48a4d0` by **Hamma**
+
+### Fixed
+- Broken temp files removed, `build_runner` re-run for Hive `.g.dart` adapters — `60529c5` by **Hamma**
+- Compact `ButtonGroupM3E` bottom sheet layout, `BlobBackground` removed — `af487e9` by **Hamma**
+- Top spacing added to `ToolbarM3E` headers below status bar — `18cfe42` by **Hamma**
+
+### Removed
+- `BlobBackground` widget — `af487e9` by **Hamma**
+- `material_new_shapes` dependency — `d9cc8f1` by **Hamma**
+- `M3ColorSchemeGenerator` import from `app_theme.dart` — `e48a4d0` by **Hamma**
+- Old FAB bottom sheet picker (`_showAddOptions`) — `86c48dd` by **Hamma**
+
+### Dependencies
+- Added `dynamic_color: ^1.7.0` — `e48a4d0` by **Hamma**
+- Added `m3e_design: ^0.2.1` — `52b1a9f` by **Hamma**
+- Added `m3e_card_list: ^0.1.0` — `d9cc8f1` by **Hamma**
+- Added `fab_m3e: ^0.1.1` — `86c48dd` by **Hamma**
+- Added `app_bar_m3e: ^0.1.2` — `3e61894` by **Hamma**
+- Added `navigation_bar_m3e: ^0.1.1` — `3e61894` by **Hamma**
+- Added `button_group_m3e: ^0.3.1` — `d7dcf6c` by **Hamma**
+- Added `toolbar_m3e: ^0.1.1` — `d7dcf6c` by **Hamma**
+- Added `expressive_loading_indicator: ^0.0.1` — `d7dcf6c` by **Hamma**
+- Added `icon_button_m3e: ^0.2.1` — `d7dcf6c` by **Hamma**
+
+---
+
 ## [1.2.1] - 2026-06-22
 
 ### Added
