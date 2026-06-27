@@ -12,7 +12,6 @@ import '../../../../core/services/update_service.dart';
 import '../../../../data/models/app_settings.dart';
 import '../../theme/theme_provider.dart';
 import '../../theme/design_tokens.dart';
-import '../../widgets/dashboard_card.dart';
 import '../../widgets/update_dialog.dart';
 
 class SettingsView extends ConsumerWidget {
@@ -47,160 +46,152 @@ class SettingsView extends ConsumerWidget {
               safeArea: false,
             ),
             Expanded(
-              child: Stack(
-                children: [
-                  const BlobBackground(),
-                  CustomScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(child: const SizedBox(height: 24)),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: DesignTokens.spacingLG,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(child: const SizedBox(height: 24)),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: DesignTokens.spacingLG,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionHeader(context, 'APPEARANCE'),
+                          M3ECardList.of(
+                            haptic: M3EHapticFeedback.medium,
+                            splashColor: DesignTokens.primaryLavender
+                                .withValues(alpha: 0.3),
+                            highlightColor: DesignTokens.primaryLavender
+                                .withValues(alpha: 0.15),
                             children: [
-                              _buildSectionHeader(context, 'APPEARANCE'),
-                              M3ECardList.of(
-                                haptic: M3EHapticFeedback.medium,
-                                splashColor: DesignTokens.primaryLavender
-                                    .withValues(alpha: 0.3),
-                                highlightColor: DesignTokens.primaryLavender
-                                    .withValues(alpha: 0.15),
-                                children: [
-                                  _buildSettingRow(
-                                    context,
-                                    icon: CupertinoIcons.circle_lefthalf_fill,
-                                    iconColor: DesignTokens.primaryLavender,
-                                    title: 'Appearance',
-                                    subtitle: _themeLabel(settings.themeMode),
-                                    onTap: () =>
-                                        _showThemeSheet(context, ref, settings),
-                                  ),
-                                  _buildSettingRow(
-                                    context,
-                                    icon: CupertinoIcons.paintbrush,
-                                    iconColor: DesignTokens.secondaryBlue,
-                                    title: 'Accent Color',
-                                    subtitle:
-                                        '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
-                                    trailing: Container(
-                                      width: 16,
-                                      height: 16,
-                                      decoration: BoxDecoration(
-                                        color:
-                                            Color(settings.primaryColorValue),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    onTap: () =>
-                                        _showColorSheet(context, ref, settings),
-                                  ),
-                                ],
+                              _buildSettingRow(
+                                context,
+                                icon: CupertinoIcons.circle_lefthalf_fill,
+                                iconColor: DesignTokens.primaryLavender,
+                                title: 'Appearance',
+                                subtitle: _themeLabel(settings.themeMode),
+                                onTap: () =>
+                                    _showThemeSheet(context, ref, settings),
                               ),
-                              const SizedBox(height: 24),
-                              _buildSectionHeader(context, 'PREFERENCES'),
-                              M3ECardList.of(
-                                haptic: M3EHapticFeedback.medium,
-                                splashColor: DesignTokens.cardCreamAccent
-                                    .withValues(alpha: 0.3),
-                                highlightColor: DesignTokens.cardCreamAccent
-                                    .withValues(alpha: 0.15),
-                                children: [
-                                  _buildSwitchRow(
-                                    context,
-                                    icon: CupertinoIcons.hand_raised,
-                                    iconColor: DesignTokens.cardCreamAccent,
-                                    title: 'Haptic Feedback',
-                                    subtitle: 'Vibration on interactions',
-                                    value: settings.hapticFeedback,
-                                    onChanged: (v) {
-                                      HapticFeedback.selectionClick();
-                                      ref
-                                          .read(settingsProvider.notifier)
-                                          .setHapticFeedback(v);
-                                    },
+                              _buildSettingRow(
+                                context,
+                                icon: CupertinoIcons.paintbrush,
+                                iconColor: DesignTokens.secondaryBlue,
+                                title: 'Accent Color',
+                                subtitle:
+                                    '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
+                                trailing: Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: Color(settings.primaryColorValue),
+                                    shape: BoxShape.circle,
                                   ),
-                                  _buildSwitchRow(
-                                    context,
-                                    icon: CupertinoIcons.bell,
-                                    iconColor: DesignTokens.cardPinkAccent,
-                                    title: 'Notifications',
-                                    subtitle:
-                                        'Get reminded about classes and tasks',
-                                    value: settings.notificationEnabled,
-                                    onChanged: (v) {
-                                      HapticFeedback.selectionClick();
-                                      ref
-                                          .read(settingsProvider.notifier)
-                                          .setNotificationEnabled(v);
-                                    },
-                                  ),
-                                ],
+                                ),
+                                onTap: () =>
+                                    _showColorSheet(context, ref, settings),
                               ),
-                              const SizedBox(height: 24),
-                              _buildSectionHeader(context, 'ABOUT'),
-                              M3ECardList.of(
-                                haptic: M3EHapticFeedback.medium,
-                                splashColor: DesignTokens.cardGreenAccent
-                                    .withValues(alpha: 0.3),
-                                highlightColor: DesignTokens.cardGreenAccent
-                                    .withValues(alpha: 0.15),
-                                children: [
-                                  _buildSettingRow(
-                                    context,
-                                    icon: CupertinoIcons.book,
-                                    iconColor: DesignTokens.cardGreenAccent,
-                                    title: 'stdy4u',
-                                    subtitle: 'Tap for version info',
-                                    trailing: FutureBuilder<PackageInfo>(
-                                      future: PackageInfo.fromPlatform(),
-                                      builder: (ctx, snap) {
-                                        final ver =
-                                            snap.data?.version ?? '1.0.0';
-                                        final build =
-                                            snap.data?.buildNumber ?? '1';
-                                        return Text(
-                                          'v$ver+$build',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: context.textTertiary,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  _buildSettingRow(
-                                    context,
-                                    icon: CupertinoIcons.arrow_down_circle,
-                                    iconColor: DesignTokens.cardTealAccent,
-                                    title: 'Check for Updates',
-                                    subtitle: 'Download the latest version',
-                                    onTap: () => _checkForUpdate(context),
-                                  ),
-                                  _buildSettingRow(
-                                    context,
-                                    icon: CupertinoIcons.book,
-                                    iconColor: DesignTokens.primaryLavender,
-                                    title: 'GitHub Repository',
-                                    subtitle: 'MoHamed-B-M/study4u',
-                                    onTap: () => launchUrl(Uri.parse(
-                                        'https://github.com/MoHamed-B-M/study4u')),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 40),
                             ],
                           ),
-                        ),
+                          const SizedBox(height: 24),
+                          _buildSectionHeader(context, 'PREFERENCES'),
+                          M3ECardList.of(
+                            haptic: M3EHapticFeedback.medium,
+                            splashColor: DesignTokens.cardCreamAccent
+                                .withValues(alpha: 0.3),
+                            highlightColor: DesignTokens.cardCreamAccent
+                                .withValues(alpha: 0.15),
+                            children: [
+                              _buildSwitchRow(
+                                context,
+                                icon: CupertinoIcons.hand_raised,
+                                iconColor: DesignTokens.cardCreamAccent,
+                                title: 'Haptic Feedback',
+                                subtitle: 'Vibration on interactions',
+                                value: settings.hapticFeedback,
+                                onChanged: (v) {
+                                  HapticFeedback.selectionClick();
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .setHapticFeedback(v);
+                                },
+                              ),
+                              _buildSwitchRow(
+                                context,
+                                icon: CupertinoIcons.bell,
+                                iconColor: DesignTokens.cardPinkAccent,
+                                title: 'Notifications',
+                                subtitle:
+                                    'Get reminded about classes and tasks',
+                                value: settings.notificationEnabled,
+                                onChanged: (v) {
+                                  HapticFeedback.selectionClick();
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .setNotificationEnabled(v);
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          _buildSectionHeader(context, 'ABOUT'),
+                          M3ECardList.of(
+                            haptic: M3EHapticFeedback.medium,
+                            splashColor: DesignTokens.cardGreenAccent
+                                .withValues(alpha: 0.3),
+                            highlightColor: DesignTokens.cardGreenAccent
+                                .withValues(alpha: 0.15),
+                            children: [
+                              _buildSettingRow(
+                                context,
+                                icon: CupertinoIcons.book,
+                                iconColor: DesignTokens.cardGreenAccent,
+                                title: 'stdy4u',
+                                subtitle: 'Tap for version info',
+                                trailing: FutureBuilder<PackageInfo>(
+                                  future: PackageInfo.fromPlatform(),
+                                  builder: (ctx, snap) {
+                                    final ver = snap.data?.version ?? '1.0.0';
+                                    final build = snap.data?.buildNumber ?? '1';
+                                    return Text(
+                                      'v$ver+$build',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: context.textTertiary,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              _buildSettingRow(
+                                context,
+                                icon: CupertinoIcons.arrow_down_circle,
+                                iconColor: DesignTokens.cardTealAccent,
+                                title: 'Check for Updates',
+                                subtitle: 'Download the latest version',
+                                onTap: () => _checkForUpdate(context),
+                              ),
+                              _buildSettingRow(
+                                context,
+                                icon: CupertinoIcons.book,
+                                iconColor: DesignTokens.primaryLavender,
+                                title: 'GitHub Repository',
+                                subtitle: 'MoHamed-B-M/study4u',
+                                onTap: () => launchUrl(Uri.parse(
+                                    'https://github.com/MoHamed-B-M/study4u')),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 40),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ), // Expanded
+            ),
           ], // SafeArea Column children
         ), // SafeArea Column
       ), // SafeArea
@@ -396,26 +387,26 @@ class SettingsView extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (BuildContext modalCtx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Choose Theme',
-                  style: Theme.of(modalCtx).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 20),
-                ButtonGroupM3E(
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Choose Theme',
+                style: Theme.of(modalCtx).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: ButtonGroupM3E(
                   selection: true,
                   selectedIndex: selectedIndex,
                   type: ButtonGroupM3EType.connected,
-                  size: ButtonGroupM3ESize.lg,
+                  size: ButtonGroupM3ESize.sm,
                   actions: [
                     ButtonGroupM3EAction(
                       label: const Text('System'),
-                      icon: const Icon(Icons.brightness_auto),
+                      icon: const Icon(Icons.brightness_auto, size: 18),
                       onPressed: () {
                         HapticFeedback.selectionClick();
                         ref
@@ -426,7 +417,7 @@ class SettingsView extends ConsumerWidget {
                     ),
                     ButtonGroupM3EAction(
                       label: const Text('Light'),
-                      icon: const Icon(Icons.wb_sunny),
+                      icon: const Icon(Icons.wb_sunny, size: 18),
                       onPressed: () {
                         HapticFeedback.selectionClick();
                         ref
@@ -437,7 +428,7 @@ class SettingsView extends ConsumerWidget {
                     ),
                     ButtonGroupM3EAction(
                       label: const Text('Dark'),
-                      icon: const Icon(Icons.nightlight_round),
+                      icon: const Icon(Icons.nightlight_round, size: 18),
                       onPressed: () {
                         HapticFeedback.selectionClick();
                         ref
@@ -448,13 +439,13 @@ class SettingsView extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => Navigator.of(modalCtx).pop(),
-                  child: const Text('Cancel'),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.of(modalCtx).pop(),
+                child: const Text('Cancel'),
+              ),
+            ],
           ),
         );
       },
