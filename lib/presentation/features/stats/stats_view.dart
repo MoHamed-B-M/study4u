@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_bar_m3e/app_bar_m3e.dart';
+import 'package:m3e_card_list/m3e_card_list.dart';
 import '../../../../core/utils/grade_calculator.dart';
 import '../../../../domain/usecases/cgpa_calculator.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../shared/providers/pomodoro_provider.dart';
 import '../../../../domain/entities/course.dart';
-import 'package:material_new_shapes/material_new_shapes.dart';
 import '../../theme/design_tokens.dart';
-import '../../theme/rounded_polygon_border.dart';
-import '../../widgets/dashboard_card.dart';
 
 class StatsView extends ConsumerStatefulWidget {
   const StatsView({super.key});
@@ -138,62 +136,55 @@ class _StatsViewState extends ConsumerState<StatsView>
     List<CourseEntity> courses,
     double totalCredits,
   ) {
-    final cgpaShape = RoundedPolygon.rectangle(
-      width: 1,
-      height: 1,
-      rounding: CornerRounding(radius: 0.22),
-      centerX: 0.5,
-      centerY: 0.5,
-    );
-
-    return Material(
-      type: MaterialType.transparency,
-      shape: RoundedPolygonShapeBorder(polygon: cgpaShape),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        color: const Color(0xFF1B5E20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SizedBox(),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.school,
-                    size: 18,
-                    color: Colors.white,
-                  ),
+    return M3ECard(
+      index: 0,
+      position: M3ECardPosition.single,
+      outerRadius: 24,
+      innerRadius: 24,
+      gap: 0,
+      color: const Color(0xFF1B5E20),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SizedBox(),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '${cgpa.cgpa.toStringAsFixed(1)} / 4',
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                height: 1.1,
+                child: const Icon(
+                  Icons.school,
+                  size: 18,
+                  color: Colors.white,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '${cgpa.cgpa.toStringAsFixed(1)} / 4',
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              height: 1.1,
             ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 16,
-              children: [
-                _buildMiniStat(Icons.book_outlined, 'Courses ${courses.length}'),
-                _buildMiniStat(
-                    Icons.credit_card, 'Credits ${totalCredits.toInt()}'),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 16,
+            children: [
+              _buildMiniStat(Icons.book_outlined, 'Courses ${courses.length}'),
+              _buildMiniStat(
+                  Icons.credit_card, 'Credits ${totalCredits.toInt()}'),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -223,21 +214,15 @@ class _StatsViewState extends ConsumerState<StatsView>
       PomodoroStatus.idle => 'READY',
     };
 
-    final pomodoroShape = RoundedPolygon.rectangle(
-      width: 1,
-      height: 1,
-      rounding: CornerRounding(radius: 0.22),
-      centerX: 0.5,
-      centerY: 0.5,
-    );
-
-    return Material(
-      type: MaterialType.transparency,
-      shape: RoundedPolygonShapeBorder(polygon: pomodoroShape),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        color: const Color(0xFF2E7D32),
-        child: Column(
+    return M3ECard(
+      index: 1,
+      position: M3ECardPosition.single,
+      outerRadius: 24,
+      innerRadius: 24,
+      gap: 0,
+      color: const Color(0xFF2E7D32),
+      padding: const EdgeInsets.all(20),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -309,30 +294,22 @@ class _StatsViewState extends ConsumerState<StatsView>
           ),
         ],
       ),
-    ),
     );
   }
 
   Widget _buildCgpaTargetCard(BuildContext context, bool isDark) {
-    final targetShape = RoundedPolygon.rectangle(
-      width: 1,
-      height: 1,
-      rounding: CornerRounding(radius: 0.22),
-      centerX: 0.5,
-      centerY: 0.5,
-    );
-
-    return Material(
-      type: MaterialType.transparency,
-      shape: RoundedPolygonShapeBorder(polygon: targetShape),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        color: const Color(0xFF1E293B),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InkWell(
+    return M3ECard(
+      index: 2,
+      position: M3ECardPosition.single,
+      outerRadius: 24,
+      innerRadius: 24,
+      gap: 0,
+      color: const Color(0xFF1E293B),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
             onTap: () =>
                 setState(() => _cgpaTargetExpanded = !_cgpaTargetExpanded),
             borderRadius: BorderRadius.circular(8),
@@ -400,7 +377,6 @@ class _StatsViewState extends ConsumerState<StatsView>
           ],
         ],
       ),
-    ),
     );
   }
 
@@ -410,18 +386,13 @@ class _StatsViewState extends ConsumerState<StatsView>
     final display = totalSeconds > 0 ? '${hours}h ${minutes}m' : '0h 0m';
     final cs = Theme.of(context).colorScheme;
 
-    final screenTimeShape = RoundedPolygon.rectangle(
-      width: 1,
-      height: 1,
-      rounding: CornerRounding(radius: 0.22),
-      centerX: 0.5,
-      centerY: 0.5,
-    );
-
-    return DashboardCard(
-      backgroundColor: cs.surfaceContainerLow,
-      borderRadius: DesignTokens.radiusLG,
-      shape: RoundedPolygonShapeBorder(polygon: screenTimeShape),
+    return M3ECard(
+      index: 3,
+      position: M3ECardPosition.single,
+      outerRadius: 24,
+      innerRadius: 24,
+      gap: 0,
+      color: cs.surfaceContainerLow,
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
@@ -486,9 +457,13 @@ class _StatsViewState extends ConsumerState<StatsView>
     final cs = Theme.of(context).colorScheme;
 
     if (courses.isEmpty) {
-      return DashboardCard(
-        backgroundColor: cs.surfaceContainerLow,
-        borderRadius: DesignTokens.radiusLG,
+      return M3ECard(
+        index: 4,
+        position: M3ECardPosition.single,
+        outerRadius: 24,
+        innerRadius: 24,
+        gap: 0,
+        color: cs.surfaceContainerLow,
         padding: const EdgeInsets.all(DesignTokens.spacingLG),
         child: Center(
           child: Text(
@@ -502,18 +477,13 @@ class _StatsViewState extends ConsumerState<StatsView>
       );
     }
 
-    final gradeShape = RoundedPolygon.rectangle(
-      width: 1,
-      height: 1,
-      rounding: CornerRounding(radius: 0.22),
-      centerX: 0.5,
-      centerY: 0.5,
-    );
-
-    return DashboardCard(
-      backgroundColor: cs.surfaceContainerLow,
-      borderRadius: DesignTokens.radiusLG,
-      shape: RoundedPolygonShapeBorder(polygon: gradeShape),
+    return M3ECard(
+      index: 4,
+      position: M3ECardPosition.single,
+      outerRadius: 24,
+      innerRadius: 24,
+      gap: 0,
+      color: cs.surfaceContainerLow,
       padding: const EdgeInsets.all(DesignTokens.spacingLG),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
