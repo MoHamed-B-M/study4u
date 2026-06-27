@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:navigation_bar_m3e/navigation_bar_m3e.dart';
 import 'package:expressive_loading_indicator/expressive_loading_indicator.dart';
 import 'core/services/notification_service.dart';
@@ -120,7 +121,8 @@ final routerProvider = Provider<GoRouter>((ref) {
               transformHitTests: false,
               child: PageScaleProvider(
                 notifier: pageScaleNotifier,
-                child: MainScreen(child: child!),
+                child:
+                    MainScreen(currentLocation: state.matchedLocation, child: child!),
               ),
             );
           },
@@ -194,23 +196,36 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
     final router = ref.watch(routerProvider);
     final seedColor = Color(ref.watch(primaryColorProvider));
 
-    final theme = AppTheme.lightTheme(seedColor);
-    final darkTheme = AppTheme.darkTheme(seedColor);
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        final lightCS =
+            lightDynamic ?? ColorScheme.fromSeed(seedColor: seedColor);
+        final darkCS = darkDynamic ?? ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.dark,
+        );
 
-    return MaterialApp.router(
-      title: 'stdy4u',
-      debugShowCheckedModeBanner: false,
-      theme: theme,
-      darkTheme: darkTheme,
-      themeMode: themeMode,
-      routerConfig: router,
+        return MaterialApp.router(
+          title: 'stdy4u',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme(lightCS),
+          darkTheme: AppTheme.darkTheme(darkCS),
+          themeMode: themeMode,
+          routerConfig: router,
+        );
+      },
     );
   }
 }
 
 class MainScreen extends ConsumerStatefulWidget {
   final Widget child;
-  const MainScreen({super.key, required this.child});
+  final String currentLocation;
+  const MainScreen({
+    super.key,
+    required this.child,
+    required this.currentLocation,
+  });
 
   @override
   ConsumerState<MainScreen> createState() => _MainScreenState();
@@ -223,7 +238,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final showLabels = ref.watch(showNavLabelsProvider);
-    final isSettings = GoRouterState.of(context).matchedLocation == '/settings';
+    final isSettings = widget.currentLocation == '/settings';
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
