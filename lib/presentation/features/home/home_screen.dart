@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:animations/animations.dart';
-import 'package:toolbar_m3e/toolbar_m3e.dart';
+import 'package:app_bar_m3e/app_bar_m3e.dart';
 import 'package:fab_m3e/fab_m3e.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../domain/entities/course.dart';
@@ -14,6 +14,7 @@ import '../../../../domain/usecases/schedule_optimizer.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/add_course_sheet.dart';
+import '../../widgets/add_task_sheet.dart';
 import '../../widgets/quote_expansion_route.dart';
 import '../course_detail/course_detail_screen.dart';
 import '../../../core/animation/page_scale.dart' show PageScaleProvider;
@@ -39,79 +40,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final courses = ref.watch(courseListProvider);
     final tasks = ref.watch(taskListProvider);
-    final pendingCount = ref.watch(pendingTaskCountProvider);
     final upNext = ref.watch(upNextProvider);
     final greeting = ref.watch(greetingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: SafeArea(
-        top: true,
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            ToolbarM3E(
-              titleText: greeting,
-              subtitleText: 'You have $pendingCount pending tasks.',
-              variant: ToolbarM3EVariant.surface,
-              size: ToolbarM3ESize.large,
-              safeArea: false,
-              actions: [
-                ToolbarActionM3E(
-                  icon: Icons.settings_outlined,
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    context.push('/settings');
-                  },
-                ),
-              ],
-            ),
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 320,
-                      child: PageView(
-                        controller: _pageController,
-                        physics: const BouncingScrollPhysics(),
-                        onPageChanged: (index) =>
-                            setState(() => _currentPage = index),
-                        children: [
-                          _buildUpNextPage(context, upNext, courses, ref),
-                          _buildTasksPage(context, ref, tasks),
-                          _buildQuickStatsPage(context),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: _buildPageIndicator(isDark),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.04,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          _buildSectionHeader(
-                              context, 'Current Courses', 'View all'),
-                          const SizedBox(height: 16),
-                          _buildCoursesList(context, courses, ref),
-                          const SizedBox(height: 120),
-                        ],
-                      ),
-                    ),
-                  ),
+      appBar: AppBarM3E(
+        titleText: greeting,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.push('/settings');
+            },
+          ),
+        ],
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 320,
+              child: PageView(
+                controller: _pageController,
+                physics: const BouncingScrollPhysics(),
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                children: [
+                  _buildUpNextPage(context, upNext, courses, ref),
+                  _buildTasksPage(context, ref, tasks),
+                  _buildQuickStatsPage(context),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          SliverToBoxAdapter(
+            child: _buildPageIndicator(isDark),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.04,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  _buildSectionHeader(context, 'Current Courses', 'View all'),
+                  const SizedBox(height: 16),
+                  _buildCoursesList(context, courses, ref),
+                  const SizedBox(height: 120),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: _buildFAB(context),
     );
@@ -750,27 +736,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  void _showAddOptions(BuildContext context) {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surfaceDark,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppTheme.radiusCard)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.book, color: AppTheme.primary),
+              ),
+              title: const Text('Add Course',
+                  style: TextStyle(color: Colors.white)),
+              subtitle: Text('Create a new course',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.pop(ctx);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: AppTheme.surfaceDark,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppTheme.radiusCard)),
+                  ),
+                  builder: (_) => const AddCourseSheet(),
+                );
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFA18CFF).withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.task_alt, color: Color(0xFFA18CFF)),
+              ),
+              title:
+                  const Text('Add Task', style: TextStyle(color: Colors.white)),
+              subtitle: Text('Create a new task',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.pop(ctx);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: AppTheme.surfaceDark,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppTheme.radiusCard)),
+                  ),
+                  builder: (_) => const AddTaskSheet(),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFAB(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: FabM3E(
         icon: const Icon(Icons.add),
-        onPressed: () {
-          HapticFeedback.lightImpact();
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: AppTheme.surfaceDark,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppTheme.radiusCard)),
-            ),
-            builder: (_) => const AddCourseSheet(),
-          );
-        },
+        onPressed: () => _showAddOptions(context),
         size: FabM3ESize.small,
         shapeFamily: FabM3EShapeFamily.round,
-        tooltip: 'Add Course',
+        tooltip: 'Add',
       ),
     );
   }

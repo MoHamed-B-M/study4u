@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toolbar_m3e/toolbar_m3e.dart';
+import 'package:app_bar_m3e/app_bar_m3e.dart';
 import 'package:button_group_m3e/button_group_m3e.dart';
 import 'package:m3e_card_list/m3e_card_list.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -33,182 +33,167 @@ class SettingsView extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
-      body: SafeArea(
-        top: true,
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            ToolbarM3E(
-              titleText: 'Settings',
-              subtitleText: 'STUDY4U',
-              variant: ToolbarM3EVariant.surface,
-              size: ToolbarM3ESize.large,
-              safeArea: false,
-            ),
-            Expanded(
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(child: const SizedBox(height: 24)),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: DesignTokens.spacingLG,
+      appBar: AppBarM3E(
+        titleText: 'Settings',
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(child: const SizedBox(height: 24)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spacingLG,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(context, 'APPEARANCE'),
+                  M3ECardList.of(
+                    haptic: M3EHapticFeedback.medium,
+                    splashColor:
+                        DesignTokens.primaryLavender.withValues(alpha: 0.3),
+                    highlightColor:
+                        DesignTokens.primaryLavender.withValues(alpha: 0.15),
+                    children: [
+                      _buildSettingRow(
+                        context,
+                        icon: CupertinoIcons.circle_lefthalf_fill,
+                        iconColor: DesignTokens.primaryLavender,
+                        title: 'Appearance',
+                        subtitle: _themeLabel(settings.themeMode),
+                        onTap: () => _showThemeSheet(context, ref, settings),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionHeader(context, 'APPEARANCE'),
-                          M3ECardList.of(
-                            haptic: M3EHapticFeedback.medium,
-                            splashColor: DesignTokens.primaryLavender
-                                .withValues(alpha: 0.3),
-                            highlightColor: DesignTokens.primaryLavender
-                                .withValues(alpha: 0.15),
-                            children: [
-                              _buildSettingRow(
-                                context,
-                                icon: CupertinoIcons.circle_lefthalf_fill,
-                                iconColor: DesignTokens.primaryLavender,
-                                title: 'Appearance',
-                                subtitle: _themeLabel(settings.themeMode),
-                                onTap: () =>
-                                    _showThemeSheet(context, ref, settings),
-                              ),
-                              _buildSettingRow(
-                                context,
-                                icon: CupertinoIcons.paintbrush,
-                                iconColor: DesignTokens.secondaryBlue,
-                                title: 'Accent Color',
-                                subtitle:
-                                    '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
-                                trailing: Container(
-                                  width: 16,
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    color: Color(settings.primaryColorValue),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                onTap: () =>
-                                    _showColorSheet(context, ref, settings),
-                              ),
-                            ],
+                      _buildSettingRow(
+                        context,
+                        icon: CupertinoIcons.paintbrush,
+                        iconColor: DesignTokens.secondaryBlue,
+                        title: 'Accent Color',
+                        subtitle:
+                            '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
+                        trailing: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Color(settings.primaryColorValue),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(height: 24),
-                          _buildSectionHeader(context, 'PREFERENCES'),
-                          M3ECardList.of(
-                            haptic: M3EHapticFeedback.medium,
-                            splashColor: DesignTokens.cardCreamAccent
-                                .withValues(alpha: 0.3),
-                            highlightColor: DesignTokens.cardCreamAccent
-                                .withValues(alpha: 0.15),
-                            children: [
-                              _buildSwitchRow(
-                                context,
-                                icon: CupertinoIcons.hand_raised,
-                                iconColor: DesignTokens.cardCreamAccent,
-                                title: 'Haptic Feedback',
-                                subtitle: 'Vibration on interactions',
-                                value: settings.hapticFeedback,
-                                onChanged: (v) {
-                                  HapticFeedback.selectionClick();
-                                  ref
-                                      .read(settingsProvider.notifier)
-                                      .setHapticFeedback(v);
-                                },
-                              ),
-                              _buildSwitchRow(
-                                context,
-                                icon: CupertinoIcons.bell,
-                                iconColor: DesignTokens.cardPinkAccent,
-                                title: 'Notifications',
-                                subtitle:
-                                    'Get reminded about classes and tasks',
-                                value: settings.notificationEnabled,
-                                onChanged: (v) {
-                                  HapticFeedback.selectionClick();
-                                  ref
-                                      .read(settingsProvider.notifier)
-                                      .setNotificationEnabled(v);
-                                },
-                              ),
-                              _buildSwitchRow(
-                                context,
-                                icon: CupertinoIcons.rectangle_3_offgrid,
-                                iconColor: DesignTokens.cardBlueAccent,
-                                title: 'Show Labels',
-                                subtitle: 'Show navigation bar labels',
-                                value: settings.showNavLabels,
-                                onChanged: (v) {
-                                  HapticFeedback.selectionClick();
-                                  ref
-                                      .read(settingsProvider.notifier)
-                                      .setShowNavLabels(v);
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          _buildSectionHeader(context, 'ABOUT'),
-                          M3ECardList.of(
-                            haptic: M3EHapticFeedback.medium,
-                            splashColor: DesignTokens.cardGreenAccent
-                                .withValues(alpha: 0.3),
-                            highlightColor: DesignTokens.cardGreenAccent
-                                .withValues(alpha: 0.15),
-                            children: [
-                              _buildSettingRow(
-                                context,
-                                icon: CupertinoIcons.book,
-                                iconColor: DesignTokens.cardGreenAccent,
-                                title: 'stdy4u',
-                                subtitle: 'Tap for version info',
-                                trailing: FutureBuilder<PackageInfo>(
-                                  future: PackageInfo.fromPlatform(),
-                                  builder: (ctx, snap) {
-                                    final ver = snap.data?.version ?? '1.0.0';
-                                    final build = snap.data?.buildNumber ?? '1';
-                                    return Text(
-                                      'v$ver+$build',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: context.textTertiary,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              _buildSettingRow(
-                                context,
-                                icon: CupertinoIcons.arrow_down_circle,
-                                iconColor: DesignTokens.cardTealAccent,
-                                title: 'Check for Updates',
-                                subtitle: 'Download the latest version',
-                                onTap: () => _checkForUpdate(context),
-                              ),
-                              _buildSettingRow(
-                                context,
-                                icon: CupertinoIcons.book,
-                                iconColor: DesignTokens.primaryLavender,
-                                title: 'GitHub Repository',
-                                subtitle: 'MoHamed-B-M/study4u',
-                                onTap: () => launchUrl(Uri.parse(
-                                    'https://github.com/MoHamed-B-M/study4u')),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 40),
-                        ],
+                        ),
+                        onTap: () => _showColorSheet(context, ref, settings),
                       ),
-                    ),
+                    ],
                   ),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, 'PREFERENCES'),
+                  M3ECardList.of(
+                    haptic: M3EHapticFeedback.medium,
+                    splashColor:
+                        DesignTokens.cardCreamAccent.withValues(alpha: 0.3),
+                    highlightColor:
+                        DesignTokens.cardCreamAccent.withValues(alpha: 0.15),
+                    children: [
+                      _buildSwitchRow(
+                        context,
+                        icon: CupertinoIcons.hand_raised,
+                        iconColor: DesignTokens.cardCreamAccent,
+                        title: 'Haptic Feedback',
+                        subtitle: 'Vibration on interactions',
+                        value: settings.hapticFeedback,
+                        onChanged: (v) {
+                          HapticFeedback.selectionClick();
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setHapticFeedback(v);
+                        },
+                      ),
+                      _buildSwitchRow(
+                        context,
+                        icon: CupertinoIcons.bell,
+                        iconColor: DesignTokens.cardPinkAccent,
+                        title: 'Notifications',
+                        subtitle: 'Get reminded about classes and tasks',
+                        value: settings.notificationEnabled,
+                        onChanged: (v) {
+                          HapticFeedback.selectionClick();
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setNotificationEnabled(v);
+                        },
+                      ),
+                      _buildSwitchRow(
+                        context,
+                        icon: CupertinoIcons.rectangle_3_offgrid,
+                        iconColor: DesignTokens.cardBlueAccent,
+                        title: 'Show Labels',
+                        subtitle: 'Show navigation bar labels',
+                        value: settings.showNavLabels,
+                        onChanged: (v) {
+                          HapticFeedback.selectionClick();
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setShowNavLabels(v);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, 'ABOUT'),
+                  M3ECardList.of(
+                    haptic: M3EHapticFeedback.medium,
+                    splashColor:
+                        DesignTokens.cardGreenAccent.withValues(alpha: 0.3),
+                    highlightColor:
+                        DesignTokens.cardGreenAccent.withValues(alpha: 0.15),
+                    children: [
+                      _buildSettingRow(
+                        context,
+                        icon: CupertinoIcons.book,
+                        iconColor: DesignTokens.cardGreenAccent,
+                        title: 'stdy4u',
+                        subtitle: 'Tap for version info',
+                        trailing: FutureBuilder<PackageInfo>(
+                          future: PackageInfo.fromPlatform(),
+                          builder: (ctx, snap) {
+                            final ver = snap.data?.version ?? '1.0.0';
+                            final build = snap.data?.buildNumber ?? '1';
+                            return Text(
+                              'v$ver+$build',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: context.textTertiary,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      _buildSettingRow(
+                        context,
+                        icon: CupertinoIcons.arrow_down_circle,
+                        iconColor: DesignTokens.cardTealAccent,
+                        title: 'Check for Updates',
+                        subtitle: 'Download the latest version',
+                        onTap: () => _checkForUpdate(context),
+                      ),
+                      _buildSettingRow(
+                        context,
+                        icon: CupertinoIcons.book,
+                        iconColor: DesignTokens.primaryLavender,
+                        title: 'GitHub Repository',
+                        subtitle: 'MoHamed-B-M/study4u',
+                        onTap: () => launchUrl(Uri.parse(
+                            'https://github.com/MoHamed-B-M/study4u')),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
-          ], // SafeArea Column children
-        ), // SafeArea Column
-      ), // SafeArea
+          ),
+        ],
+      ),
     );
   }
 

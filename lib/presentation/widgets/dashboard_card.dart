@@ -7,6 +7,7 @@ class DashboardCard extends StatelessWidget {
   final Color? backgroundColor;
   final EdgeInsetsGeometry? padding;
   final double? borderRadius;
+  final ShapeBorder? shape;
   final VoidCallback? onTap;
   final double? width;
   final double? height;
@@ -17,6 +18,7 @@ class DashboardCard extends StatelessWidget {
     this.backgroundColor,
     this.padding,
     this.borderRadius,
+    this.shape,
     this.onTap,
     this.width,
     this.height,
@@ -25,6 +27,25 @@ class DashboardCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (shape != null) {
+      final card = Material(
+        type: MaterialType.transparency,
+        shape: shape,
+        child: Container(
+          width: width,
+          height: height,
+          padding: padding ?? const EdgeInsets.all(24),
+          color: backgroundColor ?? (isDark ? AppTheme.surfaceDark : AppTheme.surface),
+          child: child,
+        ),
+      );
+      if (onTap != null) {
+        return GestureDetector(onTap: onTap, child: card);
+      }
+      return card;
+    }
+
     final card = Container(
       width: width,
       height: height,

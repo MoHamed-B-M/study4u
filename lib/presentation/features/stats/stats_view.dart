@@ -1,15 +1,16 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toolbar_m3e/toolbar_m3e.dart';
+import 'package:app_bar_m3e/app_bar_m3e.dart';
 import '../../../../core/utils/grade_calculator.dart';
+import '../../../../domain/usecases/cgpa_calculator.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../shared/providers/pomodoro_provider.dart';
 import '../../../../domain/entities/course.dart';
+import 'package:material_new_shapes/material_new_shapes.dart';
 import '../../theme/design_tokens.dart';
+import '../../theme/rounded_polygon_border.dart';
 import '../../widgets/dashboard_card.dart';
-import '../../widgets/study_charts.dart';
 
 class StatsView extends ConsumerStatefulWidget {
   const StatsView({super.key});
@@ -21,6 +22,7 @@ class StatsView extends ConsumerStatefulWidget {
 class _StatsViewState extends ConsumerState<StatsView>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
+  bool _cgpaTargetExpanded = true;
 
   @override
   void initState() {
@@ -40,114 +42,155 @@ class _StatsViewState extends ConsumerState<StatsView>
   @override
   Widget build(BuildContext context) {
     final cgpa = ref.watch(cgpaResultProvider);
-    final analytics = ref.watch(attendanceAnalyticsResultProvider);
     final courses = ref.watch(courseListProvider);
     final pomodoro = ref.watch(pomodoroProvider);
+    final sessions = ref.watch(pomodoroSessionsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final totalCredits =
+        courses.fold<double>(0.0, (sum, c) => sum + c.creditHours);
+    final totalScreenSeconds =
+        sessions.fold<int>(0, (sum, s) => sum + s.durationSeconds);
 
     return Scaffold(
-      body: SafeArea(
-        top: true,
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            ToolbarM3E(
-              titleText: 'Statistics',
-              subtitleText: 'STUDY4U',
-              variant: ToolbarM3EVariant.surface,
-              size: ToolbarM3ESize.large,
-              safeArea: false,
-            ),
-            Expanded(
-              child: Stack(
+      appBar: AppBarM3E(
+        titleText: 'Statistics',
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(child: const SizedBox(height: 24)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spacingLG,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const BlobBackground(),
-                  CustomScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(child: const SizedBox(height: 24)),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: DesignTokens.spacingLG,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FadeTransition(
-                                opacity: _fadeController.drive(
-                                  CurveTween(
-                                    curve: const Interval(0.0, 0.4,
-                                        curve: Curves.easeOut),
-                                  ),
-                                ),
-                                child: AttendanceCard(
-                                  attendanceRate: analytics.percentage,
-                                  grade: cgpa.letterGrade,
-                                  gradePercentage: cgpa.percentage,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              FadeTransition(
-                                opacity: _fadeController.drive(
-                                  CurveTween(
-                                    curve: const Interval(0.2, 0.6,
-                                        curve: Curves.easeOut),
-                                  ),
-                                ),
-                                child: _buildCgpaBreakdown(context, courses),
-                              ),
-                              const SizedBox(height: 24),
-                              FadeTransition(
-                                opacity: _fadeController.drive(
-                                  CurveTween(
-                                    curve: const Interval(0.4, 0.8,
-                                        curve: Curves.easeOut),
-                                  ),
-                                ),
-                                child: PomodoroCard(
-                                  timerDisplay: pomodoro.timerString,
-                                  isActive: pomodoro.isActive,
-                                  completedSessions: pomodoro.completedSessions,
-                                  onStartPause: () {
-                                    HapticFeedback.mediumImpact();
-                                    if (pomodoro.isActive) {
-                                      ref
-                                          .read(pomodoroProvider.notifier)
-                                          .pauseTimer();
-                                    } else {
-                                      ref
-                                          .read(pomodoroProvider.notifier)
-                                          .startTimer();
-                                    }
-                                  },
-                                  onReset: () {
-                                    HapticFeedback.lightImpact();
-                                    ref
-                                        .read(pomodoroProvider.notifier)
-                                        .resetTimer();
-                                  },
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              FadeTransition(
-                                opacity: _fadeController.drive(
-                                  CurveTween(
-                                    curve: const Interval(0.6, 1.0,
-                                        curve: Curves.easeOut),
-                                  ),
-                                ),
-                                child:
-                                    _buildSubjectPerformance(context, courses),
-                              ),
-                              const SizedBox(height: 100),
-                            ],
-                          ),
-                        ),
+                  FadeTransition(
+                    opacity: _fadeController.drive(
+                      CurveTween(
+                        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
                       ),
-                    ],
+                    ),
+                    child: _buildHeroGrid(
+                        context, cgpa, pomodoro, courses, totalCredits),
                   ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(
+                      CurveTween(
+                        curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
+                      ),
+                    ),
+                    child: _buildCgpaTargetCard(context, isDark),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(
+                      CurveTween(
+                        curve: const Interval(0.4, 0.8, curve: Curves.easeOut),
+                      ),
+                    ),
+                    child:
+                        _buildScreenTime(context, totalScreenSeconds, isDark),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeController.drive(
+                      CurveTween(
+                        curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+                      ),
+                    ),
+                    child: _buildSubjectPerformance(context, courses),
+                  ),
+                  const SizedBox(height: 100),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroGrid(
+    BuildContext context,
+    CgpaResult cgpa,
+    PomodoroState pomodoro,
+    List<CourseEntity> courses,
+    double totalCredits,
+  ) {
+    return Row(
+      children: [
+        Expanded(child: _buildCgpaCard(context, cgpa, courses, totalCredits)),
+        const SizedBox(width: 12),
+        Expanded(child: _buildPomodoroCard(context, pomodoro)),
+      ],
+    );
+  }
+
+  Widget _buildCgpaCard(
+    BuildContext context,
+    CgpaResult cgpa,
+    List<CourseEntity> courses,
+    double totalCredits,
+  ) {
+    final cgpaShape = RoundedPolygon.rectangle(
+      width: 1,
+      height: 1,
+      rounding: CornerRounding(radius: 0.22),
+      centerX: 0.5,
+      centerY: 0.5,
+    );
+
+    return Material(
+      type: MaterialType.transparency,
+      shape: RoundedPolygonShapeBorder(polygon: cgpaShape),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        color: const Color(0xFF1B5E20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.school,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '${cgpa.cgpa.toStringAsFixed(1)} / 4',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                height: 1.1,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 16,
+              children: [
+                _buildMiniStat(Icons.book_outlined, 'Courses ${courses.length}'),
+                _buildMiniStat(
+                    Icons.credit_card, 'Credits ${totalCredits.toInt()}'),
+              ],
             ),
           ],
         ),
@@ -155,113 +198,283 @@ class _StatsViewState extends ConsumerState<StatsView>
     );
   }
 
-  Widget _buildCgpaBreakdown(BuildContext context, List<CourseEntity> courses) {
-    final gradedCourses = courses.where((c) => c.currentGrade > 0).toList();
-
-    if (gradedCourses.isEmpty) {
-      return DashboardCard(
-        backgroundColor: context.surface,
-        borderRadius: DesignTokens.radiusLG,
-        padding: const EdgeInsets.all(DesignTokens.spacingLG),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: DesignTokens.primaryLavender.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    CupertinoIcons.chart_bar,
-                    size: 16,
-                    color: DesignTokens.primaryLavender,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Academic Progress Details',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: context.textSecondary,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: Text(
-                'Add grades to see your progress chart',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: context.textTertiary,
-                ),
-              ),
-            ),
-          ],
+  Widget _buildMiniStat(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: Colors.white70),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.white70,
+          ),
         ),
-      );
-    }
+      ],
+    );
+  }
 
-    final barData = gradedCourses.map((c) {
-      final colors = [
-        DesignTokens.primaryLavender,
-        DesignTokens.secondaryBlue,
-        DesignTokens.cardCreamAccent,
-        DesignTokens.cardPinkAccent,
-        DesignTokens.cardGreenAccent,
-        DesignTokens.cardTealAccent,
-      ];
-      final colorIndex = gradedCourses.indexOf(c) % colors.length;
-      return BarChartData(
-        label: c.code.length > 4 ? c.code.substring(0, 4) : c.code,
-        value: c.currentGrade,
-        color: colors[colorIndex],
-      );
-    }).toList();
+  Widget _buildPomodoroCard(BuildContext context, PomodoroState pomodoro) {
+    final label = switch (pomodoro.status) {
+      PomodoroStatus.focus => 'FOCUS',
+      PomodoroStatus.shortBreak || PomodoroStatus.longBreak => 'BREAK',
+      PomodoroStatus.idle => 'READY',
+    };
 
-    return DashboardCard(
-      backgroundColor: context.surface,
-      borderRadius: DesignTokens.radiusLG,
-      padding: const EdgeInsets.all(DesignTokens.spacingLG),
-      child: Column(
+    final pomodoroShape = RoundedPolygon.rectangle(
+      width: 1,
+      height: 1,
+      rounding: CornerRounding(radius: 0.22),
+      centerX: 0.5,
+      centerY: 0.5,
+    );
+
+    return Material(
+      type: MaterialType.transparency,
+      shape: RoundedPolygonShapeBorder(polygon: pomodoroShape),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        color: const Color(0xFF2E7D32),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: DesignTokens.primaryLavender.withValues(alpha: 0.12),
+                  color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  CupertinoIcons.chart_bar,
-                  size: 16,
-                  color: DesignTokens.primaryLavender,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Academic Progress Details',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: context.textSecondary,
-                  letterSpacing: 0.5,
+                  Icons.timer_outlined,
+                  size: 18,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          StudyBarChart(
-            data: barData,
-            maxHeight: 140,
-            yMax: 4.0,
+          const SizedBox(height: 12),
+          Text(
+            pomodoro.timerString,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              fontFeatures: [FontFeature.tabularFigures()],
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                if (pomodoro.isActive) {
+                  ref.read(pomodoroProvider.notifier).pauseTimer();
+                } else {
+                  ref.read(pomodoroProvider.notifier).startTimer();
+                }
+              },
+              child: Text(
+                pomodoro.isActive ? 'Pause' : 'Start',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+    );
+  }
+
+  Widget _buildCgpaTargetCard(BuildContext context, bool isDark) {
+    final targetShape = RoundedPolygon.rectangle(
+      width: 1,
+      height: 1,
+      rounding: CornerRounding(radius: 0.22),
+      centerX: 0.5,
+      centerY: 0.5,
+    );
+
+    return Material(
+      type: MaterialType.transparency,
+      shape: RoundedPolygonShapeBorder(polygon: targetShape),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        color: const Color(0xFF1E293B),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+            onTap: () =>
+                setState(() => _cgpaTargetExpanded = !_cgpaTargetExpanded),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'CGPA Target',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Icon(
+                    _cgpaTargetExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: Colors.white70,
+                    size: 24,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_cgpaTargetExpanded) ...[
+            const SizedBox(height: 16),
+            const Center(
+              child: Text(
+                'No Target CGPA Set',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white54,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4ADE80),
+                  foregroundColor: const Color(0xFF1B5E20),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                },
+                child: const Text(
+                  'Set Target (e.g. 3.50)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    ),
+    );
+  }
+
+  Widget _buildScreenTime(BuildContext context, int totalSeconds, bool isDark) {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final display = totalSeconds > 0 ? '${hours}h ${minutes}m' : '0h 0m';
+    final cs = Theme.of(context).colorScheme;
+
+    final screenTimeShape = RoundedPolygon.rectangle(
+      width: 1,
+      height: 1,
+      rounding: CornerRounding(radius: 0.22),
+      centerX: 0.5,
+      centerY: 0.5,
+    );
+
+    return DashboardCard(
+      backgroundColor: cs.surfaceContainerLow,
+      borderRadius: DesignTokens.radiusLG,
+      shape: RoundedPolygonShapeBorder(polygon: screenTimeShape),
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.timer_outlined,
+              size: 22,
+              color: Color(0xFF4ADE80),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Screen Time',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Total focus time',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              display,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF4ADE80),
+              ),
+            ),
           ),
         ],
       ),
@@ -270,9 +483,11 @@ class _StatsViewState extends ConsumerState<StatsView>
 
   Widget _buildSubjectPerformance(
       BuildContext context, List<CourseEntity> courses) {
+    final cs = Theme.of(context).colorScheme;
+
     if (courses.isEmpty) {
       return DashboardCard(
-        backgroundColor: context.surface,
+        backgroundColor: cs.surfaceContainerLow,
         borderRadius: DesignTokens.radiusLG,
         padding: const EdgeInsets.all(DesignTokens.spacingLG),
         child: Center(
@@ -280,26 +495,35 @@ class _StatsViewState extends ConsumerState<StatsView>
             'Add courses to see performance',
             style: TextStyle(
               fontSize: 13,
-              color: context.textTertiary,
+              color: cs.onSurfaceVariant,
             ),
           ),
         ),
       );
     }
 
+    final gradeShape = RoundedPolygon.rectangle(
+      width: 1,
+      height: 1,
+      rounding: CornerRounding(radius: 0.22),
+      centerX: 0.5,
+      centerY: 0.5,
+    );
+
     return DashboardCard(
-      backgroundColor: context.surface,
+      backgroundColor: cs.surfaceContainerLow,
       borderRadius: DesignTokens.radiusLG,
+      shape: RoundedPolygonShapeBorder(polygon: gradeShape),
       padding: const EdgeInsets.all(DesignTokens.spacingLG),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Subject Performance',
+            'Grade Distribution',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: context.textPrimary,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 16),
@@ -308,6 +532,11 @@ class _StatsViewState extends ConsumerState<StatsView>
                 ? (course.currentGrade / 4.0 * 100).clamp(0, 100)
                 : 0.0;
             final letter = GradeCalculator.gpaToLetter(course.currentGrade);
+            final barColor = percentage >= 80
+                ? const Color(0xFF66BB6A)
+                : percentage >= 60
+                    ? const Color(0xFFFFB74D)
+                    : const Color(0xFFEF5350);
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
@@ -321,7 +550,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
-                      CupertinoIcons.book,
+                      Icons.book,
                       size: 18,
                       color: Color(course.colorValue),
                     ),
@@ -336,7 +565,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: context.textPrimary,
+                            color: cs.onSurface,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -345,14 +574,8 @@ class _StatsViewState extends ConsumerState<StatsView>
                           child: LinearProgressIndicator(
                             value: percentage / 100,
                             minHeight: 6,
-                            backgroundColor: context.surfaceVariant,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              percentage >= 80
-                                  ? DesignTokens.cardGreenAccent
-                                  : percentage >= 60
-                                      ? DesignTokens.cardCreamAccent
-                                      : DesignTokens.cardPinkAccent,
-                            ),
+                            backgroundColor: cs.surfaceContainerHighest,
+                            valueColor: AlwaysStoppedAnimation<Color>(barColor),
                           ),
                         ),
                       ],
@@ -367,7 +590,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: context.textPrimary,
+                          color: cs.onSurface,
                         ),
                       ),
                       Text(
@@ -375,7 +598,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: context.textTertiary,
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],

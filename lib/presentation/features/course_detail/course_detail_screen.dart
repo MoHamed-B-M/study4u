@@ -13,6 +13,7 @@ import '../../../domain/entities/course_material.dart';
 import '../../../domain/entities/attendance_record.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/add_task_sheet.dart';
 
 class CourseDetailScreen extends ConsumerStatefulWidget {
   final String courseId;
@@ -945,7 +946,7 @@ class _TasksTab extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _AddTaskSheet(courseId: courseId),
+      builder: (_) => AddTaskSheet(courseId: courseId),
     );
   }
 }
@@ -1043,132 +1044,5 @@ class _TaskTile extends ConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-class _AddTaskSheet extends ConsumerStatefulWidget {
-  final String courseId;
-  const _AddTaskSheet({required this.courseId});
-
-  @override
-  ConsumerState<_AddTaskSheet> createState() => _AddTaskSheetState();
-}
-
-class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
-  final _titleController = TextEditingController();
-  DateTime _dueDate = DateTime.now().add(const Duration(days: 1));
-  TaskUrgency _urgency = TaskUrgency.normal;
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-              child: Icon(Icons.horizontal_rule,
-                  color: cs.onSurfaceVariant, size: 32)),
-          Center(
-              child: Text('Add Task',
-                  style: Theme.of(context).textTheme.titleLarge)),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: 'What needs to be done?',
-              filled: true,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _pickDate,
-                  icon: const Icon(Icons.calendar_today, size: 18),
-                  label: Text(DateFormat('MMM dd, yyyy').format(_dueDate)),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _toggleUrgency,
-                  icon: Icon(
-                    Icons.flag,
-                    size: 18,
-                    color: _urgency == TaskUrgency.urgent
-                        ? AppTheme.warningRed
-                        : null,
-                  ),
-                  label: Text(
-                    _urgency == TaskUrgency.urgent ? 'Urgent' : 'Normal',
-                    style: TextStyle(
-                      color: _urgency == TaskUrgency.urgent
-                          ? AppTheme.warningRed
-                          : null,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: _submit,
-            icon: const Icon(Icons.add),
-            label: const Text('Add Task'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _dueDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (picked != null) {
-      setState(() => _dueDate = picked);
-    }
-  }
-
-  void _toggleUrgency() {
-    setState(() {
-      _urgency = _urgency == TaskUrgency.urgent
-          ? TaskUrgency.normal
-          : TaskUrgency.urgent;
-    });
-  }
-
-  void _submit() {
-    if (_titleController.text.trim().isEmpty) return;
-    final repo = ref.read(taskRepositoryProvider);
-    repo.addTask(TaskEntity(
-      id: const Uuid().v4(),
-      courseId: widget.courseId,
-      title: _titleController.text.trim(),
-      type: TaskType.task,
-      urgency: _urgency,
-      dueDate: _dueDate,
-    ));
-    ref.read(dataRefreshProvider.notifier).state++;
-    Navigator.of(context).pop();
   }
 }
