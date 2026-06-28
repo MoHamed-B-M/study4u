@@ -185,6 +185,15 @@ class SettingsView extends ConsumerWidget {
                         onTap: () => launchUrl(Uri.parse(
                             'https://github.com/MoHamed-B-M/study4u')),
                       ),
+                      _buildSettingRow(
+                        context,
+                        icon: CupertinoIcons.hand_thumbsup,
+                        iconColor: DesignTokens.cardTealAccent,
+                        title: 'Submit Feedback',
+                        subtitle: 'Report issues or suggest features',
+                        onTap: () => launchUrl(Uri.parse(
+                            'https://github.com/MoHamed-B-M/study4u/issues/new')),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 40),

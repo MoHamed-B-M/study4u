@@ -257,15 +257,19 @@ class _MainScreenState extends ConsumerState<MainScreen>
     final isSettings = widget.currentLocation == '/settings';
     if (isSettings != _wasSettings) {
       _wasSettings = isSettings;
-      final reduced = M3ESpring.isReducedMotion(context);
-      if (reduced) {
-        _navCtrl.value = isSettings ? 1 : 0;
+      if (isSettings) {
+        final reduced = M3ESpring.isReducedMotion(context);
+        if (reduced) {
+          _navCtrl.value = 1;
+        } else {
+          M3ESpring.animate(
+            _navCtrl,
+            to: 1,
+            spring: M3ESpring.spatial(),
+          );
+        }
       } else {
-        M3ESpring.animate(
-          _navCtrl,
-          to: isSettings ? 1 : 0,
-          spring: M3ESpring.spatial(),
-        );
+        _navCtrl.value = 0;
       }
     }
   }

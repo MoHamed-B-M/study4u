@@ -4,6 +4,19 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
+## [1.4.0] - 2026-06-28
+
+### Added
+- Pomodoro card expand/collapse in Statistics: Screen Time card now has an expand icon (chevron) that smoothly reveals a "Session Breakdown" section with the last 10 focus sessions via `SizeTransition` + M3E spring physics — by **Hamma**
+- Pomodoro control buttons in expanded view: Play/Pause toggle (`M3EFilledToggleButton`), Reset, and Go to Rest (`M3EFilledToggleButton.tonal`) for quick timer management — by **Hamma**
+- GitHub Feedback button in Settings → About: opens `github.com/.../issues/new` for reporting issues or suggesting features — by **Hamma**
+
+### Changed
+- FAB menu dimming overlay removed: `overlay: false` on `FabMenuM3E` so the dark scrim no longer appears when the menu opens — by **Hamma**
+- Nav bar now reappears instantly (no spring delay) when returning from Settings page, while keeping smooth M3E spring when hiding — by **Hamma**
+
+---
+
 ## [1.3.0] - 2026-06-27
 
 ### Added

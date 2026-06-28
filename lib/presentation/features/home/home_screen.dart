@@ -740,6 +740,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return FabMenuM3E(
       alignment: Alignment.bottomRight,
       direction: FabMenuDirection.up,
+      overlay: false,
       popOnItemTap: true,
       primaryFab: Padding(
         padding: const EdgeInsets.only(bottom: 24),

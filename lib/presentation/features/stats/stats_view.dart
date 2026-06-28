@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_bar_m3e/app_bar_m3e.dart';
+import 'package:m3e_buttons/m3e_buttons.dart';
 import 'package:m3e_card_list/m3e_card_list.dart';
 import '../../../../core/animation/m3e_spring.dart';
 import '../../../../core/utils/grade_calculator.dart';
@@ -25,7 +26,9 @@ class _StatsViewState extends ConsumerState<StatsView>
   late final AnimationController _fadeCtrl2;
   late final AnimationController _fadeCtrl3;
   late final AnimationController _fadeCtrl4;
+  late final AnimationController _screenTimeCtrl;
   bool _cgpaTargetExpanded = true;
+  bool _screenTimeExpanded = false;
 
   @override
   void initState() {
@@ -34,6 +37,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl2 = AnimationController(vsync: this);
     _fadeCtrl3 = AnimationController(vsync: this);
     _fadeCtrl4 = AnimationController(vsync: this);
+    _screenTimeCtrl = AnimationController(vsync: this);
 
     if (M3ESpring.isReducedMotion(context)) {
       _fadeCtrl1.value = 1;
@@ -60,6 +64,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl2.dispose();
     _fadeCtrl3.dispose();
     _fadeCtrl4.dispose();
+    _screenTimeCtrl.dispose();
     super.dispose();
   }
 
@@ -404,62 +409,210 @@ class _StatsViewState extends ConsumerState<StatsView>
       gap: 0,
       color: cs.surfaceContainerLow,
       padding: const EdgeInsets.all(20),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.timer_outlined,
-              size: 22,
-              color: Color(0xFF4ADE80),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Screen Time',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
+          InkWell(
+            onTap: () => _toggleScreenTime(),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.timer_outlined,
+                      size: 22,
+                      color: Color(0xFF4ADE80),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Total focus time',
-                  style: TextStyle(
-                    fontSize: 12,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Screen Time',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Total focus time',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      display,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF4ADE80),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    _screenTimeExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: cs.onSurfaceVariant,
+                    size: 24,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              display,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF4ADE80),
-              ),
+          ClipRect(
+            child: SizeTransition(
+              sizeFactor: _screenTimeCtrl,
+              axisAlignment: -1,
+              child: _buildScreenTimeExpanded(context, totalSeconds, isDark),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildScreenTimeExpanded(
+      BuildContext context, int totalSeconds, bool isDark) {
+    final cs = Theme.of(context).colorScheme;
+    final pomodoro = ref.watch(pomodoroProvider);
+    final sessions = ref.watch(pomodoroSessionsProvider);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(height: 1),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              M3EFilledToggleButton(
+                icon: Icon(
+                  pomodoro.isActive ? Icons.pause : Icons.play_arrow,
+                  size: 18,
+                ),
+                checked: pomodoro.isActive,
+                onCheckedChange: (_) {
+                  HapticFeedback.mediumImpact();
+                  if (pomodoro.isActive) {
+                    ref.read(pomodoroProvider.notifier).pauseTimer();
+                  } else {
+                    ref.read(pomodoroProvider.notifier).startTimer();
+                  }
+                },
+              ),
+              const SizedBox(width: 8),
+              M3EFilledToggleButton.tonal(
+                icon: const Icon(Icons.restart_alt, size: 18),
+                onCheckedChange: (_) {
+                  HapticFeedback.mediumImpact();
+                  ref.read(pomodoroProvider.notifier).resetTimer();
+                },
+              ),
+              const SizedBox(width: 8),
+              M3EFilledToggleButton.tonal(
+                icon: const Icon(Icons.nightlight_round, size: 18),
+                onCheckedChange: (_) {
+                  HapticFeedback.mediumImpact();
+                  ref.read(pomodoroProvider.notifier).skipSession();
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Session Breakdown',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...sessions.reversed.take(10).map((s) {
+            final dur = s.durationSeconds;
+            final dh = dur ~/ 3600;
+            final dm = (dur % 3600) ~/ 60;
+            final date =
+                '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    date,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (sessions.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  'No sessions yet',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _toggleScreenTime() {
+    HapticFeedback.lightImpact();
+    setState(() => _screenTimeExpanded = !_screenTimeExpanded);
+    final reduced = M3ESpring.isReducedMotion(context);
+    if (reduced) {
+      _screenTimeCtrl.value = _screenTimeExpanded ? 1 : 0;
+    } else {
+      M3ESpring.animate(
+        _screenTimeCtrl,
+        to: _screenTimeExpanded ? 1 : 0,
+        spring: M3ESpring.spatial(),
+      );
+    }
   }
 
   Widget _buildSubjectPerformance(
