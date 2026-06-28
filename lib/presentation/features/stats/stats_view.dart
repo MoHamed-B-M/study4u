@@ -11,6 +11,7 @@ import '../../../../domain/usecases/cgpa_calculator.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../shared/providers/pomodoro_provider.dart';
 import '../../../../domain/entities/course.dart';
+import '../../../../domain/entities/pomodoro_session.dart';
 import '../../theme/design_tokens.dart';
 
 class StatsView extends ConsumerStatefulWidget {
@@ -26,9 +27,9 @@ class _StatsViewState extends ConsumerState<StatsView>
   late final AnimationController _fadeCtrl2;
   late final AnimationController _fadeCtrl3;
   late final AnimationController _fadeCtrl4;
-  late final AnimationController _screenTimeCtrl;
+  late final AnimationController _pomodoroCtrl;
   bool _cgpaTargetExpanded = true;
-  bool _screenTimeExpanded = false;
+  bool _pomodoroExpanded = false;
 
   @override
   void initState() {
@@ -37,7 +38,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl2 = AnimationController(vsync: this);
     _fadeCtrl3 = AnimationController(vsync: this);
     _fadeCtrl4 = AnimationController(vsync: this);
-    _screenTimeCtrl = AnimationController(vsync: this);
+    _pomodoroCtrl = AnimationController(vsync: this);
 
     if (M3ESpring.isReducedMotion(context)) {
       _fadeCtrl1.value = 1;
@@ -64,7 +65,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl2.dispose();
     _fadeCtrl3.dispose();
     _fadeCtrl4.dispose();
-    _screenTimeCtrl.dispose();
+    _pomodoroCtrl.dispose();
     super.dispose();
   }
 
@@ -100,8 +101,13 @@ class _StatsViewState extends ConsumerState<StatsView>
                 children: [
                   FadeTransition(
                     opacity: _fadeCtrl1,
-                    child: _buildHeroGrid(
-                        context, cgpa, pomodoro, courses, totalCredits),
+                    child:
+                        _buildCgpaCard(context, cgpa, courses, totalCredits),
+                  ),
+                  const SizedBox(height: 24),
+                  FadeTransition(
+                    opacity: _fadeCtrl2,
+                    child: _buildPomodoroCard(context, pomodoro, sessions),
                   ),
                   const SizedBox(height: 24),
                   FadeTransition(
@@ -126,22 +132,6 @@ class _StatsViewState extends ConsumerState<StatsView>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeroGrid(
-    BuildContext context,
-    CgpaResult cgpa,
-    PomodoroState pomodoro,
-    List<CourseEntity> courses,
-    double totalCredits,
-  ) {
-    return Row(
-      children: [
-        Expanded(child: _buildCgpaCard(context, cgpa, courses, totalCredits)),
-        const SizedBox(width: 12),
-        Expanded(child: _buildPomodoroCard(context, pomodoro)),
-      ],
     );
   }
 
@@ -222,7 +212,9 @@ class _StatsViewState extends ConsumerState<StatsView>
     );
   }
 
-  Widget _buildPomodoroCard(BuildContext context, PomodoroState pomodoro) {
+  Widget _buildPomodoroCard(
+      BuildContext context, PomodoroState pomodoro,
+      List<PomodoroSessionEntity> sessions) {
     final label = switch (pomodoro.status) {
       PomodoroStatus.focus => 'FOCUS',
       PomodoroStatus.shortBreak || PomodoroStatus.longBreak => 'BREAK',
@@ -254,6 +246,18 @@ class _StatsViewState extends ConsumerState<StatsView>
                   size: 18,
                   color: Colors.white,
                 ),
+              ),
+              IconButton(
+                icon: Icon(
+                  _pomodoroExpanded
+                      ? Icons.arrow_back_ios
+                      : Icons.arrow_forward_ios,
+                  color: Colors.white70,
+                  size: 18,
+                ),
+                onPressed: _togglePomodoro,
+                visualDensity: VisualDensity.compact,
+                tooltip: _pomodoroExpanded ? 'Collapse' : 'Expand',
               ),
             ],
           ),
@@ -307,9 +311,136 @@ class _StatsViewState extends ConsumerState<StatsView>
               ),
             ),
           ),
+          ClipRect(
+            child: SizeTransition(
+              sizeFactor: _pomodoroCtrl,
+              axisAlignment: -1,
+              child: _buildPomodoroExpanded(context, pomodoro, sessions),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildPomodoroExpanded(
+    BuildContext context,
+    PomodoroState pomodoro,
+    List<PomodoroSessionEntity> sessions,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              M3EFilledToggleButton(
+                icon: Icon(
+                  pomodoro.isActive ? Icons.pause : Icons.play_arrow,
+                  size: 18,
+                ),
+                checked: pomodoro.isActive,
+                onCheckedChange: (_) {
+                  HapticFeedback.mediumImpact();
+                  if (pomodoro.isActive) {
+                    ref.read(pomodoroProvider.notifier).pauseTimer();
+                  } else {
+                    ref.read(pomodoroProvider.notifier).startTimer();
+                  }
+                },
+              ),
+              const SizedBox(width: 8),
+              M3EFilledToggleButton.tonal(
+                icon: const Icon(Icons.restart_alt, size: 18),
+                onCheckedChange: (_) {
+                  HapticFeedback.mediumImpact();
+                  ref.read(pomodoroProvider.notifier).resetTimer();
+                },
+              ),
+              const SizedBox(width: 8),
+              M3EFilledToggleButton.tonal(
+                icon: const Icon(Icons.nightlight_round, size: 18),
+                onCheckedChange: (_) {
+                  HapticFeedback.mediumImpact();
+                  ref.read(pomodoroProvider.notifier).skipSession();
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Session Breakdown',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...sessions.reversed.take(10).map((s) {
+            final dur = s.durationSeconds;
+            final dh = dur ~/ 3600;
+            final dm = (dur % 3600) ~/ 60;
+            final date =
+                '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    date,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  Text(
+                    dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (sessions.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  'No sessions yet',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white54,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _togglePomodoro() {
+    HapticFeedback.lightImpact();
+    setState(() => _pomodoroExpanded = !_pomodoroExpanded);
+    final reduced = M3ESpring.isReducedMotion(context);
+    if (reduced) {
+      _pomodoroCtrl.value = _pomodoroExpanded ? 1 : 0;
+    } else {
+      M3ESpring.animate(
+        _pomodoroCtrl,
+        to: _pomodoroExpanded ? 1 : 0,
+        spring: M3ESpring.spatial(),
+      );
+    }
   }
 
   Widget _buildCgpaTargetCard(BuildContext context, bool isDark) {
@@ -409,210 +540,62 @@ class _StatsViewState extends ConsumerState<StatsView>
       gap: 0,
       color: cs.surfaceContainerLow,
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          InkWell(
-            onTap: () => _toggleScreenTime(),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.timer_outlined,
-                      size: 22,
-                      color: Color(0xFF4ADE80),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Screen Time',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Total focus time',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      display,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF4ADE80),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    _screenTimeExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: cs.onSurfaceVariant,
-                    size: 24,
-                  ),
-                ],
-              ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.timer_outlined,
+              size: 22,
+              color: Color(0xFF4ADE80),
             ),
           ),
-          ClipRect(
-            child: SizeTransition(
-              sizeFactor: _screenTimeCtrl,
-              axisAlignment: -1,
-              child: _buildScreenTimeExpanded(context, totalSeconds, isDark),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScreenTimeExpanded(
-      BuildContext context, int totalSeconds, bool isDark) {
-    final cs = Theme.of(context).colorScheme;
-    final pomodoro = ref.watch(pomodoroProvider);
-    final sessions = ref.watch(pomodoroSessionsProvider);
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Divider(height: 1),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              M3EFilledToggleButton(
-                icon: Icon(
-                  pomodoro.isActive ? Icons.pause : Icons.play_arrow,
-                  size: 18,
-                ),
-                checked: pomodoro.isActive,
-                onCheckedChange: (_) {
-                  HapticFeedback.mediumImpact();
-                  if (pomodoro.isActive) {
-                    ref.read(pomodoroProvider.notifier).pauseTimer();
-                  } else {
-                    ref.read(pomodoroProvider.notifier).startTimer();
-                  }
-                },
-              ),
-              const SizedBox(width: 8),
-              M3EFilledToggleButton.tonal(
-                icon: const Icon(Icons.restart_alt, size: 18),
-                onCheckedChange: (_) {
-                  HapticFeedback.mediumImpact();
-                  ref.read(pomodoroProvider.notifier).resetTimer();
-                },
-              ),
-              const SizedBox(width: 8),
-              M3EFilledToggleButton.tonal(
-                icon: const Icon(Icons.nightlight_round, size: 18),
-                onCheckedChange: (_) {
-                  HapticFeedback.mediumImpact();
-                  ref.read(pomodoroProvider.notifier).skipSession();
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Session Breakdown',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...sessions.reversed.take(10).map((s) {
-            final dur = s.durationSeconds;
-            final dh = dur ~/ 3600;
-            final dm = (dur % 3600) ~/ 60;
-            final date =
-                '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    date,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-          if (sessions.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: Text(
-                  'No sessions yet',
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Screen Time',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Total focus time',
+                  style: TextStyle(
+                    fontSize: 12,
                     color: cs.onSurfaceVariant,
                   ),
                 ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              display,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF4ADE80),
               ),
             ),
+          ),
         ],
       ),
     );
-  }
-
-  void _toggleScreenTime() {
-    HapticFeedback.lightImpact();
-    setState(() => _screenTimeExpanded = !_screenTimeExpanded);
-    final reduced = M3ESpring.isReducedMotion(context);
-    if (reduced) {
-      _screenTimeCtrl.value = _screenTimeExpanded ? 1 : 0;
-    } else {
-      M3ESpring.animate(
-        _screenTimeCtrl,
-        to: _screenTimeExpanded ? 1 : 0,
-        spring: M3ESpring.spatial(),
-      );
-    }
   }
 
   Widget _buildSubjectPerformance(

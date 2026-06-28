@@ -4,20 +4,7 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
-## [1.4.0] - 2026-06-28
-
-### Added
-- Pomodoro card expand/collapse in Statistics: Screen Time card now has an expand icon (chevron) that smoothly reveals a "Session Breakdown" section with the last 10 focus sessions via `SizeTransition` + M3E spring physics — by **Hamma**
-- Pomodoro control buttons in expanded view: Play/Pause toggle (`M3EFilledToggleButton`), Reset, and Go to Rest (`M3EFilledToggleButton.tonal`) for quick timer management — by **Hamma**
-- GitHub Feedback button in Settings → About: opens `github.com/.../issues/new` for reporting issues or suggesting features — by **Hamma**
-
-### Changed
-- FAB menu dimming overlay removed: `overlay: false` on `FabMenuM3E` so the dark scrim no longer appears when the menu opens — by **Hamma**
-- Nav bar now reappears instantly (no spring delay) when returning from Settings page, while keeping smooth M3E spring when hiding — by **Hamma**
-
----
-
-## [1.3.0] - 2026-06-27
+## [1.3.0] - 2026-06-28
 
 ### Added
 - Dynamic color support via `DynamicColorBuilder` (Android 12+), falls back to seed color from settings — `e48a4d0` by **Hamma**
@@ -28,6 +15,8 @@ All notable changes to stdy4u will be documented in this file.
 - M3E widgets and custom shapes for stats view hero grid — `5a98173` by **Hamma**
 - ToolbarM3E headers replaced with `AppBarM3E` on stats, home, and settings — `d7dcf6c` by **Hamma**
 - Settings page redesigned with `M3ECardList` expressive cards — `0f724ec` by **Hamma**
+- GitHub Feedback button in Settings → About: opens `github.com/.../issues/new` for reporting issues or suggesting features — by **Hamma**
+- Pomodoro card expand/collapse in Statistics: expand icon (arrow) in top-right corner springs the card open with M3E spatial physics, revealing Play/Pause toggle (`M3EFilledToggleButton`), Reset, and Go to Rest buttons plus session breakdown — by **Hamma**
 
 ### Changed
 - Theme system refactored to M3E Expressive design (`m3e_design`), `AppTheme.lightTheme` / `darkTheme` now accept `ColorScheme` directly — `52b1a9f`, `e48a4d0` by **Hamma**
@@ -41,6 +30,8 @@ All notable changes to stdy4u will be documented in this file.
   - Squish action buttons: scale-down press uses high-stiffness spatial spring (`600/14`) for tactile feedback — `7e1931b` by **Hamma**
   - Animated counter: number tween uses spatial spring (`300/16`) replacing `Curves.elasticOut` — `7e1931b` by **Hamma**
 - Nav bar body transition: removed `AnimatedSwitcher` (redundant with GoRouter), nav bar uses `SlideTransition` with spring-driven controller — `7e1931b` by **Hamma**
+- FAB menu dimming overlay removed: `overlay: false` on `FabMenuM3E` so the dark scrim no longer appears when the menu opens — by **Hamma**
+- Nav bar now reappears instantly (no spring delay) when returning from Settings page, while keeping smooth M3E spring when hiding — by **Hamma**
 
 ### Fixed
 - Broken temp files removed, `build_runner` re-run for Hive `.g.dart` adapters — `60529c5` by **Hamma**
