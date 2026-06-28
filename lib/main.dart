@@ -231,14 +231,52 @@ class MainScreen extends ConsumerStatefulWidget {
   ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends ConsumerState<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen>
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
+  late AnimationController _navCtrl;
+  late Animation<Offset> _navSlide;
+  bool _wasSettings = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _navCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _navSlide = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, 1.5),
+    ).animate(CurvedAnimation(parent: _navCtrl, curve: Curves.easeInOutCubic));
+    _wasSettings = widget.currentLocation == '/settings';
+    if (_wasSettings) _navCtrl.value = 1;
+  }
+
+  @override
+  void didUpdateWidget(MainScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final isSettings = widget.currentLocation == '/settings';
+    if (isSettings != _wasSettings) {
+      _wasSettings = isSettings;
+      if (isSettings) {
+        _navCtrl.forward();
+      } else {
+        _navCtrl.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _navCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final showLabels = ref.watch(showNavLabelsProvider);
-    final isSettings = widget.currentLocation == '/settings';
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
@@ -258,40 +296,41 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           child: widget.child,
         ),
       ),
-      bottomNavigationBar: isSettings
-          ? null
-          : Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: NavigationBarM3E(
-                selectedIndex: _currentIndex,
-                onDestinationSelected: (index) {
-                  HapticFeedback.lightImpact();
-                  setState(() => _currentIndex = index);
-                  if (index == 0) context.go('/');
-                  if (index == 1) context.go('/tracker');
-                  if (index == 2) context.go('/stats');
-                },
-                labelBehavior: showLabels
-                    ? NavBarM3ELabelBehavior.alwaysShow
-                    : NavBarM3ELabelBehavior.alwaysHide,
-                size: NavBarM3ESize.small,
-                elevation: 4,
-                destinations: const [
-                  NavigationDestinationM3E(
-                      icon: Icon(Icons.home_outlined),
-                      selectedIcon: Icon(Icons.home),
-                      label: 'Home'),
-                  NavigationDestinationM3E(
-                      icon: Icon(Icons.calendar_today_outlined),
-                      selectedIcon: Icon(Icons.calendar_today),
-                      label: 'Tracker'),
-                  NavigationDestinationM3E(
-                      icon: Icon(Icons.analytics_outlined),
-                      selectedIcon: Icon(Icons.analytics),
-                      label: 'Stats'),
-                ],
-              ),
-            ),
+      bottomNavigationBar: SlideTransition(
+        position: _navSlide,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: NavigationBarM3E(
+            selectedIndex: _currentIndex,
+            onDestinationSelected: (index) {
+              HapticFeedback.lightImpact();
+              setState(() => _currentIndex = index);
+              if (index == 0) context.go('/');
+              if (index == 1) context.go('/tracker');
+              if (index == 2) context.go('/stats');
+            },
+            labelBehavior: showLabels
+                ? NavBarM3ELabelBehavior.alwaysShow
+                : NavBarM3ELabelBehavior.alwaysHide,
+            size: NavBarM3ESize.small,
+            elevation: 4,
+            destinations: const [
+              NavigationDestinationM3E(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: 'Home'),
+              NavigationDestinationM3E(
+                  icon: Icon(Icons.calendar_today_outlined),
+                  selectedIcon: Icon(Icons.calendar_today),
+                  label: 'Tracker'),
+              NavigationDestinationM3E(
+                  icon: Icon(Icons.analytics_outlined),
+                  selectedIcon: Icon(Icons.analytics),
+                  label: 'Stats'),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

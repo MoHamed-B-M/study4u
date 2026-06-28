@@ -12,7 +12,9 @@ import '../../../domain/entities/task.dart';
 import '../../../domain/entities/course_material.dart';
 import '../../../domain/entities/attendance_record.dart';
 import '../../../shared/providers/logic_providers.dart';
+import '../../../core/services/notification_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/add_course_sheet.dart';
 import '../../widgets/add_task_sheet.dart';
 
 class CourseDetailScreen extends ConsumerStatefulWidget {
@@ -39,9 +41,51 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     super.dispose();
   }
 
-  void _handleEditCourse() {}
+  void _handleEditCourse() {
+    final course = ref.read(courseDetailProvider(widget.courseId));
+    if (course == null) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor:
+          Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppTheme.radiusCard)),
+      ),
+      builder: (_) => AddCourseSheet(course: course),
+    );
+  }
 
-  void _handleDeleteCourse() {}
+  void _handleDeleteCourse() {
+    final course = ref.read(courseDetailProvider(widget.courseId));
+    if (course == null) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Course'),
+        content: Text('Are you sure you want to delete "${course.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              ref.read(courseRepositoryProvider).deleteCourse(course.id);
+              NotificationService.instance
+                  .cancelNotification(course.id.hashCode);
+              Navigator.of(ctx).pop();
+              Navigator.of(context).maybePop();
+            },
+            style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.warningRed),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,17 +119,18 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            color: AppTheme.surfaceDark,
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
             elevation: 4,
+            surfaceTintColor: Colors.transparent,
             itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'edit',
                 child: Row(
                   children: [
-                    const Icon(Icons.edit_outlined,
-                        size: 20, color: Colors.white),
+                    Icon(Icons.edit_outlined,
+                        size: 20, color: Theme.of(context).colorScheme.onSurface),
                     const SizedBox(width: 12),
-                    Text('Edit', style: TextStyle(color: Colors.white)),
+                    Text('Edit', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                   ],
                 ),
               ),

@@ -67,7 +67,9 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
       constraints: BoxConstraints(maxWidth: screenWidth * 0.88),
       child: Container(
         decoration: BoxDecoration(
-          color: AppTheme.surfaceDark,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppTheme.surfaceDark
+              : Theme.of(context).colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(28),
         ),
         child: _downloadProgress == null && _error == null

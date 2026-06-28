@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/course.dart';
 import '../../shared/providers/logic_providers.dart';
+import '../../core/services/notification_service.dart';
 import '../theme/app_theme.dart';
 
 class AddCourseSheet extends ConsumerStatefulWidget {
@@ -101,6 +102,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
   void _save() {
     HapticFeedback.mediumImpact();
     final id = widget.course?.id ?? const Uuid().v4();
+    final weekDays = _weekDays.map((d) => _days[d]).toList();
     final course = CourseEntity(
       id: id,
       code: _codeCtrl.text.trim(),
@@ -112,15 +114,26 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
       colorValue: _colorValue,
       targetGrade: _targetGrade,
       creditHours: _creditHours,
-      scheduleJson: _weekDays.map((d) => _days[d]).toList().toString(),
-      weekDays: _weekDays.map((d) => _days[d]).toList(),
+      scheduleJson: weekDays.toString(),
+      weekDays: weekDays,
     );
 
     if (widget.course != null) {
       ref.read(courseRepositoryProvider).updateCourse(course);
+      NotificationService.instance.cancelNotification(course.id.hashCode);
     } else {
       ref.read(courseRepositoryProvider).addCourse(course);
     }
+
+    if (weekDays.isNotEmpty) {
+      NotificationService.instance.scheduleClassReminder(
+        id: course.id.hashCode,
+        courseName: course.name,
+        startTime: course.startTime,
+        weekDays: weekDays,
+      );
+    }
+
     ref.read(dataRefreshProvider.notifier).state++;
     Navigator.of(context).pop();
   }
