@@ -19,6 +19,15 @@ All notable changes to stdy4u will be documented in this file.
 ### Changed
 - Theme system refactored to M3E Expressive design (`m3e_design`), `AppTheme.lightTheme` / `darkTheme` now accept `ColorScheme` directly — `52b1a9f`, `e48a4d0` by **Hamma**
 - Nav bar hiding on settings: passes `currentLocation` from `ShellRoute.builder` instead of `GoRouterState.of(context)` to fix scope resolution — `e48a4d0` by **Hamma**
+- **M3E spring physics animation refactor**: All custom animations converted from standard easing curves to `SpringSimulation` from `flutter/physics.dart`:
+  - Nav bar slide (spatial): `stiffness: 400, damping: 20` with reduced motion support — `7e1931b` by **Hamma**
+  - Splash screen startup: fade, scale, and glow driven by staggered `SpringSimulation` with spatial/effect springs — `7e1931b` by **Hamma**
+  - Staggered list items: combined slide (spatial) + fade (effects) with single spring controller — `7e1931b` by **Hamma**
+  - Slide-out panel: toggle animation uses spatial spring for smooth width reveal — `7e1931b` by **Hamma**
+  - Stats view cards: 4 staggered fade-in controllers with effects springs and `Timer` delays — `7e1931b` by **Hanna`
+  - Squish action buttons: scale-down press uses high-stiffness spatial spring (`600/14`) for tactile feedback — `7e1931b` by **Hamma**
+  - Animated counter: number tween uses spatial spring (`300/16`) replacing `Curves.elasticOut` — `7e1931b` by **Hamma**
+- Nav bar body transition: removed `AnimatedSwitcher` (redundant with GoRouter), nav bar uses `SlideTransition` with spring-driven controller — `7e1931b` by **Hamma**
 
 ### Fixed
 - Broken temp files removed, `build_runner` re-run for Hive `.g.dart` adapters — `60529c5` by **Hamma**

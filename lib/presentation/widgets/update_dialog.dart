@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
+import '../../core/animation/m3e_spring.dart';
 import '../../core/services/update_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/design_tokens.dart';
@@ -327,17 +328,12 @@ class _SquishActionButton extends StatefulWidget {
 class _SquishActionButtonState extends State<_SquishActionButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnim;
   bool _pressed = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
-    _scaleAnim = _controller.drive(Tween<double>(begin: 1.0, end: 0.94));
+    _controller = AnimationController(vsync: this);
   }
 
   @override
@@ -348,19 +344,44 @@ class _SquishActionButtonState extends State<_SquishActionButton>
 
   void _handleTapDown(TapDownDetails details) {
     setState(() => _pressed = true);
-    _controller.forward();
+    if (M3ESpring.isReducedMotion(context)) {
+      _controller.value = 1;
+    } else {
+      M3ESpring.animate(
+        _controller,
+        to: 1,
+        spring: M3ESpring.spatial(stiffness: 600, damping: 14),
+      );
+    }
   }
 
   void _handleTapUp(TapUpDetails details) {
     setState(() => _pressed = false);
-    _controller.reverse().then((_) {
+    if (M3ESpring.isReducedMotion(context)) {
+      _controller.value = 0;
       if (mounted && widget.onTap != null) widget.onTap!();
-    });
+    } else {
+      M3ESpring.animate(
+        _controller,
+        to: 0,
+        spring: M3ESpring.spatial(stiffness: 600, damping: 14),
+      ).then((_) {
+        if (mounted && widget.onTap != null) widget.onTap!();
+      });
+    }
   }
 
   void _handleTapCancel() {
     setState(() => _pressed = false);
-    _controller.reverse();
+    if (M3ESpring.isReducedMotion(context)) {
+      _controller.value = 0;
+    } else {
+      M3ESpring.animate(
+        _controller,
+        to: 0,
+        spring: M3ESpring.spatial(stiffness: 600, damping: 14),
+      );
+    }
   }
 
   @override
@@ -369,14 +390,14 @@ class _SquishActionButtonState extends State<_SquishActionButton>
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnim.value,
-          child: child,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) => Transform.scale(
+            scale: 1.0 - (_controller.value * 0.06),
+            child: child,
+          ),
+          child: widget.builder(_pressed),
         ),
-        child: widget.builder(_pressed),
-      ),
     );
   }
 }

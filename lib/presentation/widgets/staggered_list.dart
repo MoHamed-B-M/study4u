@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/animation/m3e_spring.dart';
 
 class StaggeredList extends StatelessWidget {
   final List<Widget> items;
@@ -58,21 +59,25 @@ class _StaggeredItemState extends State<_StaggeredItem>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
+    _controller = AnimationController(vsync: this);
     final delay = widget.itemDelay + widget.staggerDelay * widget.index;
     Future.delayed(delay, () {
-      if (mounted) _controller.forward();
+      if (!mounted) return;
+      if (M3ESpring.isReducedMotion(context)) {
+        _controller.value = 1;
+      } else {
+        M3ESpring.animate(
+          _controller,
+          to: 1,
+          spring: M3ESpring.spatial(stiffness: 450, damping: 22),
+        );
+      }
     });
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    ).animate(_controller);
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
   }
 
   @override

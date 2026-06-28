@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_bar_m3e/app_bar_m3e.dart';
 import 'package:m3e_card_list/m3e_card_list.dart';
+import '../../../../core/animation/m3e_spring.dart';
 import '../../../../core/utils/grade_calculator.dart';
 import '../../../../domain/usecases/cgpa_calculator.dart';
 import '../../../../shared/providers/logic_providers.dart';
@@ -18,22 +20,46 @@ class StatsView extends ConsumerStatefulWidget {
 }
 
 class _StatsViewState extends ConsumerState<StatsView>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _fadeController;
+    with TickerProviderStateMixin {
+  late final AnimationController _fadeCtrl1;
+  late final AnimationController _fadeCtrl2;
+  late final AnimationController _fadeCtrl3;
+  late final AnimationController _fadeCtrl4;
   bool _cgpaTargetExpanded = true;
 
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    )..forward();
+    _fadeCtrl1 = AnimationController(vsync: this);
+    _fadeCtrl2 = AnimationController(vsync: this);
+    _fadeCtrl3 = AnimationController(vsync: this);
+    _fadeCtrl4 = AnimationController(vsync: this);
+
+    if (M3ESpring.isReducedMotion(context)) {
+      _fadeCtrl1.value = 1;
+      _fadeCtrl2.value = 1;
+      _fadeCtrl3.value = 1;
+      _fadeCtrl4.value = 1;
+    } else {
+      M3ESpring.animate(_fadeCtrl1, to: 1, spring: M3ESpring.effects());
+      Timer(const Duration(milliseconds: 120), () {
+        if (mounted) M3ESpring.animate(_fadeCtrl2, to: 1, spring: M3ESpring.effects());
+      });
+      Timer(const Duration(milliseconds: 240), () {
+        if (mounted) M3ESpring.animate(_fadeCtrl3, to: 1, spring: M3ESpring.effects());
+      });
+      Timer(const Duration(milliseconds: 360), () {
+        if (mounted) M3ESpring.animate(_fadeCtrl4, to: 1, spring: M3ESpring.effects());
+      });
+    }
   }
 
   @override
   void dispose() {
-    _fadeController.dispose();
+    _fadeCtrl1.dispose();
+    _fadeCtrl2.dispose();
+    _fadeCtrl3.dispose();
+    _fadeCtrl4.dispose();
     super.dispose();
   }
 
@@ -68,40 +94,24 @@ class _StatsViewState extends ConsumerState<StatsView>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   FadeTransition(
-                    opacity: _fadeController.drive(
-                      CurveTween(
-                        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
-                      ),
-                    ),
+                    opacity: _fadeCtrl1,
                     child: _buildHeroGrid(
                         context, cgpa, pomodoro, courses, totalCredits),
                   ),
                   const SizedBox(height: 24),
                   FadeTransition(
-                    opacity: _fadeController.drive(
-                      CurveTween(
-                        curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
-                      ),
-                    ),
+                    opacity: _fadeCtrl2,
                     child: _buildCgpaTargetCard(context, isDark),
                   ),
                   const SizedBox(height: 24),
                   FadeTransition(
-                    opacity: _fadeController.drive(
-                      CurveTween(
-                        curve: const Interval(0.4, 0.8, curve: Curves.easeOut),
-                      ),
-                    ),
+                    opacity: _fadeCtrl3,
                     child:
                         _buildScreenTime(context, totalScreenSeconds, isDark),
                   ),
                   const SizedBox(height: 24),
                   FadeTransition(
-                    opacity: _fadeController.drive(
-                      CurveTween(
-                        curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
-                      ),
-                    ),
+                    opacity: _fadeCtrl4,
                     child: _buildSubjectPerformance(context, courses),
                   ),
                   const SizedBox(height: 100),

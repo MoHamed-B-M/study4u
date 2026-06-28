@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../core/animation/m3e_spring.dart';
 
 class AnimatedCounter extends StatefulWidget {
   final double targetValue;
   final int decimals;
   final TextStyle? style;
   final String suffix;
-  final Duration duration;
 
   const AnimatedCounter({
     super.key,
@@ -13,7 +13,6 @@ class AnimatedCounter extends StatefulWidget {
     this.decimals = 2,
     this.style,
     this.suffix = '',
-    this.duration = const Duration(milliseconds: 1000),
   });
 
   @override
@@ -23,27 +22,40 @@ class AnimatedCounter extends StatefulWidget {
 class AnimatedCounterState extends State<AnimatedCounter>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
   double _displayValue = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
+    _controller = AnimationController(vsync: this);
     _controller.addListener(() {
-      setState(() => _displayValue = _animation.value * widget.targetValue);
+      setState(() => _displayValue = _controller.value * widget.targetValue);
     });
-    _controller.forward();
+    if (context.mounted && M3ESpring.isReducedMotion(context)) {
+      _controller.value = 1;
+    } else {
+      M3ESpring.animate(
+        _controller,
+        to: 1,
+        spring: M3ESpring.spatial(stiffness: 300, damping: 16),
+      );
+    }
   }
 
   @override
   void didUpdateWidget(AnimatedCounter oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.targetValue != widget.targetValue) {
-      _controller.reset();
-      _animation = CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
-      _controller.forward();
+      _controller.value = 0;
+      if (context.mounted && M3ESpring.isReducedMotion(context)) {
+        _controller.value = 1;
+      } else {
+        M3ESpring.animate(
+          _controller,
+          to: 1,
+          spring: M3ESpring.spatial(stiffness: 300, damping: 16),
+        );
+      }
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/animation/m3e_spring.dart';
 import '../theme/app_theme.dart';
 
 class SlideOutPanel extends StatefulWidget {
@@ -26,10 +27,7 @@ class _SlideOutPanelState extends State<SlideOutPanel>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 320),
-    );
+    _controller = AnimationController(vsync: this);
     _widthAnim = _controller.drive(Tween<double>(
       begin: 0,
       end: 1,
@@ -45,10 +43,14 @@ class _SlideOutPanelState extends State<SlideOutPanel>
   void toggle() {
     setState(() {
       _isOpen = !_isOpen;
-      if (_isOpen) {
-        _controller.forward();
+      if (M3ESpring.isReducedMotion(context)) {
+        _controller.value = _isOpen ? 1 : 0;
       } else {
-        _controller.reverse();
+        M3ESpring.animate(
+          _controller,
+          to: _isOpen ? 1 : 0,
+          spring: M3ESpring.spatial(stiffness: 500, damping: 24),
+        );
       }
     });
   }

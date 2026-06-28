@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../core/animation/m3e_spring.dart';
 
 class SplashScreen extends StatefulWidget {
   final Widget nextPage;
@@ -11,14 +12,13 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static const _bgColor = Color(0xFF111625);
   static const _glowColor = Color(0xFF4ADE80);
 
-  late final AnimationController _controller;
-  late final Animation<double> _fadeIn;
-  late final Animation<double> _scaleIn;
-  late final Animation<double> _glowIn;
+  late final AnimationController _fadeCtrl;
+  late final AnimationController _scaleCtrl;
+  late final AnimationController _glowCtrl;
 
   bool _navigated = false;
 
@@ -26,29 +26,31 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
+    _fadeCtrl = AnimationController(vsync: this);
+    _scaleCtrl = AnimationController(vsync: this);
+    _glowCtrl = AnimationController(vsync: this);
+
+    M3ESpring.animate(
+      _fadeCtrl,
+      to: 1,
+      spring: M3ESpring.effects(stiffness: 250, damping: 28),
     );
 
-    _fadeIn = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    );
+    Timer(const Duration(milliseconds: 100), () {
+      M3ESpring.animate(
+        _scaleCtrl,
+        to: 1,
+        spring: M3ESpring.spatial(stiffness: 350, damping: 18),
+      );
+    });
 
-    _scaleIn = Tween<double>(begin: 0.82, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
-      ),
-    );
-
-    _glowIn = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
-    );
-
-    _controller.forward();
+    Timer(const Duration(milliseconds: 400), () {
+      M3ESpring.animate(
+        _glowCtrl,
+        to: 1,
+        spring: M3ESpring.effects(stiffness: 180, damping: 35),
+      );
+    });
 
     Timer(const Duration(milliseconds: 2800), _navigateToApp);
   }
@@ -69,7 +71,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _fadeCtrl.dispose();
+    _scaleCtrl.dispose();
+    _glowCtrl.dispose();
     super.dispose();
   }
 
@@ -77,41 +81,41 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 
+    final reduced = M3ESpring.isReducedMotion(context);
+    final fVal = reduced ? 1.0 : _fadeCtrl.value;
+    final sVal = reduced ? 1.0 : _scaleCtrl.value;
+    final gVal = reduced ? 1.0 : _glowCtrl.value;
+
     return Scaffold(
       backgroundColor: _bgColor,
       body: Stack(
         children: [
-          AnimatedBuilder(
-            animation: _glowIn,
-            builder: (context, _) => Opacity(
-              opacity: _glowIn.value,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  width: size.width * 1.3,
-                  height: size.height * 0.35,
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      center: const Alignment(0, 0.9),
-                      radius: 0.9,
-                      colors: [
-                        _glowColor.withAlpha(90),
-                        _glowColor.withAlpha(20),
-                        Colors.transparent,
-                      ],
-                    ),
+          Opacity(
+            opacity: gVal,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: size.width * 1.3,
+                height: size.height * 0.35,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(0, 0.9),
+                    radius: 0.9,
+                    colors: [
+                      _glowColor.withAlpha(90),
+                      _glowColor.withAlpha(20),
+                      Colors.transparent,
+                    ],
                   ),
                 ),
               ),
             ),
           ),
           Center(
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, _) => Transform.scale(
-                scale: _scaleIn.value,
-                child: Opacity(
-                  opacity: _fadeIn.value,
+            child: Transform.scale(
+              scale: sVal,
+              child: Opacity(
+                opacity: fVal,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -150,10 +154,9 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ),
-            ),
+          ),
+          ),
+          ),
           ),
         ],
       ),

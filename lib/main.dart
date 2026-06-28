@@ -19,6 +19,7 @@ import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
 import 'core/animation/page_scale.dart';
+import 'core/animation/m3e_spring.dart';
 import 'data/models/app_settings.dart';
 
 void main() {
@@ -241,14 +242,11 @@ class _MainScreenState extends ConsumerState<MainScreen>
   @override
   void initState() {
     super.initState();
-    _navCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
+    _navCtrl = AnimationController(vsync: this);
     _navSlide = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0, 1.5),
-    ).animate(CurvedAnimation(parent: _navCtrl, curve: Curves.easeInOutCubic));
+    ).animate(_navCtrl);
     _wasSettings = widget.currentLocation == '/settings';
     if (_wasSettings) _navCtrl.value = 1;
   }
@@ -259,10 +257,15 @@ class _MainScreenState extends ConsumerState<MainScreen>
     final isSettings = widget.currentLocation == '/settings';
     if (isSettings != _wasSettings) {
       _wasSettings = isSettings;
-      if (isSettings) {
-        _navCtrl.forward();
+      final reduced = M3ESpring.isReducedMotion(context);
+      if (reduced) {
+        _navCtrl.value = isSettings ? 1 : 0;
       } else {
-        _navCtrl.reverse();
+        M3ESpring.animate(
+          _navCtrl,
+          to: isSettings ? 1 : 0,
+          spring: M3ESpring.spatial(),
+        );
       }
     }
   }
@@ -287,14 +290,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
     return Scaffold(
       body: RepaintBoundary(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: widget.child,
-        ),
+        child: widget.child,
       ),
       bottomNavigationBar: SlideTransition(
         position: _navSlide,
