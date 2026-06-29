@@ -75,13 +75,13 @@ android {
         }
     }
 
-    // ABI splits to reduce APK size.
+    // Split APKs per architecture so each download is ~20–25 MB instead of ~55 MB.
     splits {
         abi {
             isEnable = true
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86_64")
-            isUniversalApk = true
+            isUniversalApk = false
         }
     }
 }

@@ -11,6 +11,7 @@ All notable changes to stdy4u will be documented in this file.
 - `google_nav_bar: ^5.0.7` replacing `navigation_bar_m3e` — by **Hamma**
 
 ### Changed
+- **APK size optimization**: universal APK disabled → per-ABI split APKs via `--split-per-abi`; added `--split-debug-info` to CI build command; each APK is now ~20–25 MB instead of ~55 MB — by **Hamma**
 - Nav bar replaced: `NavigationBarM3E` → `GNav` with green accent (`#4ADE80`), `easeOutExpo` curve, outlined Material icons — by **Hamma**
 - Nav bar hide detection on Settings: now reads `GoRouterState.of(context).matchedLocation` directly in `build()` instead of relying on `didUpdateWidget` which didn't fire when only the child route changed inside the `ValueListenableBuilder` shell — by **Hamma**
 - Pomodoro card expansion: removed horizontal `SizeTransition` + spring controller; replaced with `AnimatedSize` + `SpringCurve(stiffness: 400, damping: 20)` + `AnimatedSwitcher` + `FadeTransition` using `ValueKey` — eliminates layout jitter from mixing `SizeTransition` in a `Row` — by **Hamma**

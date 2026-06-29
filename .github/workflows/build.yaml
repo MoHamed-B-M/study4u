@@ -92,20 +92,34 @@ jobs:
         run: |
           sed -i "s/version: .*/version: $VERSION+${{ github.run_number }}/" pubspec.yaml
 
-      - name: Build APK (signed release — universal arm64+v7a)
+      - name: Build split APKs (signed release)
         if: env.IS_RELEASE == 'true'
-        run: flutter build apk --release --target-platform android-arm64,android-arm --build-number=${{ github.run_number }}
+        run: |
+          flutter build apk --release \
+            --split-per-abi \
+            --split-debug-info=build/debug-info \
+            --build-number=${{ github.run_number }}
 
-      - name: Build APK (release — universal arm64+v7a)
+      - name: Build split APKs
         if: env.IS_RELEASE != 'true'
-        run: flutter build apk --release --target-platform android-arm64,android-arm
+        run: |
+          flutter build apk --release \
+            --split-per-abi \
+            --split-debug-info=build/debug-info
 
-      - name: Upload APK as artifact (PR / branch push)
-        if: env.IS_RELEASE != 'true'
+      - name: Upload split APKs as artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: stdy4u-app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: stdy4u-apks
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
+
+      - name: Upload debug symbols
+        if: env.IS_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stdy4u-debug-info
+          path: build/debug-info/
           retention-days: 30
 
       - name: Extract release notes from CHANGELOG
@@ -128,4 +142,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: stdy4u ${{ github.ref_name }}
           body_path: release_notes.md
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
