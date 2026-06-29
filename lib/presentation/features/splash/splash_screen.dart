@@ -26,9 +26,9 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    _fadeCtrl = AnimationController(vsync: this);
-    _scaleCtrl = AnimationController(vsync: this);
-    _glowCtrl = AnimationController(vsync: this);
+    _fadeCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
+    _scaleCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
+    _glowCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
 
     M3ESpring.animate(
       _fadeCtrl,
@@ -37,6 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     Timer(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
       M3ESpring.animate(
         _scaleCtrl,
         to: 1,
@@ -45,6 +46,7 @@ class _SplashScreenState extends State<SplashScreen>
     });
 
     Timer(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
       M3ESpring.animate(
         _glowCtrl,
         to: 1,
@@ -53,6 +55,10 @@ class _SplashScreenState extends State<SplashScreen>
     });
 
     Timer(const Duration(milliseconds: 2800), _navigateToApp);
+  }
+
+  void _onUpdate() {
+    if (mounted) setState(() {});
   }
 
   void _navigateToApp() {

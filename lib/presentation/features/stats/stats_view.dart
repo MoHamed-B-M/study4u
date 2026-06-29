@@ -6,6 +6,7 @@ import 'package:app_bar_m3e/app_bar_m3e.dart';
 import 'package:m3e_buttons/m3e_buttons.dart';
 import 'package:m3e_card_list/m3e_card_list.dart';
 import '../../../../core/animation/m3e_spring.dart';
+import '../../../../core/animation/spring_curve.dart';
 import '../../../../core/utils/grade_calculator.dart';
 import '../../../../domain/usecases/cgpa_calculator.dart';
 import '../../../../shared/providers/logic_providers.dart';
@@ -28,7 +29,6 @@ class _StatsViewState extends ConsumerState<StatsView>
   late final AnimationController _fadeCtrl2;
   late final AnimationController _fadeCtrl3;
   late final AnimationController _fadeCtrl4;
-  late final AnimationController _pomodoroCtrl;
   late final AnimationController _screenTimeCtrl;
   bool _cgpaTargetExpanded = true;
   bool _pomodoroExpanded = false;
@@ -41,7 +41,6 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl2 = AnimationController(vsync: this);
     _fadeCtrl3 = AnimationController(vsync: this);
     _fadeCtrl4 = AnimationController(vsync: this);
-    _pomodoroCtrl = AnimationController(vsync: this);
     _screenTimeCtrl = AnimationController(vsync: this);
 
     if (M3ESpring.isReducedMotion(context)) {
@@ -69,7 +68,6 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl2.dispose();
     _fadeCtrl3.dispose();
     _fadeCtrl4.dispose();
-    _pomodoroCtrl.dispose();
     _screenTimeCtrl.dispose();
     super.dispose();
   }
@@ -256,106 +254,102 @@ class _StatsViewState extends ConsumerState<StatsView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ClipRect(
-                child: SizeTransition(
-                  sizeFactor: _pomodoroCtrl,
-                  axis: Axis.horizontal,
-                  axisAlignment: 1,
-                  child: _buildPomodoroLeftPanel(
-                      context, pomodoro, sessions, label),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.timer_outlined,
+                  size: 18,
+                  color: Colors.white,
                 ),
               ),
-              if (_pomodoroExpanded) const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.timer_outlined,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _pomodoroExpanded
-                                ? Icons.arrow_back_ios
-                                : Icons.arrow_forward_ios,
-                            color: Colors.white70,
-                            size: 18,
-                          ),
-                          onPressed: _togglePomodoro,
-                          visualDensity: VisualDensity.compact,
-                          tooltip:
-                              _pomodoroExpanded ? 'Collapse' : 'Expand',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      pomodoro.timerString,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        fontFeatures: [FontFeature.tabularFigures()],
-                        height: 1.1,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor:
-                              Colors.white.withValues(alpha: 0.2),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          if (pomodoro.isActive) {
-                            ref.read(pomodoroProvider.notifier).pauseTimer();
-                          } else {
-                            ref.read(pomodoroProvider.notifier).startTimer();
-                          }
-                        },
-                        child: Text(
-                          pomodoro.isActive ? 'Pause' : 'Start',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+              IconButton(
+                icon: Icon(
+                  _pomodoroExpanded
+                      ? Icons.arrow_back_ios
+                      : Icons.arrow_forward_ios,
+                  color: Colors.white70,
+                  size: 18,
                 ),
+                onPressed: _togglePomodoro,
+                visualDensity: VisualDensity.compact,
+                tooltip: _pomodoroExpanded ? 'Collapse' : 'Expand',
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            pomodoro.timerString,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              fontFeatures: [FontFeature.tabularFigures()],
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor:
+                    Colors.white.withValues(alpha: 0.2),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                if (pomodoro.isActive) {
+                  ref.read(pomodoroProvider.notifier).pauseTimer();
+                } else {
+                  ref.read(pomodoroProvider.notifier).startTimer();
+                }
+              },
+              child: Text(
+                pomodoro.isActive ? 'Pause' : 'Start',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+          AnimatedSize(
+            curve: const SpringCurve(stiffness: 400, damping: 20),
+            duration: const Duration(milliseconds: 600),
+            alignment: Alignment.topCenter,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: _pomodoroExpanded
+                  ? SizedBox(
+                      key: const ValueKey('expanded'),
+                      width: 240,
+                      child: _buildPomodoroLeftPanel(
+                          context, pomodoro, sessions, label),
+                    )
+                  : const SizedBox.shrink(key: ValueKey('compact')),
+            ),
           ),
         ],
       ),
@@ -473,16 +467,6 @@ class _StatsViewState extends ConsumerState<StatsView>
   void _togglePomodoro() {
     HapticFeedback.lightImpact();
     setState(() => _pomodoroExpanded = !_pomodoroExpanded);
-    final reduced = M3ESpring.isReducedMotion(context);
-    if (reduced) {
-      _pomodoroCtrl.value = _pomodoroExpanded ? 1 : 0;
-    } else {
-      M3ESpring.animate(
-        _pomodoroCtrl,
-        to: _pomodoroExpanded ? 1 : 0,
-        spring: SpringDescription(mass: 1, stiffness: 250, damping: 12),
-      );
-    }
   }
 
   Widget _buildCgpaTargetCard(BuildContext context, bool isDark) {

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:navigation_bar_m3e/navigation_bar_m3e.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:expressive_loading_indicator/expressive_loading_indicator.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
@@ -122,8 +122,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               transformHitTests: false,
               child: PageScaleProvider(
                 notifier: pageScaleNotifier,
-                child:
-                    MainScreen(currentLocation: state.matchedLocation, child: child!),
+                child: MainScreen(child: child!),
               ),
             );
           },
@@ -221,12 +220,7 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
 
 class MainScreen extends ConsumerStatefulWidget {
   final Widget child;
-  final String currentLocation;
-  const MainScreen({
-    super.key,
-    required this.child,
-    required this.currentLocation,
-  });
+  const MainScreen({super.key, required this.child});
 
   @override
   ConsumerState<MainScreen> createState() => _MainScreenState();
@@ -236,37 +230,12 @@ class _MainScreenState extends ConsumerState<MainScreen>
     with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _navCtrl;
-  bool _wasSettings = false;
+  String _lastLocation = '';
 
   @override
   void initState() {
     super.initState();
     _navCtrl = AnimationController(vsync: this);
-    _wasSettings = widget.currentLocation == '/settings';
-    if (_wasSettings) _navCtrl.value = 1;
-  }
-
-  @override
-  void didUpdateWidget(MainScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final isSettings = widget.currentLocation == '/settings';
-    if (isSettings != _wasSettings) {
-      _wasSettings = isSettings;
-      if (isSettings) {
-        final reduced = M3ESpring.isReducedMotion(context);
-        if (reduced) {
-          _navCtrl.value = 1;
-        } else {
-          M3ESpring.animate(
-            _navCtrl,
-            to: 1,
-            spring: M3ESpring.spatial(),
-          );
-        }
-      } else {
-        _navCtrl.value = 0;
-      }
-    }
   }
 
   @override
@@ -277,8 +246,33 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   @override
   Widget build(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    if (location != _lastLocation) {
+      final prev = _lastLocation;
+      _lastLocation = location;
+      final wasSettings = prev == '/settings';
+      final isSettings = location == '/settings';
+      if (isSettings != wasSettings) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          if (isSettings) {
+            if (M3ESpring.isReducedMotion(context)) {
+              _navCtrl.value = 1;
+            } else {
+              M3ESpring.animate(
+                _navCtrl,
+                to: 1,
+                spring: M3ESpring.spatial(),
+              );
+            }
+          } else {
+            _navCtrl.value = 0;
+          }
+        });
+      }
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final showLabels = ref.watch(showNavLabelsProvider);
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
@@ -305,33 +299,42 @@ class _MainScreenState extends ConsumerState<MainScreen>
         },
         child: Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: NavigationBarM3E(
+          child: GNav(
+            rippleColor: Colors.grey[800]!,
+            hoverColor: Colors.grey[700]!,
+            haptic: true,
+            tabBorderRadius: 15,
+            curve: Curves.easeOutExpo,
+            duration: const Duration(milliseconds: 900),
+            gap: 8,
+            color: isDark ? Colors.grey[600]! : Colors.grey[700]!,
+            activeColor: const Color(0xFF4ADE80),
+            iconSize: 24,
+            tabBackgroundColor:
+                const Color(0xFF4ADE80).withValues(alpha: 0.1),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             selectedIndex: _currentIndex,
-            onDestinationSelected: (index) {
+            onTabChange: (index) {
               HapticFeedback.lightImpact();
               setState(() => _currentIndex = index);
               if (index == 0) context.go('/');
               if (index == 1) context.go('/tracker');
               if (index == 2) context.go('/stats');
             },
-            labelBehavior: showLabels
-                ? NavBarM3ELabelBehavior.alwaysShow
-                : NavBarM3ELabelBehavior.alwaysHide,
-            size: NavBarM3ESize.small,
-            elevation: 4,
-            destinations: const [
-              NavigationDestinationM3E(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
-                  label: 'Home'),
-              NavigationDestinationM3E(
-                  icon: Icon(Icons.calendar_today_outlined),
-                  selectedIcon: Icon(Icons.calendar_today),
-                  label: 'Tracker'),
-              NavigationDestinationM3E(
-                  icon: Icon(Icons.analytics_outlined),
-                  selectedIcon: Icon(Icons.analytics),
-                  label: 'Stats'),
+            tabs: const [
+              GButton(
+                icon: Icons.home_outlined,
+                text: 'Home',
+              ),
+              GButton(
+                icon: Icons.calendar_today_outlined,
+                text: 'Tracker',
+              ),
+              GButton(
+                icon: Icons.analytics_outlined,
+                text: 'Stats',
+              ),
             ],
           ),
         ),

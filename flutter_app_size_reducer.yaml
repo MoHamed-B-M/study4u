@@ -1,0 +1,46 @@
+assets:
+  maxAssetSize: 1048576
+  excludeExtensions:
+    - ttf
+    - otf
+    - json
+  excludePaths:
+    - assets/fonts/
+    - assets/config/
+  optimizeImages: true
+  optimizeQuality: 85
+  imageFormats:
+    - png
+    - jpg
+    - jpeg
+    - gif
+    - webp
+
+dependencies:
+  checkUnused: true
+  checkOutdated: true
+  excludePackages: []
+  suggestAlternatives: true
+
+code:
+  detectUnusedCode: true
+  detectUnusedImports: true
+  analyzeDirs:
+    - lib
+  excludeDirs:
+    - lib/generated/
+  minComplexity: 10
+
+build:
+  buildTypes:
+    - apk
+  trackHistory: true
+  maxHistoryEntries: 10
+  sizeBudget: 0
+
+reporting:
+  outputFormat: markdown
+  openHtmlReports: false
+  reportDir: .reports
+  includeCharts: true
+  useColors: true

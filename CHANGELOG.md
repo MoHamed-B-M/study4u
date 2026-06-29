@@ -4,22 +4,23 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
-## [1.3.0] - 2026-06-28
+## [1.3.0] - 2026-06-29
 
 ### Added
-- Dynamic color support via `DynamicColorBuilder` (Android 12+), falls back to seed color from settings — `e48a4d0` by **Hamma**
-- `FabMenuM3E` for Add Course / Add Task actions, replaces old bottom sheet picker — `86c48dd` by **Hamma**
-- `m3e_card_list` integration: stats cards now use `M3ECard` widget — `d9cc8f1` by **Hamma**
-- Optional nav bar labels with floating compact `NavigationBarM3E` — `3e61894` by **Hamma**
-- `ButtonGroupM3E` bottom sheet for add options — `d7dcf6c` by **Hamma**
-- M3E widgets and custom shapes for stats view hero grid — `5a98173` by **Hamma**
-- ToolbarM3E headers replaced with `AppBarM3E` on stats, home, and settings — `d7dcf6c` by **Hamma**
-- Settings page redesigned with `M3ECardList` expressive cards — `0f724ec` by **Hamma**
-- GitHub Feedback button in Settings → About: opens `github.com/.../issues/new` for reporting issues or suggesting features — by **Hamma**
-- Pomodoro card in hero grid now has a left-arrow expand button: expanded content slides in from the right (horizontal `SizeTransition`) with a bouncy spring (stiffness: 250, damping: 12), revealing Play/Pause toggle, Reset, Go to Rest buttons, and session breakdown — by **Hamma**
-- Screen Time expand with app usage stats: expandable card shows hourly bar chart (24 bars, green, highest highlighted), top apps list with progress bars, and total usage comparison badge — by **Hamma**
-- `app_usage: ^4.1.0` dependency for Android app usage stats — by **Hamma**
-- Onboarding replaced with `parallax_onboarding: ^0.1.0`: 3 swipeable parallax pages (Focus Timer, Schedule, CGPA Tracker) with green icons and dark/light theme support — by **Hamma**
+- `SpringCurve` utility: underdamped spring approximation as a `Curve` subclass for use with `AnimatedSize` — by **Hamma**
+- `google_nav_bar: ^5.0.7` replacing `navigation_bar_m3e` — by **Hamma**
+
+### Changed
+- Nav bar replaced: `NavigationBarM3E` → `GNav` with green accent (`#4ADE80`), `easeOutExpo` curve, outlined Material icons — by **Hamma**
+- Nav bar hide detection on Settings: now reads `GoRouterState.of(context).matchedLocation` directly in `build()` instead of relying on `didUpdateWidget` which didn't fire when only the child route changed inside the `ValueListenableBuilder` shell — by **Hamma**
+- Pomodoro card expansion: removed horizontal `SizeTransition` + spring controller; replaced with `AnimatedSize` + `SpringCurve(stiffness: 400, damping: 20)` + `AnimatedSwitcher` + `FadeTransition` using `ValueKey` — eliminates layout jitter from mixing `SizeTransition` in a `Row` — by **Hamma**
+- Splash screen zoom: added `addListener(_onUpdate)` → `setState()` to all three animation controllers so the widget rebuilds on animation ticks — by **Hamma**
+- App size optimization: removed 9 unused dependencies (`riverpod_annotation`, `flutter_svg`, `animate_do`, `m3e_collection`, `fl_chart`, `workmanager`, `flutter_background_service`, `home_widget`, `ota_update`) and 1 unused dev dependency (`flutter_assets_cleaner`) — by **Hamma**
+
+### Fixed
+- Splash screen zoom-in animation not playing: animation controllers had no listeners, so `build()` never re-rendered with updated `_scaleCtrl.value` — by **Hamma**
+- Nav bar not hiding on Settings screen: `didUpdateWidget` was not called by the `ValueListenableBuilder` shell when only the child route changed — by **Hamma**
+- Pomodoro card expansion jitter: `SizeTransition(axis: horizontal)` inside a `Row` caused continuous layout reflow as the expanded width changed — by **Hamma**
 
 ### Changed
 - Theme system refactored to M3E Expressive design (`m3e_design`), `AppTheme.lightTheme` / `darkTheme` now accept `ColorScheme` directly — `52b1a9f`, `e48a4d0` by **Hamma**
