@@ -19,6 +19,7 @@ All notable changes to stdy4u will be documented in this file.
 - Pomodoro card in hero grid now has a left-arrow expand button: expanded content slides in from the right (horizontal `SizeTransition`) with a bouncy spring (stiffness: 250, damping: 12), revealing Play/Pause toggle, Reset, Go to Rest buttons, and session breakdown — by **Hamma**
 - Screen Time expand with app usage stats: expandable card shows hourly bar chart (24 bars, green, highest highlighted), top apps list with progress bars, and total usage comparison badge — by **Hamma**
 - `app_usage: ^4.1.0` dependency for Android app usage stats — by **Hamma**
+- Onboarding replaced with `parallax_onboarding: ^0.1.0`: 3 swipeable parallax pages (Focus Timer, Schedule, CGPA Tracker) with green icons and dark/light theme support — by **Hamma**
 
 ### Changed
 - Theme system refactored to M3E Expressive design (`m3e_design`), `AppTheme.lightTheme` / `darkTheme` now accept `ColorScheme` directly — `52b1a9f`, `e48a4d0` by **Hamma**

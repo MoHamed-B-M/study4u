@@ -1,4 +1,5 @@
 import 'package:app_usage/app_usage.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppUsageState {
@@ -64,7 +65,7 @@ class AppUsageNotifier extends StateNotifier<AppUsageState> {
         weekTotal: weekTotal,
         loading: false,
       );
-    } on AppUsageException catch (e) {
+    } on PlatformException catch (e) {
       state = state.copyWith(
         loading: false,
         error: 'Usage access not granted: ${e.message}',
