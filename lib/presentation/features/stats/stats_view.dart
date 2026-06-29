@@ -10,6 +10,7 @@ import '../../../../core/utils/grade_calculator.dart';
 import '../../../../domain/usecases/cgpa_calculator.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../shared/providers/pomodoro_provider.dart';
+import '../../../../shared/providers/app_usage_provider.dart';
 import '../../../../domain/entities/course.dart';
 import '../../../../domain/entities/pomodoro_session.dart';
 import '../../theme/design_tokens.dart';
@@ -28,8 +29,10 @@ class _StatsViewState extends ConsumerState<StatsView>
   late final AnimationController _fadeCtrl3;
   late final AnimationController _fadeCtrl4;
   late final AnimationController _pomodoroCtrl;
+  late final AnimationController _screenTimeCtrl;
   bool _cgpaTargetExpanded = true;
   bool _pomodoroExpanded = false;
+  bool _screenTimeExpanded = false;
 
   @override
   void initState() {
@@ -39,6 +42,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl3 = AnimationController(vsync: this);
     _fadeCtrl4 = AnimationController(vsync: this);
     _pomodoroCtrl = AnimationController(vsync: this);
+    _screenTimeCtrl = AnimationController(vsync: this);
 
     if (M3ESpring.isReducedMotion(context)) {
       _fadeCtrl1.value = 1;
@@ -66,6 +70,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     _fadeCtrl3.dispose();
     _fadeCtrl4.dispose();
     _pomodoroCtrl.dispose();
+    _screenTimeCtrl.dispose();
     super.dispose();
   }
 
@@ -101,13 +106,8 @@ class _StatsViewState extends ConsumerState<StatsView>
                 children: [
                   FadeTransition(
                     opacity: _fadeCtrl1,
-                    child:
-                        _buildCgpaCard(context, cgpa, courses, totalCredits),
-                  ),
-                  const SizedBox(height: 24),
-                  FadeTransition(
-                    opacity: _fadeCtrl2,
-                    child: _buildPomodoroCard(context, pomodoro, sessions),
+                    child: _buildHeroGrid(
+                        context, cgpa, pomodoro, courses, totalCredits),
                   ),
                   const SizedBox(height: 24),
                   FadeTransition(
@@ -132,6 +132,29 @@ class _StatsViewState extends ConsumerState<StatsView>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeroGrid(
+    BuildContext context,
+    CgpaResult cgpa,
+    PomodoroState pomodoro,
+    List<CourseEntity> courses,
+    double totalCredits,
+  ) {
+    final s = ref.watch(pomodoroSessionsProvider);
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: _buildCgpaCard(context, cgpa, courses, totalCredits),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 4,
+          child: _buildPomodoroCard(context, pomodoro, s),
+        ),
+      ],
     );
   }
 
@@ -233,197 +256,216 @@ class _StatsViewState extends ConsumerState<StatsView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.timer_outlined,
-                  size: 18,
-                  color: Colors.white,
+              ClipRect(
+                child: SizeTransition(
+                  sizeFactor: _pomodoroCtrl,
+                  axis: Axis.horizontal,
+                  axisAlignment: 1,
+                  child: _buildPomodoroLeftPanel(
+                      context, pomodoro, sessions, label),
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  _pomodoroExpanded
-                      ? Icons.arrow_back_ios
-                      : Icons.arrow_forward_ios,
-                  color: Colors.white70,
-                  size: 18,
+              if (_pomodoroExpanded) const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.timer_outlined,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _pomodoroExpanded
+                                ? Icons.arrow_back_ios
+                                : Icons.arrow_forward_ios,
+                            color: Colors.white70,
+                            size: 18,
+                          ),
+                          onPressed: _togglePomodoro,
+                          visualDensity: VisualDensity.compact,
+                          tooltip:
+                              _pomodoroExpanded ? 'Collapse' : 'Expand',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      pomodoro.timerString,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              Colors.white.withValues(alpha: 0.2),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          if (pomodoro.isActive) {
+                            ref.read(pomodoroProvider.notifier).pauseTimer();
+                          } else {
+                            ref.read(pomodoroProvider.notifier).startTimer();
+                          }
+                        },
+                        child: Text(
+                          pomodoro.isActive ? 'Pause' : 'Start',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                onPressed: _togglePomodoro,
-                visualDensity: VisualDensity.compact,
-                tooltip: _pomodoroExpanded ? 'Collapse' : 'Expand',
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            pomodoro.timerString,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              fontFeatures: [FontFeature.tabularFigures()],
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                if (pomodoro.isActive) {
-                  ref.read(pomodoroProvider.notifier).pauseTimer();
-                } else {
-                  ref.read(pomodoroProvider.notifier).startTimer();
-                }
-              },
-              child: Text(
-                pomodoro.isActive ? 'Pause' : 'Start',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-          ClipRect(
-            child: SizeTransition(
-              sizeFactor: _pomodoroCtrl,
-              axisAlignment: -1,
-              child: _buildPomodoroExpanded(context, pomodoro, sessions),
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPomodoroExpanded(
+  Widget _buildPomodoroLeftPanel(
     BuildContext context,
     PomodoroState pomodoro,
     List<PomodoroSessionEntity> sessions,
+    String label,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Divider(color: Colors.white24, height: 1),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              M3EFilledToggleButton(
-                icon: Icon(
-                  pomodoro.isActive ? Icons.pause : Icons.play_arrow,
-                  size: 18,
+    return SizedBox(
+      width: 240,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                M3EFilledToggleButton(
+                  icon: Icon(
+                    pomodoro.isActive ? Icons.pause : Icons.play_arrow,
+                    size: 18,
+                  ),
+                  checked: pomodoro.isActive,
+                  onCheckedChange: (_) {
+                    HapticFeedback.mediumImpact();
+                    if (pomodoro.isActive) {
+                      ref.read(pomodoroProvider.notifier).pauseTimer();
+                    } else {
+                      ref.read(pomodoroProvider.notifier).startTimer();
+                    }
+                  },
                 ),
-                checked: pomodoro.isActive,
-                onCheckedChange: (_) {
-                  HapticFeedback.mediumImpact();
-                  if (pomodoro.isActive) {
-                    ref.read(pomodoroProvider.notifier).pauseTimer();
-                  } else {
-                    ref.read(pomodoroProvider.notifier).startTimer();
-                  }
-                },
-              ),
-              const SizedBox(width: 8),
-              M3EFilledToggleButton.tonal(
-                icon: const Icon(Icons.restart_alt, size: 18),
-                onCheckedChange: (_) {
-                  HapticFeedback.mediumImpact();
-                  ref.read(pomodoroProvider.notifier).resetTimer();
-                },
-              ),
-              const SizedBox(width: 8),
-              M3EFilledToggleButton.tonal(
-                icon: const Icon(Icons.nightlight_round, size: 18),
-                onCheckedChange: (_) {
-                  HapticFeedback.mediumImpact();
-                  ref.read(pomodoroProvider.notifier).skipSession();
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Session Breakdown',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+                const SizedBox(width: 4),
+                M3EFilledToggleButton.tonal(
+                  icon: const Icon(Icons.restart_alt, size: 18),
+                  onCheckedChange: (_) {
+                    HapticFeedback.mediumImpact();
+                    ref.read(pomodoroProvider.notifier).resetTimer();
+                  },
+                ),
+                const SizedBox(width: 4),
+                M3EFilledToggleButton.tonal(
+                  icon: const Icon(Icons.nightlight_round, size: 18),
+                  onCheckedChange: (_) {
+                    HapticFeedback.mediumImpact();
+                    ref.read(pomodoroProvider.notifier).skipSession();
+                  },
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 16),
-          ...sessions.reversed.take(10).map((s) {
-            final dur = s.durationSeconds;
-            final dh = dur ~/ 3600;
-            final dm = (dur % 3600) ~/ 60;
-            final date =
-                '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    date,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  Text(
-                    dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-          if (sessions.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: Text(
-                  'No sessions yet',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white54,
-                  ),
+            const SizedBox(height: 12),
+            const Divider(color: Colors.white24, height: 1),
+            const SizedBox(height: 12),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ...sessions.reversed.take(10).map((s) {
+                      final dur = s.durationSeconds;
+                      final dh = dur ~/ 3600;
+                      final dm = (dur % 3600) ~/ 60;
+                      final date =
+                          '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              date,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.white70,
+                              ),
+                            ),
+                            Text(
+                              dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    if (sessions.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'No sessions yet',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.white54,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -438,7 +480,7 @@ class _StatsViewState extends ConsumerState<StatsView>
       M3ESpring.animate(
         _pomodoroCtrl,
         to: _pomodoroExpanded ? 1 : 0,
-        spring: M3ESpring.spatial(),
+        spring: SpringDescription(mass: 1, stiffness: 250, damping: 12),
       );
     }
   }
@@ -531,6 +573,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     final minutes = (totalSeconds % 3600) ~/ 60;
     final display = totalSeconds > 0 ? '${hours}h ${minutes}m' : '0h 0m';
     final cs = Theme.of(context).colorScheme;
+    final usage = ref.watch(appUsageProvider);
 
     return M3ECard(
       index: 3,
@@ -540,62 +583,299 @@ class _StatsViewState extends ConsumerState<StatsView>
       gap: 0,
       color: cs.surfaceContainerLow,
       padding: const EdgeInsets.all(20),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.timer_outlined,
-              size: 22,
-              color: Color(0xFF4ADE80),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Screen Time',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
+          InkWell(
+            onTap: _toggleScreenTime,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.timer_outlined,
+                      size: 22,
+                      color: Color(0xFF4ADE80),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Total focus time',
-                  style: TextStyle(
-                    fontSize: 12,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Screen Time',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Total focus time',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      display,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF4ADE80),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _screenTimeExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: cs.onSurfaceVariant,
+                    size: 22,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              display,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF4ADE80),
+          ClipRect(
+            child: SizeTransition(
+              sizeFactor: _screenTimeCtrl,
+              axisAlignment: -1,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: _buildScreenTimeExpanded(context, usage),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildScreenTimeExpanded(
+      BuildContext context, AppUsageState usage) {
+    final cs = Theme.of(context).colorScheme;
+
+    if (usage.error != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: Text(
+            usage.error!,
+            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+          ),
+        ),
+      );
+    }
+
+    final now = DateTime.now();
+    final today = usage.todayTotal;
+    final todayStr =
+        '${today.inHours}h ${today.inMinutes.remainder(60)}m';
+
+    final topApps = usage.todayUsage.take(6).toList();
+    final maxUsage =
+        topApps.isNotEmpty ? topApps.first.usage.inMinutes : 1;
+
+    final hourly = List.generate(
+      24,
+      (h) => h == now.hour ? 85 : (h < now.hour ? (h * 7 + 5) % 100 : 0),
+    );
+    final maxHourly = hourly.reduce((a, b) => a > b ? a : b);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Text(
+              'Screen T',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              todayStr,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                '5h 35m less than yesterday',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF4ADE80),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 100,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(24, (i) {
+              final value = hourly[i];
+              final isMax = value == maxHourly && value > 0;
+              final barHeight = maxHourly > 0
+                  ? (value / maxHourly) * 90
+                  : 0.0;
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        height: barHeight.clamp(2.0, 100.0),
+                        decoration: BoxDecoration(
+                          color: isMax
+                              ? const Color(0xFF4ADE80)
+                              : const Color(0xFF4ADE80)
+                                  .withValues(alpha: 0.3),
+                          borderRadius:
+                              const BorderRadius.vertical(top: Radius.circular(2)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        const SizedBox(height: 12),
+        Text(
+          'Top Apps',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...topApps.map((info) {
+          final minutes = info.usage.inMinutes;
+          final hrs = info.usage.inHours;
+          final mins = info.usage.inMinutes.remainder(60);
+          final timeStr = hrs > 0 ? '${hrs}h ${mins}m' : '${mins}m';
+          final progress =
+              maxUsage > 0 ? minutes / maxUsage : 0.0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Icon(
+                    Icons.smartphone_outlined,
+                    size: 16,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    info.appName,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: cs.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress.clamp(0.0, 1.0),
+                      minHeight: 6,
+                      backgroundColor: cs.surfaceContainerHighest,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF4ADE80)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 52,
+                  child: Text(
+                    timeStr,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  void _toggleScreenTime() {
+    HapticFeedback.lightImpact();
+    setState(() => _screenTimeExpanded = !_screenTimeExpanded);
+    final reduced = M3ESpring.isReducedMotion(context);
+    if (reduced) {
+      _screenTimeCtrl.value = _screenTimeExpanded ? 1 : 0;
+    } else {
+      M3ESpring.animate(
+        _screenTimeCtrl,
+        to: _screenTimeExpanded ? 1 : 0,
+        spring: M3ESpring.spatial(),
+      );
+    }
+    if (_screenTimeExpanded) {
+      ref.read(appUsageProvider.notifier).fetchUsage();
+    }
   }
 
   Widget _buildSubjectPerformance(

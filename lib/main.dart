@@ -236,17 +236,12 @@ class _MainScreenState extends ConsumerState<MainScreen>
     with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _navCtrl;
-  late Animation<Offset> _navSlide;
   bool _wasSettings = false;
 
   @override
   void initState() {
     super.initState();
     _navCtrl = AnimationController(vsync: this);
-    _navSlide = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0, 1.5),
-    ).animate(_navCtrl);
     _wasSettings = widget.currentLocation == '/settings';
     if (_wasSettings) _navCtrl.value = 1;
   }
@@ -296,8 +291,18 @@ class _MainScreenState extends ConsumerState<MainScreen>
       body: RepaintBoundary(
         child: widget.child,
       ),
-      bottomNavigationBar: SlideTransition(
-        position: _navSlide,
+      bottomNavigationBar: AnimatedBuilder(
+        animation: _navCtrl,
+        builder: (context, child) {
+          final value = 1 - _navCtrl.value;
+          return ClipRect(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              heightFactor: value,
+              child: Opacity(opacity: value, child: child),
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: NavigationBarM3E(

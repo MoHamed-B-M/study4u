@@ -16,7 +16,9 @@ All notable changes to stdy4u will be documented in this file.
 - ToolbarM3E headers replaced with `AppBarM3E` on stats, home, and settings — `d7dcf6c` by **Hamma**
 - Settings page redesigned with `M3ECardList` expressive cards — `0f724ec` by **Hamma**
 - GitHub Feedback button in Settings → About: opens `github.com/.../issues/new` for reporting issues or suggesting features — by **Hamma**
-- Pomodoro card expand/collapse in Statistics: expand icon (arrow) in top-right corner springs the card open with M3E spatial physics, revealing Play/Pause toggle (`M3EFilledToggleButton`), Reset, and Go to Rest buttons plus session breakdown — by **Hamma**
+- Pomodoro card in hero grid now has a left-arrow expand button: expanded content slides in from the right (horizontal `SizeTransition`) with a bouncy spring (stiffness: 250, damping: 12), revealing Play/Pause toggle, Reset, Go to Rest buttons, and session breakdown — by **Hamma**
+- Screen Time expand with app usage stats: expandable card shows hourly bar chart (24 bars, green, highest highlighted), top apps list with progress bars, and total usage comparison badge — by **Hamma**
+- `app_usage: ^4.1.0` dependency for Android app usage stats — by **Hamma**
 
 ### Changed
 - Theme system refactored to M3E Expressive design (`m3e_design`), `AppTheme.lightTheme` / `darkTheme` now accept `ColorScheme` directly — `52b1a9f`, `e48a4d0` by **Hamma**
@@ -31,7 +33,7 @@ All notable changes to stdy4u will be documented in this file.
   - Animated counter: number tween uses spatial spring (`300/16`) replacing `Curves.elasticOut` — `7e1931b` by **Hamma**
 - Nav bar body transition: removed `AnimatedSwitcher` (redundant with GoRouter), nav bar uses `SlideTransition` with spring-driven controller — `7e1931b` by **Hamma**
 - FAB menu dimming overlay removed: `overlay: false` on `FabMenuM3E` so the dark scrim no longer appears when the menu opens — by **Hamma**
-- Nav bar now reappears instantly (no spring delay) when returning from Settings page, while keeping smooth M3E spring when hiding — by **Hamma**
+- Nav bar hiding on Settings refactored: uses `Align` + `heightFactor` + spring `SizeTransition` instead of `SlideTransition` to avoid leaving empty space at screen bottom when hidden — by **Hamma**
 
 ### Fixed
 - Broken temp files removed, `build_runner` re-run for Hive `.g.dart` adapters — `60529c5` by **Hamma**

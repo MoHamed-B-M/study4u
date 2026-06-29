@@ -39,6 +39,9 @@ dependencies:
   m3e_card_list: ^0.1.0
   material_color_utilities: ^0.13.0
 
+  # App Usage Stats
+  app_usage: ^4.1.0
+
   # Data & Persistence
   hive: ^2.2.3
   hive_flutter: ^1.1.0
