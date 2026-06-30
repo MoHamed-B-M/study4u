@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:expressive_loading_indicator/expressive_loading_indicator.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
 import 'data/datasources/local_storage.dart';
-import 'presentation/theme/app_theme.dart';
+import 'theme/comic_theme.dart';
 import 'presentation/theme/theme_provider.dart';
 import 'presentation/features/home/home_screen.dart';
 import 'presentation/features/tracker/tracker_screen.dart';
@@ -77,17 +75,26 @@ class _StartupAppState extends State<StartupApp> {
       );
     }
     if (!_ready) {
-      return const MaterialApp(
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Center(child: ExpressiveLoadingIndicator()),
+        theme: ComicTheme.dark,
+        home: const Scaffold(
+          body: Center(
+            child: Text(
+              'LOADING...',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: ComicTheme.surfaceWhite,
+              ),
+            ),
+          ),
         ),
       );
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark()
-          .copyWith(scaffoldBackgroundColor: AppTheme.scaffoldDark),
+      theme: ComicTheme.dark,
       home: SplashScreen(nextPage: _getNextPage()),
     );
   }
@@ -194,26 +201,14 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
-    final seedColor = Color(ref.watch(primaryColorProvider));
 
-    return DynamicColorBuilder(
-      builder: (lightDynamic, darkDynamic) {
-        final lightCS =
-            lightDynamic ?? ColorScheme.fromSeed(seedColor: seedColor);
-        final darkCS = darkDynamic ?? ColorScheme.fromSeed(
-          seedColor: seedColor,
-          brightness: Brightness.dark,
-        );
-
-        return MaterialApp.router(
-          title: 'stdy4u',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme(lightCS),
-          darkTheme: AppTheme.darkTheme(darkCS),
-          themeMode: themeMode,
-          routerConfig: router,
-        );
-      },
+    return MaterialApp.router(
+      title: 'stdy4u',
+      debugShowCheckedModeBanner: false,
+      theme: ComicTheme.light,
+      darkTheme: ComicTheme.dark,
+      themeMode: themeMode,
+      routerConfig: router,
     );
   }
 }

@@ -2,14 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toolbar_m3e/toolbar_m3e.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../../../shared/providers/logic_providers.dart';
-import '../../../../domain/entities/course.dart';
-import '../../../../domain/entities/attendance_record.dart';
-import '../../../../domain/usecases/attendance_analytics.dart';
-import '../../theme/design_tokens.dart';
-import '../../widgets/dashboard_card.dart';
+import '../../../shared/providers/logic_providers.dart';
+import '../../../domain/entities/course.dart';
+import '../../../domain/entities/attendance_record.dart';
+import '../../../domain/usecases/attendance_analytics.dart';
+import '../../../theme/comic_theme.dart';
+import '../../../widgets/comic_card.dart';
 import '../../widgets/circular_progress_ring.dart';
 
 class TrackerView extends ConsumerStatefulWidget {
@@ -45,37 +44,28 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
     final courses = ref.watch(courseListProvider);
 
     return Scaffold(
-      appBar: ToolbarM3E(
-        titleText: 'Attendance',
-        subtitleText: 'STUDY4U',
-        variant: ToolbarM3EVariant.surface,
-        size: ToolbarM3ESize.large,
+      appBar: AppBar(
+        title: const Text('Attendance'),
       ),
-      body: Stack(
-        children: [
-          const BlobBackground(),
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: const SizedBox(height: 24)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: DesignTokens.spacingLG,
-                  ),
-                  child: Column(
-                    children: [
-                      _buildAttendanceOverview(analytics),
-                      const SizedBox(height: 24),
-                      _buildCalendarCard(context),
-                      const SizedBox(height: 24),
-                      _buildDailySchedule(context, courses),
-                      const SizedBox(height: 100),
-                    ],
-                  ),
-                ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
               ),
-            ],
+              child: Column(
+                children: [
+                  _buildAttendanceOverview(analytics),
+                  const SizedBox(height: 24),
+                  _buildCalendarCard(context),
+                  const SizedBox(height: 24),
+                  _buildDailySchedule(context, courses),
+                  const SizedBox(height: 100),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -83,23 +73,23 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
   }
 
   Widget _buildAttendanceOverview(AttendanceAnalyticsResult analytics) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (!analytics.hasRecords) {
-      return DashboardCard(
-        backgroundColor: context.surface,
-        borderRadius: DesignTokens.radiusLG,
-        padding: const EdgeInsets.all(DesignTokens.spacingLG),
+      return ComicCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: DesignTokens.cardBlue,
+                color: const Color(0xFFE8F0FE),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 CupertinoIcons.checkmark_seal,
                 size: 32,
-                color: DesignTokens.cardBlueAccent,
+                color: Color(0xFF64B5F6),
               ),
             ),
             const SizedBox(height: 16),
@@ -108,7 +98,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: context.textPrimary,
+                color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
               ),
             ),
             const SizedBox(height: 4),
@@ -116,7 +106,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
               'Start marking attendance to see your stats.',
               style: TextStyle(
                 fontSize: 13,
-                color: context.textSecondary,
+                color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -124,10 +114,8 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
       );
     }
 
-    return DashboardCard(
-      backgroundColor: DesignTokens.primaryLavender,
-      borderRadius: DesignTokens.radiusLG,
-      padding: const EdgeInsets.all(DesignTokens.spacingLG),
+    return ComicCard(
+      padding: const EdgeInsets.all(24),
       child: Row(
         children: [
           Expanded(
@@ -139,7 +127,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: DesignTokens.textWhite,
+                    color: Colors.white,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -149,7 +137,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                   style: const TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
-                    color: DesignTokens.textWhite,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -159,20 +147,20 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                       : 'You\'re doing great!',
                   style: TextStyle(
                     fontSize: 12,
-                    color: DesignTokens.textWhite.withValues(alpha: 0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     _buildStatPill('Present', analytics.present,
-                        DesignTokens.cardGreenAccent),
+                        const Color(0xFF66BB6A)),
                     const SizedBox(width: 8),
                     _buildStatPill('Absent', analytics.absent,
-                        DesignTokens.cardPinkAccent),
+                        const Color(0xFFEF5350)),
                     const SizedBox(width: 8),
                     _buildStatPill(
-                        'Late', analytics.late, DesignTokens.cardCreamAccent),
+                        'Late', analytics.late, const Color(0xFFFFB74D)),
                   ],
                 ),
               ],
@@ -183,8 +171,8 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
             progress: analytics.percentage / 100,
             size: 80,
             strokeWidth: 8,
-            progressColor: DesignTokens.textWhite,
-            backgroundColor: DesignTokens.textWhite.withValues(alpha: 0.2),
+            progressColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.2),
             label: '${analytics.percentage.toStringAsFixed(0)}%',
           ),
         ],
@@ -196,7 +184,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: DesignTokens.textWhite.withValues(alpha: 0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -213,10 +201,10 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
           const SizedBox(width: 6),
           Text(
             '$count',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: DesignTokens.textWhite,
+              color: Colors.white,
             ),
           ),
         ],
@@ -225,10 +213,9 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
   }
 
   Widget _buildCalendarCard(BuildContext context) {
-    return DashboardCard(
-      backgroundColor: context.surface,
-      borderRadius: DesignTokens.radiusLG,
-      padding: const EdgeInsets.all(DesignTokens.spacingMD),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ComicCard(
+      padding: const EdgeInsets.all(16),
       child: TableCalendar(
         firstDay: DateTime.utc(2020, 1, 1),
         lastDay: DateTime.utc(2030, 12, 31),
@@ -243,22 +230,22 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
         },
         calendarStyle: CalendarStyle(
           todayDecoration: BoxDecoration(
-            color: DesignTokens.primaryLavender,
+            color: const Color(0xFFA18CFF),
             shape: BoxShape.circle,
           ),
           selectedDecoration: BoxDecoration(
-            color: DesignTokens.secondaryBlue,
+            color: const Color(0xFF8F99FB),
             shape: BoxShape.circle,
           ),
           defaultTextStyle: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: context.textPrimary,
+            color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
           ),
           weekendTextStyle: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: DesignTokens.cardPinkAccent,
+            color: Color(0xFFEF5350),
           ),
         ),
         headerStyle: HeaderStyle(
@@ -267,17 +254,17 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
           titleTextStyle: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: context.textPrimary,
+            color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
           ),
           leftChevronIcon: Icon(
             CupertinoIcons.chevron_left,
             size: 18,
-            color: context.textSecondary,
+            color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
           ),
           rightChevronIcon: Icon(
             CupertinoIcons.chevron_right,
             size: 18,
-            color: context.textSecondary,
+            color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
           ),
         ),
       ),
@@ -285,6 +272,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
   }
 
   Widget _buildDailySchedule(BuildContext context, List<CourseEntity> courses) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -293,21 +281,19 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: context.textPrimary,
+            color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
           ),
         ),
         const SizedBox(height: 16),
         if (courses.isEmpty)
-          DashboardCard(
-            backgroundColor: context.surface,
-            borderRadius: DesignTokens.radiusLG,
-            padding: const EdgeInsets.all(DesignTokens.spacingLG),
+          ComicCard(
+            padding: const EdgeInsets.all(24),
             child: Center(
               child: Text(
                 'No classes scheduled for today.',
                 style: TextStyle(
                   fontSize: 13,
-                  color: context.textTertiary,
+                  color: isDark ? ComicTheme.darkText.withValues(alpha: 0.4) : ComicTheme.inkBlack.withValues(alpha: 0.4),
                 ),
               ),
             ),
@@ -316,10 +302,8 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
           ...courses.map((course) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: DashboardCard(
-                backgroundColor: context.surface,
-                borderRadius: DesignTokens.radiusMD,
-                padding: const EdgeInsets.all(DesignTokens.spacingMD),
+              child: ComicCard(
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     Container(
@@ -345,7 +329,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: context.textPrimary,
+                              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -353,7 +337,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                             '${course.startTime} - ${course.endTime}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: context.textSecondary,
+                              color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -364,14 +348,14 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                         _buildMarkButton(
                             'P',
                             CupertinoIcons.checkmark,
-                            DesignTokens.cardGreenAccent,
+                            const Color(0xFF66BB6A),
                             () => _markAttendance(
                                 course.id, AttendanceStatus.present)),
                         const SizedBox(height: 6),
                         _buildMarkButton(
                             'L',
                             CupertinoIcons.clock,
-                            DesignTokens.cardCreamAccent,
+                            const Color(0xFFFFB74D),
                             () => _markAttendance(
                                 course.id, AttendanceStatus.late)),
                       ],

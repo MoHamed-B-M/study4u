@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:animations/animations.dart';
-import 'package:app_bar_m3e/app_bar_m3e.dart';
-import 'package:fab_m3e/fab_m3e.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../domain/entities/course.dart';
 import '../../../../domain/entities/task.dart';
 import '../../../../domain/usecases/schedule_optimizer.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/app_card.dart';
+import '../../../../theme/comic_theme.dart';
+import '../../../../widgets/comic_card.dart';
+import '../../../../widgets/comic_button.dart';
 import '../../widgets/add_course_sheet.dart';
 import '../../widgets/add_task_sheet.dart';
 import '../../widgets/quote_expansion_route.dart';
@@ -45,10 +43,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBarM3E(
-        titleText: greeting,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+      appBar: AppBar(
+        title: Text(greeting),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -119,28 +115,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Row(
               children: [
                 Expanded(
-                  child: AppCard(
+                  child: ComicCard(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 16),
-                    color: isDark ? AppTheme.surfaceDark : Colors.white,
                     child: Column(
                       children: [
-                        Icon(Icons.book, color: AppTheme.primary, size: 24),
+                        Icon(Icons.book, color: ComicTheme.inkRed, size: 24),
                         const SizedBox(height: 8),
                         Text('${courses.length}',
-                            style: GoogleFonts.outfit(
+                            style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
                                 color: isDark
-                                    ? Colors.white
-                                    : AppTheme.textPrimary)),
+                                    ? ComicTheme.darkText
+                                    : ComicTheme.inkBlack)),
                         const SizedBox(height: 2),
                         Text('Courses',
                             style: TextStyle(
                                 fontSize: 11,
                                 color: isDark
-                                    ? Colors.white54
-                                    : AppTheme.textPrimary
+                                    ? ComicTheme.darkText.withValues(alpha: 0.6)
+                                    : ComicTheme.inkBlack
                                         .withValues(alpha: 0.6))),
                       ],
                     ),
@@ -148,28 +143,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: AppCard(
+                  child: ComicCard(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 16),
-                    color: isDark ? AppTheme.surfaceDark : Colors.white,
                     child: Column(
                       children: [
-                        Icon(Icons.task_alt, color: AppTheme.primary, size: 24),
+                        Icon(Icons.task_alt,
+                            color: ComicTheme.inkRed, size: 24),
                         const SizedBox(height: 8),
                         Text('${ref.watch(pendingTaskCountProvider)}',
-                            style: GoogleFonts.outfit(
+                            style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
                                 color: isDark
-                                    ? Colors.white
-                                    : AppTheme.textPrimary)),
+                                    ? ComicTheme.darkText
+                                    : ComicTheme.inkBlack)),
                         const SizedBox(height: 2),
                         Text('Pending',
                             style: TextStyle(
                                 fontSize: 11,
                                 color: isDark
-                                    ? Colors.white54
-                                    : AppTheme.textPrimary
+                                    ? ComicTheme.darkText.withValues(alpha: 0.6)
+                                    : ComicTheme.inkBlack
                                         .withValues(alpha: 0.6))),
                       ],
                     ),
@@ -202,8 +197,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         color: isDark
-                            ? Colors.white54
-                            : AppTheme.textPrimary.withValues(alpha: 0.6),
+                            ? ComicTheme.darkText.withValues(alpha: 0.6)
+                            : ComicTheme.inkBlack.withValues(alpha: 0.6),
                       )),
                 ),
               )
@@ -212,10 +207,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final task = tasks[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: AppCard(
+                  child: ComicCard(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 14),
-                    color: isDark ? AppTheme.surfaceDark : Colors.white,
                     child: Row(
                       children: [
                         GestureDetector(
@@ -234,18 +228,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: task.isCompleted
-                                  ? AppTheme.primary
+                                  ? ComicTheme.inkRed
                                   : Colors.transparent,
                               border: Border.all(
                                 color: task.isCompleted
-                                    ? AppTheme.primary
+                                    ? ComicTheme.inkRed
                                     : Colors.grey.shade400,
                                 width: 2,
                               ),
                             ),
                             child: task.isCompleted
                                 ? const Icon(Icons.check,
-                                    size: 14, color: Colors.white)
+                                    size: 14, color: ComicTheme.surfaceWhite)
                                 : null,
                           ),
                         ),
@@ -260,8 +254,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
                                   color: isDark
-                                      ? Colors.white
-                                      : AppTheme.textPrimary,
+                                      ? ComicTheme.darkText
+                                      : ComicTheme.inkBlack,
                                   decoration: task.isCompleted
                                       ? TextDecoration.lineThrough
                                       : null,
@@ -275,8 +269,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 style: TextStyle(
                                     fontSize: 11,
                                     color: isDark
-                                        ? Colors.white38
-                                        : AppTheme.textPrimary
+                                        ? ComicTheme.darkText
+                                            .withValues(alpha: 0.5)
+                                        : ComicTheme.inkBlack
                                             .withValues(alpha: 0.5)),
                               ),
                             ],
@@ -287,15 +282,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color:
-                                  AppTheme.warningRed.withValues(alpha: 0.15),
+                              color: ComicTheme.inkRed.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text('URGENT',
                                 style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w700,
-                                    color: AppTheme.warningRed)),
+                                    color: ComicTheme.inkRed)),
                           ),
                       ],
                     ),
@@ -309,7 +303,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Text('+${tasks.length - 3} more tasks',
                       style: TextStyle(
                           fontSize: 12,
-                          color: AppTheme.primary,
+                          color: ComicTheme.inkRed,
                           fontWeight: FontWeight.w600)),
                 ),
               ),
@@ -330,9 +324,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             _buildSectionHeader(context, 'Attendance', null),
             const SizedBox(height: 12),
-            AppCard(
+            ComicCard(
               padding: const EdgeInsets.all(16),
-              color: isDark ? AppTheme.surfaceDark : Colors.white,
               child: Row(
                 children: [
                   SizedBox(
@@ -350,12 +343,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 : 0,
                             strokeWidth: 6,
                             backgroundColor: isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : AppTheme.textPrimary.withValues(alpha: 0.08),
+                                ? ComicTheme.darkText.withValues(alpha: 0.08)
+                                : ComicTheme.inkBlack.withValues(alpha: 0.08),
                             valueColor: AlwaysStoppedAnimation<Color>(
                               analytics.isBelowThreshold
-                                  ? AppTheme.warningRed
-                                  : AppTheme.primary,
+                                  ? ComicTheme.inkRed
+                                  : ComicTheme.inkRed,
                             ),
                             strokeCap: StrokeCap.round,
                           ),
@@ -364,11 +357,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           analytics.hasRecords
                               ? '${analytics.percentage.toInt()}%'
                               : '--',
-                          style: GoogleFonts.outfit(
+                          style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
-                              color:
-                                  isDark ? Colors.white : AppTheme.textPrimary),
+                              color: isDark
+                                  ? ComicTheme.darkText
+                                  : ComicTheme.inkBlack),
                         ),
                       ],
                     ),
@@ -383,11 +377,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             _miniStat(
                                 Colors.green, '${analytics.present}', isDark),
                             const SizedBox(width: 16),
-                            _miniStat(AppTheme.warningRed,
-                                '${analytics.absent}', isDark),
-                            const SizedBox(width: 16),
-                            _miniStat(AppTheme.amberYellow, '${analytics.late}',
+                            _miniStat(ComicTheme.inkRed, '${analytics.absent}',
                                 isDark),
+                            const SizedBox(width: 16),
+                            _miniStat(const Color(0xFFF59E0B),
+                                '${analytics.late}', isDark),
                           ],
                         ),
                         if (analytics.isBelowThreshold) ...[
@@ -396,15 +390,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color:
-                                  AppTheme.warningRed.withValues(alpha: 0.15),
+                              color: ComicTheme.inkRed.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text('Below 75%!',
                                 style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    color: AppTheme.warningRed)),
+                                    color: ComicTheme.inkRed)),
                           ),
                         ],
                       ],
@@ -416,12 +409,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 16),
             _buildSectionHeader(context, 'Pomodoro', null),
             const SizedBox(height: 12),
-            AppCard(
+            ComicCard(
               padding: const EdgeInsets.all(16),
-              color: isDark ? AppTheme.surfaceDark : Colors.white,
               child: Row(
                 children: [
-                  Icon(Icons.timer_outlined, color: AppTheme.primary, size: 28),
+                  Icon(Icons.timer_outlined,
+                      color: ComicTheme.inkRed, size: 28),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -431,22 +424,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: isDark
-                                    ? Colors.white
-                                    : AppTheme.textPrimary)),
+                                    ? ComicTheme.darkText
+                                    : ComicTheme.inkBlack)),
                         Text('Start a session to track focus',
                             style: TextStyle(
                                 fontSize: 12,
                                 color: isDark
-                                    ? Colors.white54
-                                    : AppTheme.textPrimary
+                                    ? ComicTheme.darkText.withValues(alpha: 0.6)
+                                    : ComicTheme.inkBlack
                                         .withValues(alpha: 0.6))),
                       ],
                     ),
                   ),
                   Icon(Icons.chevron_right,
                       color: isDark
-                          ? Colors.white38
-                          : AppTheme.textPrimary.withValues(alpha: 0.4)),
+                          ? ComicTheme.darkText.withValues(alpha: 0.4)
+                          : ComicTheme.inkBlack.withValues(alpha: 0.4)),
                 ],
               ),
             ),
@@ -460,7 +453,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       children: [
         Text(value,
-            style: GoogleFonts.outfit(
+            style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.w800, color: color)),
         SizedBox(
           width: 8,
@@ -485,10 +478,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 8,
             decoration: BoxDecoration(
               color: _currentPage == index
-                  ? AppTheme.primary
+                  ? ComicTheme.inkRed
                   : (isDark
-                      ? Colors.white24
-                      : AppTheme.textPrimary.withValues(alpha: 0.2)),
+                      ? ComicTheme.darkText.withValues(alpha: 0.24)
+                      : ComicTheme.inkBlack.withValues(alpha: 0.2)),
               borderRadius: BorderRadius.circular(4),
             ),
           );
@@ -504,17 +497,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title,
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : AppTheme.textPrimary,
+              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
             )),
         if (action != null)
-          TextButton(
+          ComicButton(
             onPressed: () => HapticFeedback.lightImpact(),
+            padding: EdgeInsets.zero,
             child: Text(action,
                 style: TextStyle(
-                    color: AppTheme.primary,
+                    color: ComicTheme.surfaceWhite,
                     fontWeight: FontWeight.w600,
                     fontSize: 13)),
           ),
@@ -527,12 +521,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return RepaintBoundary(
       key: upNextKey,
       child: Material(
-        color: AppTheme.mintGreenLight,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        color: const Color(0xFFA7F3D0),
+        borderRadius: BorderRadius.circular(24),
         elevation: 0,
-        shadowColor: AppTheme.mintGreenLight.withValues(alpha: 0.3),
+        shadowColor: const Color(0xFFA7F3D0).withValues(alpha: 0.3),
         child: InkWell(
-          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+          borderRadius: BorderRadius.circular(24),
           onTap: () {
             HapticFeedback.lightImpact();
             final renderBox =
@@ -548,7 +542,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               final scaleNotifier = PageScaleProvider.of(context);
               Navigator.of(context).push(QuoteExpansionRoute(
                 sourceRect: rect,
-                sourceColor: AppTheme.mintGreenLight,
+                sourceColor: const Color(0xFFA7F3D0),
                 pageScaleNotifier: scaleNotifier,
               ));
             }
@@ -584,7 +578,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 16),
                 Text(
                   course.name,
-                  style: GoogleFonts.outfit(
+                  style: const TextStyle(
                     color: Colors.black87,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -626,8 +620,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           style: TextStyle(
             fontSize: 14,
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white54
-                : AppTheme.textPrimary.withValues(alpha: 0.6),
+                ? ComicTheme.darkText.withValues(alpha: 0.6)
+                : ComicTheme.inkBlack.withValues(alpha: 0.6),
           ));
     }
     return SizedBox(
@@ -643,14 +637,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             width: 150,
             margin: const EdgeInsets.only(right: 14),
             child: OpenContainer(
-              closedColor: isDark ? AppTheme.surfaceDark : Colors.white,
+              closedColor:
+                  isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
               closedElevation: 0,
               closedShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
                 side: BorderSide(
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.06)
-                      : AppTheme.outline.withValues(alpha: 0.3),
+                      ? ComicTheme.surfaceWhite.withValues(alpha: 0.06)
+                      : ComicTheme.inkBlack.withValues(alpha: 0.15),
                 ),
               ),
               openColor: Theme.of(context).scaffoldBackgroundColor,
@@ -682,7 +677,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
-                          color: isDark ? Colors.white : AppTheme.textPrimary,
+                          color: isDark
+                              ? ComicTheme.darkText
+                              : ComicTheme.inkBlack,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -695,8 +692,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark
-                              ? Colors.white60
-                              : AppTheme.textPrimary.withValues(alpha: 0.7),
+                              ? ComicTheme.darkText.withValues(alpha: 0.7)
+                              : ComicTheme.inkBlack.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -707,8 +704,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Icons.access_time,
                             size: 12,
                             color: isDark
-                                ? Colors.white38
-                                : AppTheme.textPrimary.withValues(alpha: 0.4),
+                                ? ComicTheme.darkText.withValues(alpha: 0.4)
+                                : ComicTheme.inkBlack.withValues(alpha: 0.4),
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -716,8 +713,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             style: TextStyle(
                               fontSize: 11,
                               color: isDark
-                                  ? Colors.white38
-                                  : AppTheme.textPrimary.withValues(alpha: 0.5),
+                                  ? ComicTheme.darkText.withValues(alpha: 0.5)
+                                  : ComicTheme.inkBlack.withValues(alpha: 0.5),
                             ),
                           ),
                         ],
@@ -737,56 +734,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildFAB(BuildContext context) {
-    return FabMenuM3E(
-      alignment: Alignment.bottomRight,
-      direction: FabMenuDirection.up,
-      overlay: false,
-      popOnItemTap: true,
-      primaryFab: Padding(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: FabM3E(
-          icon: const Icon(Icons.add),
-          size: FabM3ESize.small,
-          shapeFamily: FabM3EShapeFamily.round,
-          tooltip: 'Add',
-        ),
-      ),
-      items: [
-        FabMenuItem(
-          icon: const Icon(Icons.book),
-          label: const Text('Add Course'),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppTheme.radiusCard)),
+    return FloatingActionButton(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: ComicTheme.surfaceWhite,
+          shape: const RoundedRectangleBorder(),
+          builder: (_) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ComicButton(
+                    isCta: true,
+                    onPressed: () {
+                      Navigator.pop(context);
+                      HapticFeedback.lightImpact();
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: ComicTheme.surfaceWhite,
+                        shape: const RoundedRectangleBorder(),
+                        builder: (_) => const AddCourseSheet(),
+                      );
+                    },
+                    child: const Text('Add Course'),
+                  ),
+                  const SizedBox(height: 8),
+                  ComicButton(
+                    isCta: true,
+                    onPressed: () {
+                      Navigator.pop(context);
+                      HapticFeedback.lightImpact();
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: ComicTheme.surfaceWhite,
+                        shape: const RoundedRectangleBorder(),
+                        builder: (_) => const AddTaskSheet(),
+                      );
+                    },
+                    child: const Text('Add Task'),
+                  ),
+                ],
               ),
-              builder: (_) => const AddCourseSheet(),
-            );
-          },
-        ),
-        FabMenuItem(
-          icon: const Icon(Icons.task_alt),
-          label: const Text('Add Task'),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppTheme.radiusCard)),
-              ),
-              builder: (_) => const AddTaskSheet(),
-            );
-          },
-        ),
-      ],
+            ),
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
     );
   }
 }

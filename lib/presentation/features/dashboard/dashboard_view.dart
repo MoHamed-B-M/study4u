@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:toolbar_m3e/toolbar_m3e.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../presentation/theme/theme_provider.dart';
 import '../../../../domain/entities/course.dart';
 import '../../../../domain/entities/task.dart';
-import '../../theme/design_tokens.dart';
-import '../../widgets/dashboard_card.dart';
+import '../../../../theme/comic_theme.dart';
+import '../../../../widgets/comic_card.dart';
 import '../../widgets/quote_expansion_route.dart';
+import '../../widgets/circular_progress_ring.dart';
 import '../../../core/animation/page_scale.dart' show PageScaleProvider;
 
 class DashboardView extends ConsumerWidget {
@@ -22,24 +21,19 @@ class DashboardView extends ConsumerWidget {
     final courses = ref.watch(courseListProvider);
     final pendingCount = ref.watch(pendingTaskCountProvider);
     final upNext = ref.watch(upNextProvider);
-    final greeting = ref.watch(greetingProvider);
     final settings = ref.watch(settingsProvider);
     final userName = settings.userName.isEmpty ? 'Student' : settings.userName;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final nextCourse = upNext.hasNext ? upNext.course : null;
     final nextProgress = nextCourse != null ? nextCourse.percentage / 100 : 0.0;
 
     return Scaffold(
-      appBar: ToolbarM3E(
-        title: Text('Hi! $userName')
-            .animate()
-            .fadeIn(duration: 300.ms, delay: 100.ms),
-        subtitleText: greeting,
-        variant: ToolbarM3EVariant.surface,
-        size: ToolbarM3ESize.large,
+      appBar: AppBar(
+        title: Text('Hi! $userName'),
         actions: [
-          ToolbarActionM3E(
-            icon: CupertinoIcons.bell,
+          IconButton(
+            icon: const Icon(CupertinoIcons.bell),
             onPressed: () {
               HapticFeedback.lightImpact();
               context.push('/settings');
@@ -47,142 +41,201 @@ class DashboardView extends ConsumerWidget {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          const BlobBackground(),
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: const SizedBox(height: 24)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: DesignTokens.spacingLG,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: InfoCard(
-                              icon: CupertinoIcons.checkmark_seal,
-                              iconColor: DesignTokens.cardBlueAccent,
-                              backgroundColor: DesignTokens.cardBlue,
-                              value: pendingCount.toString(),
-                              label: 'Pending Tasks',
-                            )
-                                .animate()
-                                .fadeIn(duration: 400.ms)
-                                .slideY(begin: 0.1),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child:
-                                _buildTotalCoursesCard(context, courses.length)
-                                    .animate()
-                                    .fadeIn(duration: 400.ms, delay: 100.ms)
-                                    .slideY(begin: 0.1),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      if (nextCourse != null)
-                        _NextClassCardWrapper(
-                          course: nextCourse,
-                          nextProgress: nextProgress,
-                        )
-                            .animate()
-                            .fadeIn(duration: 500.ms, delay: 200.ms)
-                            .slideY(begin: 0.15),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'My Courses',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: context.textPrimary,
-                            ),
-                          ),
-                          if (courses.length > 3)
-                            GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                              },
-                              child: Text(
-                                'See All',
+                      Expanded(
+                        child: ComicCard(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color:
+                                      ComicTheme.inkRed.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  CupertinoIcons.checkmark_seal,
+                                  size: 18,
+                                  color: ComicTheme.inkRed,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                pendingCount.toString(),
                                 style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: DesignTokens.primaryLavender,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark
+                                      ? ComicTheme.darkText
+                                      : ComicTheme.inkBlack,
+                                  height: 1.1,
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        height: 140,
-                        child: courses.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'No courses yet. Tap + to add one.',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: context.textTertiary,
-                                  ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Pending Tasks',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark
+                                      ? ComicTheme.darkText
+                                          .withValues(alpha: 0.7)
+                                      : ComicTheme.inkBlack
+                                          .withValues(alpha: 0.7),
                                 ),
-                              )
-                            : ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: courses.length,
-                                itemBuilder: (context, index) {
-                                  final course = courses[index];
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      right:
-                                          index < courses.length - 1 ? 12 : 0,
-                                    ),
-                                    child: CourseCard(
-                                      code: course.code,
-                                      name: course.name,
-                                      color: Color(course.colorValue),
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        context.push('/course/${course.id}');
-                                      },
-                                    )
-                                        .animate()
-                                        .fadeIn(
-                                          duration: 300.ms,
-                                          delay: (300 + index * 80).ms,
-                                        )
-                                        .slideX(begin: 0.15),
-                                  );
-                                },
                               ),
+                            ],
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTotalCoursesCard(context, courses.length),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (nextCourse != null)
+                    _NextClassCardWrapper(
+                      course: nextCourse,
+                      nextProgress: nextProgress,
+                    ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       Text(
-                        'Today\'s Tasks',
+                        'My Courses',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: context.textPrimary,
+                          color: isDark
+                              ? ComicTheme.darkText
+                              : ComicTheme.inkBlack,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildTasksList(context, ref),
-                      const SizedBox(height: 100),
+                      if (courses.length > 3)
+                        GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                          },
+                          child: Text(
+                            'See All',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: ComicTheme.inkRed,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 140,
+                    child: courses.isEmpty
+                        ? Center(
+                            child: Text(
+                              'No courses yet. Tap + to add one.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark
+                                    ? ComicTheme.darkText.withValues(alpha: 0.5)
+                                    : ComicTheme.inkBlack
+                                        .withValues(alpha: 0.5),
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: courses.length,
+                            itemBuilder: (context, index) {
+                              final course = courses[index];
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  right: index < courses.length - 1 ? 12 : 0,
+                                ),
+                                child: ComicCard(
+                                  width: 120,
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Color(course.colorValue)
+                                              .withValues(alpha: 0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(Icons.menu_book_rounded,
+                                            size: 18,
+                                            color: Color(course.colorValue)),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        course.code,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: isDark
+                                              ? ComicTheme.darkText
+                                              : ComicTheme.inkBlack,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        course.name,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark
+                                              ? ComicTheme.darkText
+                                                  .withValues(alpha: 0.7)
+                                              : ComicTheme.inkBlack
+                                                  .withValues(alpha: 0.7),
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Today\'s Tasks',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTasksList(context, ref),
+                  const SizedBox(height: 100),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -190,21 +243,22 @@ class DashboardView extends ConsumerWidget {
   }
 
   Widget _buildTotalCoursesCard(BuildContext context, int count) {
-    return DashboardCard(
-      backgroundColor: DesignTokens.cardCream,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ComicCard(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: DesignTokens.cardCreamAccent.withValues(alpha: 0.15),
+              color: ComicTheme.inkRed.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               CupertinoIcons.book,
               size: 18,
-              color: DesignTokens.cardCreamAccent,
+              color: ComicTheme.inkRed,
             ),
           ),
           const Spacer(),
@@ -213,7 +267,7 @@ class DashboardView extends ConsumerWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: context.textPrimary,
+              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
               height: 1.1,
             ),
           ),
@@ -223,7 +277,9 @@ class DashboardView extends ConsumerWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: context.textSecondary,
+              color: isDark
+                  ? ComicTheme.darkText.withValues(alpha: 0.7)
+                  : ComicTheme.inkBlack.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -234,26 +290,23 @@ class DashboardView extends ConsumerWidget {
   Widget _buildTasksList(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(taskListProvider);
     final pending = tasks.where((t) => !t.isCompleted).take(3).toList();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (pending.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(DesignTokens.spacingMD),
-        decoration: BoxDecoration(
-          color: DesignTokens.cardGreen,
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        ),
+      return ComicCard(
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: DesignTokens.cardGreenAccent.withValues(alpha: 0.15),
+                color: ComicTheme.inkRed.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 CupertinoIcons.checkmark_seal_fill,
                 size: 18,
-                color: DesignTokens.cardGreenAccent,
+                color: ComicTheme.inkRed,
               ),
             ),
             const SizedBox(width: 12),
@@ -266,14 +319,16 @@ class DashboardView extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: context.textPrimary,
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                     ),
                   ),
                   Text(
                     'No pending tasks right now.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: context.textSecondary,
+                      color: isDark
+                          ? ComicTheme.darkText.withValues(alpha: 0.7)
+                          : ComicTheme.inkBlack.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -288,9 +343,8 @@ class DashboardView extends ConsumerWidget {
       children: pending.map((task) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: DashboardCard(
-            backgroundColor: context.surface,
-            padding: const EdgeInsets.all(DesignTokens.spacingMD),
+          child: ComicCard(
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 GestureDetector(
@@ -306,12 +360,14 @@ class DashboardView extends ConsumerWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: task.isCompleted
-                          ? DesignTokens.primaryLavender
+                          ? ComicTheme.inkRed
                           : CupertinoColors.transparent,
                       border: Border.all(
                         color: task.isCompleted
-                            ? DesignTokens.primaryLavender
-                            : context.textTertiary,
+                            ? ComicTheme.inkRed
+                            : (isDark
+                                ? ComicTheme.darkText.withValues(alpha: 0.5)
+                                : ComicTheme.inkBlack.withValues(alpha: 0.5)),
                         width: 2,
                       ),
                     ),
@@ -319,7 +375,7 @@ class DashboardView extends ConsumerWidget {
                         ? const Icon(
                             CupertinoIcons.check_mark,
                             size: 12,
-                            color: DesignTokens.textWhite,
+                            color: ComicTheme.surfaceWhite,
                           )
                         : null,
                   ),
@@ -335,8 +391,12 @@ class DashboardView extends ConsumerWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: task.isCompleted
-                              ? context.textTertiary
-                              : context.textPrimary,
+                              ? (isDark
+                                  ? ComicTheme.darkText.withValues(alpha: 0.5)
+                                  : ComicTheme.inkBlack.withValues(alpha: 0.5))
+                              : (isDark
+                                  ? ComicTheme.darkText
+                                  : ComicTheme.inkBlack),
                           decoration: task.isCompleted
                               ? TextDecoration.lineThrough
                               : null,
@@ -347,7 +407,9 @@ class DashboardView extends ConsumerWidget {
                         '${task.dueDate.month}/${task.dueDate.day}',
                         style: TextStyle(
                           fontSize: 11,
-                          color: context.textTertiary,
+                          color: isDark
+                              ? ComicTheme.darkText.withValues(alpha: 0.5)
+                              : ComicTheme.inkBlack.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -358,7 +420,7 @@ class DashboardView extends ConsumerWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: DesignTokens.cardPink,
+                      color: ComicTheme.inkRed.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
@@ -366,7 +428,7 @@ class DashboardView extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: DesignTokens.cardPinkAccent,
+                        color: ComicTheme.inkRed,
                       ),
                     ),
                   ),
@@ -401,12 +463,7 @@ class _NextClassCardWrapperState extends ConsumerState<_NextClassCardWrapper> {
     final course = widget.course;
     return RepaintBoundary(
       key: _key,
-      child: NextClassCard(
-        courseName: course.name,
-        courseCode: course.code,
-        time: '${course.startTime} - ${course.endTime}',
-        progress: widget.nextProgress,
-        color: Color(course.colorValue),
+      child: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
           final renderBox =
@@ -427,6 +484,66 @@ class _NextClassCardWrapperState extends ConsumerState<_NextClassCardWrapper> {
             ));
           }
         },
+        child: ComicCard(
+          backgroundColor: Color(course.colorValue),
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Next Class',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: ComicTheme.surfaceWhite.withValues(alpha: 0.7),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      course.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: ComicTheme.surfaceWhite,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${course.code} \u2022 ${course.startTime} - ${course.endTime}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: ComicTheme.surfaceWhite.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '${(widget.nextProgress * 100).toInt()}% of semester',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: ComicTheme.surfaceWhite.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              CircularProgressRing(
+                progress: widget.nextProgress,
+                size: 72,
+                strokeWidth: 6,
+                progressColor: ComicTheme.surfaceWhite,
+                backgroundColor: ComicTheme.surfaceWhite.withValues(alpha: 0.2),
+                label: '${(widget.nextProgress * 100).toInt()}%',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:parallax_onboarding/parallax_onboarding.dart';
+import '../../../../theme/comic_theme.dart';
 import '../../theme/theme_provider.dart';
 import '../../../main.dart';
 
@@ -11,8 +12,8 @@ class FeaturePreviewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF111625) : const Color(0xFFF5F5F5);
-    final green = const Color(0xFF4ADE80);
+    final bgColor = isDark ? ComicTheme.darkPulp : ComicTheme.paperBg;
+    final accent = ComicTheme.inkRed;
 
     void finish() {
       ref.read(settingsProvider.notifier).setOnboardingComplete(true);
@@ -45,7 +46,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : Colors.black87,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                     height: 1.2,
                   ),
                 ),
@@ -55,7 +56,9 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
-                    color: isDark ? Colors.white60 : Colors.black54,
+                    color: isDark
+                        ? ComicTheme.darkText.withOpacity(0.6)
+                        : ComicTheme.inkBlack.withOpacity(0.54),
                     height: 1.4,
                   ),
                 ),
@@ -64,7 +67,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
           ),
           foreground: Padding(
             padding: const EdgeInsets.all(32),
-            child: Icon(Icons.timer_outlined, size: 120, color: green),
+            child: Icon(Icons.timer_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0.35,
           foregroundAlignment: Alignment.topCenter,
@@ -82,7 +85,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : Colors.black87,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                     height: 1.2,
                   ),
                 ),
@@ -92,7 +95,9 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
-                    color: isDark ? Colors.white60 : Colors.black54,
+                    color: isDark
+                        ? ComicTheme.darkText.withOpacity(0.6)
+                        : ComicTheme.inkBlack.withOpacity(0.54),
                     height: 1.4,
                   ),
                 ),
@@ -101,7 +106,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
           ),
           foreground: Padding(
             padding: const EdgeInsets.all(32),
-            child: Icon(Icons.calendar_month_outlined, size: 120, color: green),
+            child: Icon(Icons.calendar_month_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0.35,
           foregroundAlignment: Alignment.topCenter,
@@ -119,7 +124,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : Colors.black87,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                     height: 1.2,
                   ),
                 ),
@@ -129,7 +134,9 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
-                    color: isDark ? Colors.white60 : Colors.black54,
+                    color: isDark
+                        ? ComicTheme.darkText.withOpacity(0.6)
+                        : ComicTheme.inkBlack.withOpacity(0.54),
                     height: 1.4,
                   ),
                 ),
@@ -138,7 +145,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
           ),
           foreground: Padding(
             padding: const EdgeInsets.all(32),
-            child: Icon(Icons.school_outlined, size: 120, color: green),
+            child: Icon(Icons.school_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0.35,
           foregroundAlignment: Alignment.topCenter,

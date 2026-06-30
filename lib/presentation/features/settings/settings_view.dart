@@ -3,15 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_bar_m3e/app_bar_m3e.dart';
-import 'package:button_group_m3e/button_group_m3e.dart';
-import 'package:m3e_card_list/m3e_card_list.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/update_service.dart';
 import '../../../../data/models/app_settings.dart';
+import '../../../../theme/comic_theme.dart';
+import '../../../../widgets/comic_card.dart';
+import '../../../../widgets/comic_button.dart';
 import '../../theme/theme_provider.dart';
-import '../../theme/design_tokens.dart';
 import '../../widgets/update_dialog.dart';
 
 class SettingsView extends ConsumerWidget {
@@ -33,35 +32,24 @@ class SettingsView extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
-      appBar: AppBarM3E(
-        titleText: 'Settings',
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          SliverToBoxAdapter(child: const SizedBox(height: 24)),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: DesignTokens.spacingLG,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(context, 'APPEARANCE'),
-                  M3ECardList.of(
-                    haptic: M3EHapticFeedback.medium,
-                    splashColor:
-                        DesignTokens.primaryLavender.withValues(alpha: 0.3),
-                    highlightColor:
-                        DesignTokens.primaryLavender.withValues(alpha: 0.15),
-                    children: [
+                  ComicCard(
+                    padding: EdgeInsets.zero,
+                    child: Column(children: [
                       _buildSettingRow(
                         context,
                         icon: CupertinoIcons.circle_lefthalf_fill,
-                        iconColor: DesignTokens.primaryLavender,
+                        iconColor: ComicTheme.inkRed,
                         title: 'Appearance',
                         subtitle: _themeLabel(settings.themeMode),
                         onTap: () => _showThemeSheet(context, ref, settings),
@@ -69,7 +57,7 @@ class SettingsView extends ConsumerWidget {
                       _buildSettingRow(
                         context,
                         icon: CupertinoIcons.paintbrush,
-                        iconColor: DesignTokens.secondaryBlue,
+                        iconColor: ComicTheme.inkRed,
                         title: 'Accent Color',
                         subtitle:
                             '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
@@ -83,21 +71,17 @@ class SettingsView extends ConsumerWidget {
                         ),
                         onTap: () => _showColorSheet(context, ref, settings),
                       ),
-                    ],
+                    ]),
                   ),
                   const SizedBox(height: 24),
                   _buildSectionHeader(context, 'PREFERENCES'),
-                  M3ECardList.of(
-                    haptic: M3EHapticFeedback.medium,
-                    splashColor:
-                        DesignTokens.cardCreamAccent.withValues(alpha: 0.3),
-                    highlightColor:
-                        DesignTokens.cardCreamAccent.withValues(alpha: 0.15),
-                    children: [
+                  ComicCard(
+                    padding: EdgeInsets.zero,
+                    child: Column(children: [
                       _buildSwitchRow(
                         context,
                         icon: CupertinoIcons.hand_raised,
-                        iconColor: DesignTokens.cardCreamAccent,
+                        iconColor: ComicTheme.inkRed,
                         title: 'Haptic Feedback',
                         subtitle: 'Vibration on interactions',
                         value: settings.hapticFeedback,
@@ -111,7 +95,7 @@ class SettingsView extends ConsumerWidget {
                       _buildSwitchRow(
                         context,
                         icon: CupertinoIcons.bell,
-                        iconColor: DesignTokens.cardPinkAccent,
+                        iconColor: ComicTheme.inkRed,
                         title: 'Notifications',
                         subtitle: 'Get reminded about classes and tasks',
                         value: settings.notificationEnabled,
@@ -125,7 +109,7 @@ class SettingsView extends ConsumerWidget {
                       _buildSwitchRow(
                         context,
                         icon: CupertinoIcons.rectangle_3_offgrid,
-                        iconColor: DesignTokens.cardBlueAccent,
+                        iconColor: ComicTheme.inkRed,
                         title: 'Show Labels',
                         subtitle: 'Show navigation bar labels',
                         value: settings.showNavLabels,
@@ -136,21 +120,17 @@ class SettingsView extends ConsumerWidget {
                               .setShowNavLabels(v);
                         },
                       ),
-                    ],
+                    ]),
                   ),
                   const SizedBox(height: 24),
                   _buildSectionHeader(context, 'ABOUT'),
-                  M3ECardList.of(
-                    haptic: M3EHapticFeedback.medium,
-                    splashColor:
-                        DesignTokens.cardGreenAccent.withValues(alpha: 0.3),
-                    highlightColor:
-                        DesignTokens.cardGreenAccent.withValues(alpha: 0.15),
-                    children: [
+                  ComicCard(
+                    padding: EdgeInsets.zero,
+                    child: Column(children: [
                       _buildSettingRow(
                         context,
                         icon: CupertinoIcons.book,
-                        iconColor: DesignTokens.cardGreenAccent,
+                        iconColor: ComicTheme.inkRed,
                         title: 'stdy4u',
                         subtitle: 'Tap for version info',
                         trailing: FutureBuilder<PackageInfo>(
@@ -162,7 +142,6 @@ class SettingsView extends ConsumerWidget {
                               'v$ver+$build',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: context.textTertiary,
                               ),
                             );
                           },
@@ -171,7 +150,7 @@ class SettingsView extends ConsumerWidget {
                       _buildSettingRow(
                         context,
                         icon: CupertinoIcons.arrow_down_circle,
-                        iconColor: DesignTokens.cardTealAccent,
+                        iconColor: ComicTheme.inkRed,
                         title: 'Check for Updates',
                         subtitle: 'Download the latest version',
                         onTap: () => _checkForUpdate(context),
@@ -179,7 +158,7 @@ class SettingsView extends ConsumerWidget {
                       _buildSettingRow(
                         context,
                         icon: CupertinoIcons.book,
-                        iconColor: DesignTokens.primaryLavender,
+                        iconColor: ComicTheme.inkRed,
                         title: 'GitHub Repository',
                         subtitle: 'MoHamed-B-M/study4u',
                         onTap: () => launchUrl(Uri.parse(
@@ -188,13 +167,13 @@ class SettingsView extends ConsumerWidget {
                       _buildSettingRow(
                         context,
                         icon: CupertinoIcons.hand_thumbsup,
-                        iconColor: DesignTokens.cardTealAccent,
+                        iconColor: ComicTheme.inkRed,
                         title: 'Submit Feedback',
                         subtitle: 'Report issues or suggest features',
                         onTap: () => launchUrl(Uri.parse(
                             'https://github.com/MoHamed-B-M/study4u/issues/new')),
                       ),
-                    ],
+                    ]),
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -207,6 +186,7 @@ class SettingsView extends ConsumerWidget {
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
@@ -214,7 +194,7 @@ class SettingsView extends ConsumerWidget {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w700,
-          color: context.textTertiary,
+          color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
           letterSpacing: 0.5,
         ),
       ),
@@ -230,6 +210,14 @@ class SettingsView extends ConsumerWidget {
     Widget? trailing,
     VoidCallback? onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryText = isDark ? ComicTheme.darkText : ComicTheme.inkBlack;
+    final secondaryText = isDark
+        ? ComicTheme.darkText.withValues(alpha: 0.7)
+        : ComicTheme.inkBlack.withValues(alpha: 0.7);
+    final tertiaryText = isDark
+        ? ComicTheme.darkText.withValues(alpha: 0.5)
+        : ComicTheme.inkBlack.withValues(alpha: 0.5);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -256,7 +244,7 @@ class SettingsView extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: context.textPrimary,
+                      color: primaryText,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -264,7 +252,7 @@ class SettingsView extends ConsumerWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: context.textSecondary,
+                      color: secondaryText,
                     ),
                   ),
                 ],
@@ -278,7 +266,7 @@ class SettingsView extends ConsumerWidget {
               Icon(
                 CupertinoIcons.chevron_right,
                 size: 16,
-                color: context.textTertiary,
+                color: tertiaryText,
               ),
           ],
         ),
@@ -295,6 +283,11 @@ class SettingsView extends ConsumerWidget {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryText = isDark ? ComicTheme.darkText : ComicTheme.inkBlack;
+    final secondaryText = isDark
+        ? ComicTheme.darkText.withValues(alpha: 0.7)
+        : ComicTheme.inkBlack.withValues(alpha: 0.7);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
@@ -318,7 +311,7 @@ class SettingsView extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: context.textPrimary,
+                    color: primaryText,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -326,7 +319,7 @@ class SettingsView extends ConsumerWidget {
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.textSecondary,
+                    color: secondaryText,
                   ),
                 ),
               ],
@@ -334,7 +327,7 @@ class SettingsView extends ConsumerWidget {
           ),
           CupertinoSwitch(
             value: value,
-            activeTrackColor: DesignTokens.primaryLavender,
+            activeTrackColor: ComicTheme.inkRed,
             onChanged: onChanged,
           ),
         ],
@@ -383,17 +376,8 @@ class SettingsView extends ConsumerWidget {
 
   void _showThemeSheet(
       BuildContext context, WidgetRef ref, AppSettings settings) {
-    final selectedIndex = switch (settings.themeMode) {
-      'light' => 1,
-      'dark' => 2,
-      _ => 0,
-    };
-
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (BuildContext modalCtx) {
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -402,54 +386,70 @@ class SettingsView extends ConsumerWidget {
             children: [
               Text(
                 'Choose Theme',
-                style: Theme.of(modalCtx).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ButtonGroupM3E(
-                  selection: true,
-                  selectedIndex: selectedIndex,
-                  type: ButtonGroupM3EType.connected,
-                  size: ButtonGroupM3ESize.sm,
-                  actions: [
-                    ButtonGroupM3EAction(
-                      label: const Text('System'),
-                      icon: const Icon(Icons.brightness_auto, size: 18),
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        ref
-                            .read(settingsProvider.notifier)
-                            .setThemeMode('system');
-                        Navigator.of(modalCtx).pop();
-                      },
-                    ),
-                    ButtonGroupM3EAction(
-                      label: const Text('Light'),
-                      icon: const Icon(Icons.wb_sunny, size: 18),
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        ref
-                            .read(settingsProvider.notifier)
-                            .setThemeMode('light');
-                        Navigator.of(modalCtx).pop();
-                      },
-                    ),
-                    ButtonGroupM3EAction(
-                      label: const Text('Dark'),
-                      icon: const Icon(Icons.nightlight_round, size: 18),
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        ref
-                            .read(settingsProvider.notifier)
-                            .setThemeMode('dark');
-                        Navigator.of(modalCtx).pop();
-                      },
-                    ),
-                  ],
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: ComicTheme.inkBlack,
                 ),
               ),
               const SizedBox(height: 16),
-              TextButton(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ComicButton(
+                    isCta: settings.themeMode == 'system',
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setThemeMode('system');
+                      Navigator.of(modalCtx).pop();
+                    },
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    child: const Column(children: [
+                      Icon(Icons.brightness_auto, size: 18),
+                      Text('System'),
+                    ]),
+                  ),
+                  const SizedBox(width: 8),
+                  ComicButton(
+                    isCta: settings.themeMode == 'light',
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setThemeMode('light');
+                      Navigator.of(modalCtx).pop();
+                    },
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    child: const Column(children: [
+                      Icon(Icons.wb_sunny, size: 18),
+                      Text('Light'),
+                    ]),
+                  ),
+                  const SizedBox(width: 8),
+                  ComicButton(
+                    isCta: settings.themeMode == 'dark',
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setThemeMode('dark');
+                      Navigator.of(modalCtx).pop();
+                    },
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    child: const Column(children: [
+                      Icon(Icons.nightlight_round, size: 18),
+                      Text('Dark'),
+                    ]),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ComicButton(
                 onPressed: () => Navigator.of(modalCtx).pop(),
                 child: const Text('Cancel'),
               ),
@@ -487,7 +487,7 @@ class SettingsView extends ConsumerWidget {
                   color: color,
                   shape: BoxShape.circle,
                   border: isSelected
-                      ? Border.all(color: DesignTokens.textWhite, width: 3)
+                      ? Border.all(color: ComicTheme.surfaceWhite, width: 3)
                       : null,
                   boxShadow: isSelected
                       ? [
@@ -500,7 +500,7 @@ class SettingsView extends ConsumerWidget {
                 ),
                 child: isSelected
                     ? const Icon(CupertinoIcons.check_mark,
-                        color: DesignTokens.textWhite)
+                        color: ComicTheme.surfaceWhite)
                     : null,
               ),
             );

@@ -2,9 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_bar_m3e/app_bar_m3e.dart';
-import 'package:m3e_buttons/m3e_buttons.dart';
-import 'package:m3e_card_list/m3e_card_list.dart';
 import '../../../../core/animation/m3e_spring.dart';
 import '../../../../core/animation/spring_curve.dart';
 import '../../../../core/utils/grade_calculator.dart';
@@ -14,7 +11,8 @@ import '../../../../shared/providers/pomodoro_provider.dart';
 import '../../../../shared/providers/app_usage_provider.dart';
 import '../../../../domain/entities/course.dart';
 import '../../../../domain/entities/pomodoro_session.dart';
-import '../../theme/design_tokens.dart';
+import '../../../../widgets/comic_card.dart';
+import '../../../../widgets/comic_button.dart';
 
 class StatsView extends ConsumerStatefulWidget {
   const StatsView({super.key});
@@ -85,10 +83,8 @@ class _StatsViewState extends ConsumerState<StatsView>
         sessions.fold<int>(0, (sum, s) => sum + s.durationSeconds);
 
     return Scaffold(
-      appBar: AppBarM3E(
-        titleText: 'Statistics',
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+      appBar: AppBar(
+        title: const Text('Statistics'),
       ),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
@@ -97,7 +93,7 @@ class _StatsViewState extends ConsumerState<StatsView>
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: DesignTokens.spacingLG,
+                horizontal: 24,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,13 +158,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     List<CourseEntity> courses,
     double totalCredits,
   ) {
-    return M3ECard(
-      index: 0,
-      position: M3ECardPosition.single,
-      outerRadius: 24,
-      innerRadius: 24,
-      gap: 0,
-      color: const Color(0xFF1B5E20),
+    return ComicCard(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,13 +232,7 @@ class _StatsViewState extends ConsumerState<StatsView>
       PomodoroStatus.idle => 'READY',
     };
 
-    return M3ECard(
-      index: 1,
-      position: M3ECardPosition.single,
-      outerRadius: 24,
-      innerRadius: 24,
-      gap: 0,
-      color: const Color(0xFF2E7D32),
+    return ComicCard(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,16 +290,7 @@ class _StatsViewState extends ConsumerState<StatsView>
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor:
-                    Colors.white.withValues(alpha: 0.2),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+            child: ComicButton(
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 if (pomodoro.isActive) {
@@ -372,13 +347,9 @@ class _StatsViewState extends ConsumerState<StatsView>
           children: [
             Row(
               children: [
-                M3EFilledToggleButton(
-                  icon: Icon(
-                    pomodoro.isActive ? Icons.pause : Icons.play_arrow,
-                    size: 18,
-                  ),
-                  checked: pomodoro.isActive,
-                  onCheckedChange: (_) {
+                ComicButton(
+                  isCta: true,
+                  onPressed: () {
                     HapticFeedback.mediumImpact();
                     if (pomodoro.isActive) {
                       ref.read(pomodoroProvider.notifier).pauseTimer();
@@ -386,22 +357,28 @@ class _StatsViewState extends ConsumerState<StatsView>
                       ref.read(pomodoroProvider.notifier).startTimer();
                     }
                   },
+                  child: Icon(
+                    pomodoro.isActive ? Icons.pause : Icons.play_arrow,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 4),
-                M3EFilledToggleButton.tonal(
-                  icon: const Icon(Icons.restart_alt, size: 18),
-                  onCheckedChange: (_) {
+                ComicButton(
+                  isCta: true,
+                  onPressed: () {
                     HapticFeedback.mediumImpact();
                     ref.read(pomodoroProvider.notifier).resetTimer();
                   },
+                  child: const Icon(Icons.restart_alt, size: 18),
                 ),
                 const SizedBox(width: 4),
-                M3EFilledToggleButton.tonal(
-                  icon: const Icon(Icons.nightlight_round, size: 18),
-                  onCheckedChange: (_) {
+                ComicButton(
+                  isCta: true,
+                  onPressed: () {
                     HapticFeedback.mediumImpact();
                     ref.read(pomodoroProvider.notifier).skipSession();
                   },
+                  child: const Icon(Icons.nightlight_round, size: 18),
                 ),
               ],
             ),
@@ -470,13 +447,7 @@ class _StatsViewState extends ConsumerState<StatsView>
   }
 
   Widget _buildCgpaTargetCard(BuildContext context, bool isDark) {
-    return M3ECard(
-      index: 2,
-      position: M3ECardPosition.single,
-      outerRadius: 24,
-      innerRadius: 24,
-      gap: 0,
-      color: const Color(0xFF1E293B),
+    return ComicCard(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -559,13 +530,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     final cs = Theme.of(context).colorScheme;
     final usage = ref.watch(appUsageProvider);
 
-    return M3ECard(
-      index: 3,
-      position: M3ECardPosition.single,
-      outerRadius: 24,
-      innerRadius: 24,
-      gap: 0,
-      color: cs.surfaceContainerLow,
+    return ComicCard(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -867,14 +832,8 @@ class _StatsViewState extends ConsumerState<StatsView>
     final cs = Theme.of(context).colorScheme;
 
     if (courses.isEmpty) {
-      return M3ECard(
-        index: 4,
-        position: M3ECardPosition.single,
-        outerRadius: 24,
-        innerRadius: 24,
-        gap: 0,
-        color: cs.surfaceContainerLow,
-        padding: const EdgeInsets.all(DesignTokens.spacingLG),
+      return ComicCard(
+        padding: const EdgeInsets.all(24),
         child: Center(
           child: Text(
             'Add courses to see performance',
@@ -887,14 +846,8 @@ class _StatsViewState extends ConsumerState<StatsView>
       );
     }
 
-    return M3ECard(
-      index: 4,
-      position: M3ECardPosition.single,
-      outerRadius: 24,
-      innerRadius: 24,
-      gap: 0,
-      color: cs.surfaceContainerLow,
-      padding: const EdgeInsets.all(DesignTokens.spacingLG),
+    return ComicCard(
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

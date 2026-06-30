@@ -13,7 +13,9 @@ import '../../../domain/entities/course_material.dart';
 import '../../../domain/entities/attendance_record.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../core/services/notification_service.dart';
-import '../../theme/app_theme.dart';
+import '../../../../theme/comic_theme.dart';
+import '../../../../widgets/comic_card.dart';
+import '../../../../widgets/comic_button.dart';
 import '../../widgets/add_course_sheet.dart';
 import '../../widgets/add_task_sheet.dart';
 
@@ -51,7 +53,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppTheme.radiusCard)),
+            top: Radius.circular(24)),
       ),
       builder: (_) => AddCourseSheet(course: course),
     );
@@ -66,11 +68,12 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
         title: const Text('Delete Course'),
         content: Text('Are you sure you want to delete "${course.name}"?'),
         actions: [
-          TextButton(
+          ComicButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
           ),
-          FilledButton(
+          ComicButton(
+            isCta: true,
             onPressed: () {
               ref.read(courseRepositoryProvider).deleteCourse(course.id);
               NotificationService.instance
@@ -78,8 +81,6 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               Navigator.of(ctx).pop();
               Navigator.of(context).maybePop();
             },
-            style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.warningRed),
             child: const Text('Delete'),
           ),
         ],
@@ -139,10 +140,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 child: Row(
                   children: [
                     Icon(Icons.delete_outline,
-                        size: 20, color: AppTheme.warningRed),
+                        size: 20, color: ComicTheme.inkRed),
                     const SizedBox(width: 12),
                     Text('Delete',
-                        style: TextStyle(color: AppTheme.warningRed)),
+                        style: TextStyle(color: ComicTheme.inkRed)),
                   ],
                 ),
               ),
@@ -219,52 +220,47 @@ class _InfoTab extends ConsumerWidget {
 
   Widget _buildGradeSection(BuildContext context, ColorScheme cs, Color color) {
     final percentage = course.percentage;
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${course.currentGrade.toStringAsFixed(1)} / ${course.targetGrade.toStringAsFixed(1)}',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: percentage >= 80
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${percentage.toStringAsFixed(0)}%',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: percentage >= 80 ? Colors.green : Colors.orange,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: percentage / 100,
-                minHeight: 10,
-                backgroundColor: cs.surfaceContainerHighest,
+    return ComicCard(
+      padding: const EdgeInsets.all(20),
+      borderRadius: BorderRadius.circular(16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${course.currentGrade.toStringAsFixed(1)} / ${course.targetGrade.toStringAsFixed(1)}',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: percentage >= 80
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${percentage.toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: percentage >= 80 ? Colors.green : Colors.orange,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: percentage / 100,
+              minHeight: 10,
+              backgroundColor: cs.surfaceContainerHighest,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -282,38 +278,28 @@ class _InfoTab extends ConsumerWidget {
     final rate = total > 0 ? present / total * 100 : 0.0;
 
     if (total == 0) {
-      return Card(
-        elevation: 0,
-        color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
-        child: const Padding(
-          padding: EdgeInsets.all(20),
-          child: Center(child: Text('No attendance records yet')),
-        ),
+      return ComicCard(
+        padding: const EdgeInsets.all(20),
+        borderRadius: BorderRadius.circular(16),
+        child: const Center(child: Text('No attendance records yet')),
       );
     }
 
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildStat(Icons.check_circle_outline, 'Present', '$present',
-                Colors.green),
-            Container(width: 1, height: 40, color: cs.outlineVariant),
-            _buildStat(Icons.cancel_outlined, 'Absent', '${total - present}',
-                AppTheme.warningRed),
-            Container(width: 1, height: 40, color: cs.outlineVariant),
-            _buildStat(Icons.trending_up, 'Rate', '${rate.toStringAsFixed(0)}%',
-                cs.primary),
-          ],
-        ),
+    return ComicCard(
+      padding: const EdgeInsets.all(20),
+      borderRadius: BorderRadius.circular(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStat(Icons.check_circle_outline, 'Present', '$present',
+              Colors.green),
+          Container(width: 1, height: 40, color: cs.outlineVariant),
+          _buildStat(Icons.cancel_outlined, 'Absent', '${total - present}',
+              ComicTheme.inkRed),
+          Container(width: 1, height: 40, color: cs.outlineVariant),
+          _buildStat(Icons.trending_up, 'Rate', '${rate.toStringAsFixed(0)}%',
+              cs.primary),
+        ],
       ),
     );
   }
@@ -342,37 +328,32 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: cs.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: cs.primary, size: 20),
+    return ComicCard(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: cs.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
-                const SizedBox(height: 2),
-                Text(value,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 15)),
-              ],
-            ),
-          ],
-        ),
+            child: Icon(icon, color: cs.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+              const SizedBox(height: 2),
+              Text(value,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 15)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -441,10 +422,17 @@ class _MaterialsTab extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton.icon(
+          child: ComicButton(
+            isCta: true,
             onPressed: () => _showAddMaterialSheet(context, ref),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Material'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add, size: 18, color: ComicTheme.surfaceWhite),
+                const SizedBox(width: 8),
+                const Text('Add Material'),
+              ],
+            ),
           ),
         ),
       ],
@@ -513,7 +501,7 @@ class _MaterialTile extends StatelessWidget {
               title: const Text('File Not Found'),
               content: const Text('File may have been moved.'),
               actions: [
-                TextButton(
+                ComicButton(
                     onPressed: () => Navigator.pop(ctx),
                     child: const Text('OK'))
               ],
@@ -529,54 +517,49 @@ class _MaterialTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        elevation: 0,
-        color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
+      child: ComicCard(
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () => _open(context),
-          borderRadius: BorderRadius.circular(AppTheme.radiusMD),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: cs.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(_icon(), color: cs.primary, size: 20),
+          borderRadius: BorderRadius.circular(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: cs.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(material.title,
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 2),
-                      Text(
-                        _subtitle(material),
-                        style:
-                            TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                child: Icon(_icon(), color: cs.primary, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(material.title,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(
+                      _subtitle(material),
+                      style:
+                          TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                if (onDelete != null)
-                  IconButton(
-                    onPressed: onDelete,
-                    icon: Icon(Icons.delete_outline,
-                        size: 18, color: AppTheme.warningRed.withOpacity(0.6)),
-                  ),
-                if (material.type == 'link' || material.type == 'file')
-                  Icon(Icons.open_in_new, size: 16, color: cs.onSurfaceVariant),
-              ],
-            ),
+              ),
+              if (onDelete != null)
+                IconButton(
+                  onPressed: onDelete,
+                  icon: Icon(Icons.delete_outline,
+                      size: 18, color: ComicTheme.inkRed.withOpacity(0.6)),
+                ),
+              if (material.type == 'link' || material.type == 'file')
+                Icon(Icons.open_in_new, size: 16, color: cs.onSurfaceVariant),
+            ],
           ),
         ),
       ),
@@ -712,10 +695,16 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
               maxLines: 3,
             ),
           if (_type == 'file') ...[
-            OutlinedButton.icon(
+            ComicButton(
               onPressed: _pickFile,
-              icon: const Icon(Icons.upload_file),
-              label: Text(_pickedFileName ?? 'Pick a file'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.upload_file, size: 18, color: ComicTheme.inkBlack),
+                  const SizedBox(width: 8),
+                  Text(_pickedFileName ?? 'Pick a file'),
+                ],
+              ),
             ),
             if (_pickedFileName != null)
               Row(
@@ -734,10 +723,17 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
               ),
           ],
           const SizedBox(height: 24),
-          FilledButton.icon(
+          ComicButton(
+            isCta: true,
             onPressed: _submit,
-            icon: const Icon(Icons.add),
-            label: const Text('Add Material'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add, size: 18, color: ComicTheme.surfaceWhite),
+                const SizedBox(width: 8),
+                const Text('Add Material'),
+              ],
+            ),
           ),
         ],
       ),
@@ -797,10 +793,17 @@ class _NotesTab extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton.icon(
+          child: ComicButton(
+            isCta: true,
             onPressed: () => _showAddNoteSheet(context, ref),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Note'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add, size: 18, color: ComicTheme.surfaceWhite),
+                const SizedBox(width: 8),
+                const Text('Add Note'),
+              ],
+            ),
           ),
         ),
       ],
@@ -825,49 +828,44 @@ class _NoteTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        elevation: 0,
-        color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppTheme.tertiary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.article_outlined,
-                    color: Colors.orange, size: 20),
+      child: ComicCard(
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Color(0xFFFBBF24).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(note.title,
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
-                    if (note.content.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(note.content,
-                          style: TextStyle(
-                              fontSize: 13, color: cs.onSurfaceVariant)),
-                    ],
-                    const SizedBox(height: 6),
-                    Text(
-                      DateFormat('MMM dd, yyyy').format(note.dueDate),
-                      style:
-                          TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
-                    ),
+              child: const Icon(Icons.article_outlined,
+                  color: Colors.orange, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(note.title,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  if (note.content.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(note.content,
+                        style: TextStyle(
+                            fontSize: 13, color: cs.onSurfaceVariant)),
                   ],
-                ),
+                  const SizedBox(height: 6),
+                  Text(
+                    DateFormat('MMM dd, yyyy').format(note.dueDate),
+                    style:
+                        TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -926,10 +924,17 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
             maxLines: 4,
           ),
           const SizedBox(height: 24),
-          FilledButton.icon(
+          ComicButton(
+            isCta: true,
             onPressed: _submit,
-            icon: const Icon(Icons.add),
-            label: const Text('Add Note'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add, size: 18, color: ComicTheme.surfaceWhite),
+                const SizedBox(width: 8),
+                const Text('Add Note'),
+              ],
+            ),
           ),
         ],
       ),
@@ -977,10 +982,17 @@ class _TasksTab extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton.icon(
+          child: ComicButton(
+            isCta: true,
             onPressed: () => _showAddTaskSheet(context, ref),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Task'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add, size: 18, color: ComicTheme.surfaceWhite),
+                const SizedBox(width: 8),
+                const Text('Add Task'),
+              ],
+            ),
           ),
         ),
       ],
@@ -1005,87 +1017,82 @@ class _TaskTile extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        elevation: 0,
-        color: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMD)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  ref.read(taskRepositoryProvider).toggleTask(task.id);
-                  ref.read(dataRefreshProvider.notifier).state++;
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: task.isCompleted ? cs.primary : Colors.transparent,
-                    border: Border.all(
-                      color: task.isCompleted ? cs.primary : cs.outline,
-                      width: 2,
-                    ),
+      child: ComicCard(
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(16),
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                ref.read(taskRepositoryProvider).toggleTask(task.id);
+                ref.read(dataRefreshProvider.notifier).state++;
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: task.isCompleted ? cs.primary : Colors.transparent,
+                  border: Border.all(
+                    color: task.isCompleted ? cs.primary : cs.outline,
+                    width: 2,
                   ),
-                  child: task.isCompleted
-                      ? Icon(Icons.check, size: 16, color: cs.surface)
-                      : null,
                 ),
+                child: task.isCompleted
+                    ? Icon(Icons.check, size: 16, color: cs.surface)
+                    : null,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        decoration: task.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
-                        color: task.isCompleted
-                            ? cs.onSurfaceVariant
-                            : cs.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('MMM dd, hh:mm a').format(task.dueDate),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: task.urgency == TaskUrgency.urgent
-                            ? AppTheme.warningRed
-                            : cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (task.urgency == TaskUrgency.urgent)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.warningRed.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'URGENT',
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    task.title,
                     style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.warningRed),
+                      fontWeight: FontWeight.w600,
+                      decoration: task.isCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
+                      color: task.isCompleted
+                          ? cs.onSurfaceVariant
+                          : cs.onSurface,
+                    ),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('MMM dd, hh:mm a').format(task.dueDate),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: task.urgency == TaskUrgency.urgent
+                          ? ComicTheme.inkRed
+                          : cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (task.urgency == TaskUrgency.urgent)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: ComicTheme.inkRed.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-            ],
-          ),
+                child: const Text(
+                  'URGENT',
+                  style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: ComicTheme.inkRed),
+                ),
+              ),
+          ],
         ),
       ),
     );

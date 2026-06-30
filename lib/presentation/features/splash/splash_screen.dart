@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../theme/comic_theme.dart';
 import '../../../core/animation/m3e_spring.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,8 +14,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  static const _bgColor = Color(0xFF111625);
-  static const _glowColor = Color(0xFF4ADE80);
+  static const _bgColor = ComicTheme.darkPulp;
+  static const _glowColor = ComicTheme.inkRed;
 
   late final AnimationController _fadeCtrl;
   late final AnimationController _scaleCtrl;
