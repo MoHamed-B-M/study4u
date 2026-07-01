@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/services/update_service.dart';
-import '../../../../data/models/app_settings.dart';
-import '../../../../theme/comic_theme.dart';
-import '../../../../widgets/comic_card.dart';
-import '../../../../widgets/comic_button.dart';
+import '../../../core/services/update_service.dart';
+import '../../../data/models/app_settings.dart';
+import '../../../theme/comic_theme.dart';
+import '../../../widgets/comic_card.dart';
+import '../../../widgets/comic_button.dart';
 import '../../theme/theme_provider.dart';
 import '../../widgets/update_dialog.dart';
 
@@ -175,14 +175,24 @@ class SettingsView extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
-          letterSpacing: 0.5,
-        ),
+      child: Stack(
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
+              letterSpacing: 0.5,
+            ),
+          ),
+          Positioned(
+            bottom: -2,
+            left: 0,
+            right: 0,
+            child: Container(height: 2, color: ComicTheme.inkRed),
+          ),
+        ],
       ),
     );
   }
@@ -338,26 +348,92 @@ class SettingsView extends ConsumerWidget {
     if (!context.mounted) return;
 
     if (update == null || !update.isNewer) {
-      showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Update Check'),
-          content: Text(update == null
-              ? 'Could not check for updates.'
-              : 'You are on the latest version!'),
-          actions: [
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: const Text('OK'),
-              onPressed: () => Navigator.pop(ctx),
-            ),
-          ],
-        ),
+      if (!context.mounted) return;
+      _showComicAlert(
+        context,
+        'Update Check',
+        update == null
+            ? 'Could not check for updates.'
+            : 'You are on the latest version!',
       );
       return;
     }
 
     await UpdateDialog.show(context: context, update: update);
+  }
+
+  void _showComicAlert(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
+              border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: ComicTheme.inkBlack,
+                  offset: Offset(4, 4),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? ComicTheme.darkText.withValues(alpha: 0.7) : ComicTheme.inkBlack.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: ComicTheme.inkRed,
+                      border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: ComicTheme.inkBlack,
+                          offset: Offset(4, 4),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        color: ComicTheme.surfaceWhite,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showThemeSheet(
@@ -448,57 +524,127 @@ class SettingsView extends ConsumerWidget {
 
   void _showColorSheet(
       BuildContext context, WidgetRef ref, AppSettings settings) {
-    showCupertinoModalPopup<void>(
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext modalCtx) => CupertinoActionSheet(
-        title: const Text('Pick Accent Color'),
-        message: Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          alignment: WrapAlignment.center,
-          children: _colors.map((color) {
-            final isSelected = color.value == settings.primaryColorValue;
-            return GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                ref
-                    .read(settingsProvider.notifier)
-                    .setPrimaryColor(color.value);
-                Navigator.of(modalCtx).pop();
-              },
-              child: Container(
-                width: 52,
-                height: 52,
+      builder: (BuildContext modalCtx) {
+        final isDarkSheet = Theme.of(modalCtx).brightness == Brightness.dark;
+        return Container(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          decoration: BoxDecoration(
+            color: isDarkSheet ? ComicTheme.darkPulp : ComicTheme.paperBg,
+            border: Border(
+              top: BorderSide(color: ComicTheme.inkBlack, width: 3),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: isSelected
-                      ? Border.all(color: ComicTheme.surfaceWhite, width: 3)
-                      : null,
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                              color: color.withValues(alpha: 0.5),
-                              blurRadius: 12,
-                              spreadRadius: 2)
-                        ]
-                      : null,
+                  color: isDarkSheet
+                      ? ComicTheme.darkText.withValues(alpha: 0.3)
+                      : ComicTheme.inkBlack.withValues(alpha: 0.3),
                 ),
-                child: isSelected
-                    ? const Icon(CupertinoIcons.check_mark,
-                        color: ComicTheme.surfaceWhite)
-                    : null,
               ),
-            );
-          }).toList(),
-        ),
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          isDestructiveAction: true,
-          onPressed: () => Navigator.of(modalCtx).pop(),
-          child: const Text('Cancel'),
-        ),
-      ),
+              Text(
+                'Pick Accent Color',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: isDarkSheet
+                      ? ComicTheme.darkText
+                      : ComicTheme.inkBlack,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Wrap(
+                  spacing: 20,
+                  runSpacing: 20,
+                  alignment: WrapAlignment.center,
+                  children: _colors.map((color) {
+                    final isSelected =
+                        color.toARGB32() == settings.primaryColorValue;
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setPrimaryColor(color.toARGB32());
+                        Navigator.of(modalCtx).pop();
+                      },
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: color,
+                          border: Border.all(
+                            color: isSelected
+                                ? ComicTheme.inkBlack
+                                : Colors.transparent,
+                            width: 3,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: ComicTheme.inkBlack,
+                              offset: Offset(3, 3),
+                              blurRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: isSelected
+                            ? Icon(
+                                isDarkSheet
+                                    ? Icons.check
+                                    : Icons.check,
+                                color: color.computeLuminance() > 0.5
+                                    ? ComicTheme.inkBlack
+                                    : ComicTheme.surfaceWhite,
+                              )
+                            : null,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () => Navigator.of(modalCtx).pop(),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: ComicTheme.inkRed,
+                    border: Border.all(
+                        color: ComicTheme.inkBlack, width: 2.5),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: ComicTheme.inkBlack,
+                        offset: Offset(4, 4),
+                        blurRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: ComicTheme.surfaceWhite,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

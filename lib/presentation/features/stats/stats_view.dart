@@ -2,17 +2,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/animation/m3e_spring.dart';
-import '../../../../core/animation/spring_curve.dart';
-import '../../../../core/utils/grade_calculator.dart';
-import '../../../../domain/usecases/cgpa_calculator.dart';
-import '../../../../shared/providers/logic_providers.dart';
-import '../../../../shared/providers/pomodoro_provider.dart';
-import '../../../../shared/providers/app_usage_provider.dart';
-import '../../../../domain/entities/course.dart';
-import '../../../../domain/entities/pomodoro_session.dart';
-import '../../../../widgets/comic_card.dart';
-import '../../../../widgets/comic_button.dart';
+import '../../../core/animation/m3e_spring.dart';
+import '../../../core/animation/spring_curve.dart';
+import '../../../core/utils/grade_calculator.dart';
+import '../../../domain/usecases/cgpa_calculator.dart';
+import '../../../shared/providers/logic_providers.dart';
+import '../../../shared/providers/pomodoro_provider.dart';
+import '../../../shared/providers/app_usage_provider.dart';
+import '../../../domain/entities/course.dart';
+import '../../../domain/entities/pomodoro_session.dart';
+import '../../../theme/comic_theme.dart';
+import '../../../widgets/comic_card.dart';
+import '../../../widgets/comic_button.dart';
 
 class StatsView extends ConsumerStatefulWidget {
   const StatsView({super.key});
@@ -158,6 +159,8 @@ class _StatsViewState extends ConsumerState<StatsView>
     List<CourseEntity> courses,
     double totalCredits,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = isDark ? ComicTheme.darkText : ComicTheme.inkBlack;
     return ComicCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -170,13 +173,15 @@ class _StatsViewState extends ConsumerState<StatsView>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : Colors.black.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.school,
                   size: 18,
-                  color: Colors.white,
+                  color: primary,
                 ),
               ),
             ],
@@ -184,10 +189,10 @@ class _StatsViewState extends ConsumerState<StatsView>
           const SizedBox(height: 12),
           Text(
             '${cgpa.cgpa.toStringAsFixed(1)} / 4',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: primary,
               height: 1.1,
             ),
           ),
@@ -206,17 +211,21 @@ class _StatsViewState extends ConsumerState<StatsView>
   }
 
   Widget _buildMiniStat(IconData icon, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = isDark
+        ? ComicTheme.darkText.withValues(alpha: 0.7)
+        : ComicTheme.inkBlack.withValues(alpha: 0.7);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: Colors.white70),
+        Icon(icon, size: 12, color: secondary),
         const SizedBox(width: 4),
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Colors.white70,
+            color: secondary,
           ),
         ),
       ],
@@ -226,6 +235,7 @@ class _StatsViewState extends ConsumerState<StatsView>
   Widget _buildPomodoroCard(
       BuildContext context, PomodoroState pomodoro,
       List<PomodoroSessionEntity> sessions) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final label = switch (pomodoro.status) {
       PomodoroStatus.focus => 'FOCUS',
       PomodoroStatus.shortBreak || PomodoroStatus.longBreak => 'BREAK',
@@ -243,13 +253,15 @@ class _StatsViewState extends ConsumerState<StatsView>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : Colors.black.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.timer_outlined,
                   size: 18,
-                  color: Colors.white,
+                  color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                 ),
               ),
               IconButton(
@@ -257,7 +269,9 @@ class _StatsViewState extends ConsumerState<StatsView>
                   _pomodoroExpanded
                       ? Icons.arrow_back_ios
                       : Icons.arrow_forward_ios,
-                  color: Colors.white70,
+                  color: isDark
+                      ? ComicTheme.darkText.withValues(alpha: 0.7)
+                      : ComicTheme.inkBlack.withValues(alpha: 0.7),
                   size: 18,
                 ),
                 onPressed: _togglePomodoro,
@@ -269,10 +283,10 @@ class _StatsViewState extends ConsumerState<StatsView>
           const SizedBox(height: 12),
           Text(
             pomodoro.timerString,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
               fontFeatures: [FontFeature.tabularFigures()],
               height: 1.1,
             ),
@@ -280,10 +294,12 @@ class _StatsViewState extends ConsumerState<StatsView>
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: isDark
+                  ? ComicTheme.darkText.withValues(alpha: 0.85)
+                  : ComicTheme.inkBlack.withValues(alpha: 0.85),
               letterSpacing: 1,
             ),
           ),
@@ -337,6 +353,14 @@ class _StatsViewState extends ConsumerState<StatsView>
     List<PomodoroSessionEntity> sessions,
     String label,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = isDark
+        ? ComicTheme.darkText.withValues(alpha: 0.7)
+        : ComicTheme.inkBlack.withValues(alpha: 0.7);
+    final muted = isDark
+        ? ComicTheme.darkText.withValues(alpha: 0.5)
+        : ComicTheme.inkBlack.withValues(alpha: 0.5);
+    final primary = isDark ? ComicTheme.darkText : ComicTheme.inkBlack;
     return SizedBox(
       width: 240,
       child: Padding(
@@ -383,7 +407,10 @@ class _StatsViewState extends ConsumerState<StatsView>
               ],
             ),
             const SizedBox(height: 12),
-            const Divider(color: Colors.white24, height: 1),
+            Divider(
+              color: isDark ? Colors.white24 : Colors.black26,
+              height: 1,
+            ),
             const SizedBox(height: 12),
             Flexible(
               child: SingleChildScrollView(
@@ -403,17 +430,17 @@ class _StatsViewState extends ConsumerState<StatsView>
                           children: [
                             Text(
                               date,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.white70,
+                                color: secondary,
                               ),
                             ),
                             Text(
                               dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: primary,
                               ),
                             ),
                           ],
@@ -421,13 +448,13 @@ class _StatsViewState extends ConsumerState<StatsView>
                       );
                     }),
                     if (sessions.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
                           'No sessions yet',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.white54,
+                            color: muted,
                           ),
                         ),
                       ),
@@ -460,35 +487,39 @@ class _StatsViewState extends ConsumerState<StatsView>
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'CGPA Target',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                  children: [
+                    Text(
+                      'CGPA Target',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      ),
                     ),
-                  ),
-                  Icon(
-                    _cgpaTargetExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.white70,
-                    size: 24,
-                  ),
+                    Icon(
+                      _cgpaTargetExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: isDark
+                          ? ComicTheme.darkText.withValues(alpha: 0.7)
+                          : ComicTheme.inkBlack.withValues(alpha: 0.7),
+                      size: 24,
+                    ),
                 ],
               ),
             ),
           ),
           if (_cgpaTargetExpanded) ...[
             const SizedBox(height: 16),
-            const Center(
+            Center(
               child: Text(
                 'No Target CGPA Set',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white54,
+                  color: isDark
+                      ? ComicTheme.darkText.withValues(alpha: 0.5)
+                      : ComicTheme.inkBlack.withValues(alpha: 0.5),
                 ),
               ),
             ),

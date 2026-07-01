@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../../theme/comic_theme.dart';
+import '../../../theme/comic_theme.dart';
 import '../../../core/animation/m3e_spring.dart';
 
 class SplashScreen extends StatefulWidget {

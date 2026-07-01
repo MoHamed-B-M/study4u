@@ -13,9 +13,9 @@ import '../../../domain/entities/course_material.dart';
 import '../../../domain/entities/attendance_record.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../core/services/notification_service.dart';
-import '../../../../theme/comic_theme.dart';
-import '../../../../widgets/comic_card.dart';
-import '../../../../widgets/comic_button.dart';
+import '../../../theme/comic_theme.dart';
+import '../../../widgets/comic_card.dart';
+import '../../../widgets/comic_button.dart';
 import '../../widgets/add_course_sheet.dart';
 import '../../widgets/add_task_sheet.dart';
 

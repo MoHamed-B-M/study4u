@@ -4,17 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../shared/providers/logic_providers.dart';
-import '../../../../domain/entities/course.dart';
-import '../../../../domain/entities/task.dart';
-import '../../../../domain/usecases/schedule_optimizer.dart';
-import '../../../../theme/comic_theme.dart';
-import '../../../../widgets/comic_card.dart';
-import '../../../../widgets/comic_button.dart';
+import '../../../shared/providers/logic_providers.dart';
+import '../../../domain/entities/course.dart';
+import '../../../domain/entities/task.dart';
+import '../../../domain/usecases/schedule_optimizer.dart';
+import '../../../theme/comic_theme.dart';
+import '../../../widgets/comic_card.dart';
+import '../../../widgets/comic_button.dart';
 import '../../widgets/add_course_sheet.dart';
 import '../../widgets/add_task_sheet.dart';
 import '../../widgets/quote_expansion_route.dart';
-import '../course_detail/course_detail_screen.dart';
 import '../../../core/animation/page_scale.dart' show PageScaleProvider;
 
 class HomeScreen extends ConsumerStatefulWidget {
