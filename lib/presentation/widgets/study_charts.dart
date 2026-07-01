@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:m3e_buttons/m3e_buttons.dart';
-import 'package:icon_button_m3e/icon_button_m3e.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_card.dart';
 import 'circular_progress_ring.dart';
@@ -319,7 +317,7 @@ class PomodoroCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: M3EFilledButton.icon(
+                child: ElevatedButton.icon(
                   onPressed: onStartPause,
                   icon: Icon(isActive ? Icons.pause : Icons.play_arrow),
                   label: Text(isActive ? 'Pause' : 'Start Focus'),
@@ -327,10 +325,10 @@ class PomodoroCard extends StatelessWidget {
               ),
               if (onReset != null) ...[
                 const SizedBox(width: 12),
-                IconButtonM3E(
+                IconButton(
                   onPressed: onReset,
                   icon: const Icon(Icons.refresh_rounded),
-                  variant: IconButtonM3EVariant.filled,
+                  tooltip: 'Reset',
                 ),
               ],
             ],
