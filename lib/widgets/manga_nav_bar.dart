@@ -5,11 +5,13 @@ import '../theme/comic_theme.dart';
 class MangaNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabChange;
+  final bool enableHaptic;
 
   const MangaNavBar({
     super.key,
     required this.selectedIndex,
     required this.onTabChange,
+    this.enableHaptic = true,
   });
 
   @override
@@ -34,6 +36,7 @@ class MangaNavBar extends StatelessWidget {
                 isSelected: selectedIndex == 0,
                 onTap: () => onTabChange(0),
                 isDark: isDark,
+                enableHaptic: enableHaptic,
               ),
               _NavTab(
                 icon: Icons.calendar_today_outlined,
@@ -41,6 +44,7 @@ class MangaNavBar extends StatelessWidget {
                 isSelected: selectedIndex == 1,
                 onTap: () => onTabChange(1),
                 isDark: isDark,
+                enableHaptic: enableHaptic,
               ),
               _NavTab(
                 icon: Icons.analytics_outlined,
@@ -48,6 +52,7 @@ class MangaNavBar extends StatelessWidget {
                 isSelected: selectedIndex == 2,
                 onTap: () => onTabChange(2),
                 isDark: isDark,
+                enableHaptic: enableHaptic,
               ),
             ],
           ),
@@ -63,6 +68,7 @@ class _NavTab extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final bool isDark;
+  final bool enableHaptic;
 
   const _NavTab({
     required this.icon,
@@ -70,6 +76,7 @@ class _NavTab extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.isDark = false,
+    this.enableHaptic = true,
   });
 
   @override
@@ -78,7 +85,7 @@ class _NavTab extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          HapticFeedback.lightImpact();
+          if (enableHaptic) HapticFeedback.lightImpact();
           onTap();
         },
         child: AnimatedContainer(

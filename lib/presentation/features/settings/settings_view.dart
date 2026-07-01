@@ -106,20 +106,6 @@ class SettingsView extends ConsumerWidget {
                               .setNotificationEnabled(v);
                         },
                       ),
-                      _buildSwitchRow(
-                        context,
-                        icon: CupertinoIcons.rectangle_3_offgrid,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Show Labels',
-                        subtitle: 'Show navigation bar labels',
-                        value: settings.showNavLabels,
-                        onChanged: (v) {
-                          HapticFeedback.selectionClick();
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setShowNavLabels(v);
-                        },
-                      ),
                     ]),
                   ),
                   const SizedBox(height: 24),

@@ -18,11 +18,11 @@ import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
 import 'widgets/manga_nav_bar.dart';
 import 'core/animation/page_scale.dart';
-import 'core/animation/m3e_spring.dart';
 import 'data/models/app_settings.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   NotificationService.instance.init(
     onNotificationTap: (payload) {
       if (payload != 'app_update') return;
@@ -223,52 +223,17 @@ class MainScreen extends ConsumerStatefulWidget {
   ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends ConsumerState<MainScreen>
-    with SingleTickerProviderStateMixin {
+class _MainScreenState extends ConsumerState<MainScreen> {
+  static const _tabRoutes = ['/', '/tracker', '/stats'];
+
   int _currentIndex = 0;
-  late AnimationController _navCtrl;
-  String _lastLocation = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _navCtrl = AnimationController(vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _navCtrl.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    if (location != _lastLocation) {
-      final prev = _lastLocation;
-      _lastLocation = location;
-      final wasSettings = prev == '/settings';
-      final isSettings = location == '/settings';
-      if (isSettings != wasSettings) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          if (isSettings) {
-            if (M3ESpring.isReducedMotion(context)) {
-              _navCtrl.value = 1;
-            } else {
-              M3ESpring.animate(
-                _navCtrl,
-                to: 1,
-                spring: M3ESpring.spatial(),
-              );
-            }
-          } else {
-            _navCtrl.value = 0;
-          }
-        });
-      }
-    }
-
+    final isTabRoute = _tabRoutes.contains(location);
+    if (isTabRoute) _currentIndex = _tabRoutes.indexOf(location);
+    final enableHaptic = ref.watch(useHapticFeedbackProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -279,31 +244,27 @@ class _MainScreenState extends ConsumerState<MainScreen>
     ));
 
     return Scaffold(
-      body: RepaintBoundary(
-        child: widget.child,
-      ),
-      bottomNavigationBar: AnimatedBuilder(
-        animation: _navCtrl,
-        builder: (context, child) {
-          final value = 1 - _navCtrl.value;
-          return ClipRect(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              heightFactor: value,
-              child: Opacity(opacity: value, child: child),
-            ),
-          );
-        },
-        child: MangaNavBar(
-          selectedIndex: _currentIndex,
-          onTabChange: (index) {
-            setState(() => _currentIndex = index);
-            if (index == 0) context.go('/');
-            if (index == 1) context.go('/tracker');
-            if (index == 2) context.go('/stats');
-          },
-        ),
-      ),
+      body: isTabRoute
+          ? RepaintBoundary(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: const [
+                  HomeScreen(),
+                  TrackerScreen(),
+                  StatisticsScreen(),
+                ],
+              ),
+            )
+          : widget.child,
+      bottomNavigationBar: isTabRoute
+          ? MangaNavBar(
+              selectedIndex: _currentIndex,
+              enableHaptic: enableHaptic,
+              onTabChange: (index) {
+                context.go(_tabRoutes[index]);
+              },
+            )
+          : null,
     );
   }
 }

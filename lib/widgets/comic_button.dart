@@ -14,6 +14,7 @@ class ComicButton extends StatefulWidget {
   final double? height;
   final bool isCta;
   final bool enableSound;
+  final bool enableHaptic;
 
   const ComicButton({
     super.key,
@@ -28,6 +29,7 @@ class ComicButton extends StatefulWidget {
     this.height,
     this.isCta = false,
     this.enableSound = true,
+    this.enableHaptic = true,
   });
 
   @override
@@ -69,8 +71,11 @@ class _ComicButtonState extends State<ComicButton> {
           : null,
       onTapUp: widget.onPressed != null
           ? (_) {
+              if (widget.enableHaptic) {
+                HapticFeedback.lightImpact();
+              }
               if (widget.enableSound) {
-                SoundService.instance.playClickWithHaptic();
+                SoundService.instance.playClick();
               }
               widget.onPressed?.call();
               setState(() => _isPressed = false);

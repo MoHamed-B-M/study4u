@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
-import 'package:flutter/services.dart';
 
 class SoundService {
   SoundService._();
@@ -28,11 +27,6 @@ class SoundService {
       await _clickPlayer!.seek(Duration.zero);
       unawaited(_clickPlayer!.play());
     } catch (_) {}
-  }
-
-  Future<void> playClickWithHaptic() async {
-    HapticFeedback.heavyImpact();
-    unawaited(playClick());
   }
 
   void dispose() {

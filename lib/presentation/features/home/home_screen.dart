@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:animations/animations.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../shared/providers/logic_providers.dart';
 import '../../../../domain/entities/course.dart';
 import '../../../../domain/entities/task.dart';
@@ -497,9 +497,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title,
-            style: TextStyle(
+            style: GoogleFonts.luckiestGuy(
               fontSize: 20,
-              fontWeight: FontWeight.w700,
               color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
             )),
         if (action != null)
@@ -518,93 +517,98 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final upNextKey = GlobalKey();
     return RepaintBoundary(
       key: upNextKey,
-      child: Material(
-        color: const Color(0xFFA7F3D0),
-        borderRadius: BorderRadius.circular(24),
-        elevation: 0,
-        shadowColor: const Color(0xFFA7F3D0).withValues(alpha: 0.3),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            final renderBox =
-                upNextKey.currentContext?.findRenderObject() as RenderBox?;
-            if (renderBox != null && renderBox.hasSize) {
-              final position = renderBox.localToGlobal(Offset.zero);
-              final rect = Rect.fromLTWH(
-                position.dx,
-                position.dy,
-                renderBox.size.width,
-                renderBox.size.height,
-              );
-              final scaleNotifier = PageScaleProvider.of(context);
-              Navigator.of(context).push(QuoteExpansionRoute(
-                sourceRect: rect,
-                sourceColor: const Color(0xFFA7F3D0),
-                pageScaleNotifier: scaleNotifier,
-              ));
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'UP NEXT',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                    Icon(Icons.bolt, color: Colors.black87, size: 22),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  course.name,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${course.code} \u2022 ${course.room}',
-                  style: const TextStyle(color: Colors.black54, fontSize: 14),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Icon(Icons.access_time_rounded,
-                        color: Colors.black87, size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${course.startTime} - ${course.endTime}',
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          final renderBox =
+              upNextKey.currentContext?.findRenderObject() as RenderBox?;
+          if (renderBox != null && renderBox.hasSize) {
+            final position = renderBox.localToGlobal(Offset.zero);
+            final rect = Rect.fromLTWH(
+              position.dx,
+              position.dy,
+              renderBox.size.width,
+              renderBox.size.height,
+            );
+            final scaleNotifier = PageScaleProvider.of(context);
+            Navigator.of(context).push(QuoteExpansionRoute(
+              sourceRect: rect,
+              sourceColor: const Color(0xFFA7F3D0),
+              pageScaleNotifier: scaleNotifier,
+            ));
+          }
+        },
+        child: ComicCard(
+          padding: const EdgeInsets.all(24),
+          backgroundColor: const Color(0xFFA7F3D0),
+          customShadow: [
+            BoxShadow(
+              color: const Color(0xFFA7F3D0).withValues(alpha: 0.3),
+              offset: const Offset(4, 4),
+              blurRadius: 0,
             ),
+          ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: ComicTheme.inkBlack.withValues(alpha: 0.15),
+                    ),
+                    child: Text(
+                      'UP NEXT',
+                      style: TextStyle(
+                        color: ComicTheme.inkBlack,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.bolt, color: ComicTheme.inkBlack, size: 22),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                course.name,
+                style: TextStyle(
+                  color: ComicTheme.inkBlack,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: GoogleFonts.luckiestGuy().fontFamily,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${course.code} \u2022 ${course.room}',
+                style: TextStyle(
+                  color: ComicTheme.inkBlack.withValues(alpha: 0.6),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.access_time_rounded,
+                      color: ComicTheme.inkBlack, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${course.startTime} - ${course.endTime}',
+                    style: TextStyle(
+                      color: ComicTheme.inkBlack,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -631,99 +635,82 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         itemBuilder: (context, index) {
           final course = courses[index];
           final isDark = Theme.of(context).brightness == Brightness.dark;
-          return Container(
-            width: 150,
-            margin: const EdgeInsets.only(right: 14),
-            child: OpenContainer(
-              closedColor:
-                  isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
-              closedElevation: 0,
-              closedShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-                side: BorderSide(
-                  color: isDark
-                      ? ComicTheme.surfaceWhite.withValues(alpha: 0.06)
-                      : ComicTheme.inkBlack.withValues(alpha: 0.15),
+          return GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push('/course/${course.id}');
+            },
+            child: Container(
+              width: 150,
+              margin: const EdgeInsets.only(right: 14),
+              child: ComicCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color:
+                            Color(course.colorValue).withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.book,
+                        color: Color(course.colorValue),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      course.code,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: isDark
+                            ? ComicTheme.darkText
+                            : ComicTheme.inkBlack,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      course.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? ComicTheme.darkText.withValues(alpha: 0.7)
+                            : ComicTheme.inkBlack.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 12,
+                          color: isDark
+                              ? ComicTheme.darkText.withValues(alpha: 0.4)
+                              : ComicTheme.inkBlack.withValues(alpha: 0.4),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          course.startTime,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? ComicTheme.darkText.withValues(alpha: 0.5)
+                                : ComicTheme.inkBlack.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              openColor: Theme.of(context).scaffoldBackgroundColor,
-              openElevation: 0,
-              openShape: const RoundedRectangleBorder(),
-              transitionDuration: const Duration(milliseconds: 280),
-              closedBuilder: (context, action) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color:
-                              Color(course.colorValue).withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.book,
-                          color: Color(course.colorValue),
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        course.code,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: isDark
-                              ? ComicTheme.darkText
-                              : ComicTheme.inkBlack,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        course.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? ComicTheme.darkText.withValues(alpha: 0.7)
-                              : ComicTheme.inkBlack.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 12,
-                            color: isDark
-                                ? ComicTheme.darkText.withValues(alpha: 0.4)
-                                : ComicTheme.inkBlack.withValues(alpha: 0.4),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            course.startTime,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isDark
-                                  ? ComicTheme.darkText.withValues(alpha: 0.5)
-                                  : ComicTheme.inkBlack.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-              openBuilder: (context, closeContainer) {
-                return CourseDetailScreen(courseId: course.id);
-              },
             ),
           );
         },
