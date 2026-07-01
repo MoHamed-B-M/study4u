@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../domain/entities/course.dart';
 import '../../shared/providers/logic_providers.dart';
 import '../../core/services/notification_service.dart';
-import '../theme/app_theme.dart';
+
 
 class AddCourseSheet extends ConsumerStatefulWidget {
   final CourseEntity? course;
@@ -23,7 +23,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
 
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 30);
-  int _colorValue = AppTheme.primary.value;
+  int _colorValue = 0xFF4ADE80;
   double _targetGrade = 4.0;
   double _creditHours = 3.0;
   final Set<int> _weekDays = {};
@@ -300,11 +300,11 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: _colors.map((c) {
-                                final selected = _colorValue == c.value;
+                                final selected = _colorValue == c.toARGB32();
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 4),
                                   child: GestureDetector(
-                                    onTap: () => setState(() => _colorValue = c.value),
+                                    onTap: () => setState(() => _colorValue = c.toARGB32()),
                                     child: AnimatedContainer(
                                       duration: const Duration(milliseconds: 200),
                                       width: 32, height: 32,

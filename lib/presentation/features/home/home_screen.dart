@@ -45,12 +45,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: Text(greeting),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
+          GestureDetector(
+            onTap: () {
               HapticFeedback.lightImpact();
-              context.push('/settings');
+              GoRouter.of(context).push('/settings');
             },
+            child: Container(
+              width: 36,
+              height: 36,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                border: Border.all(color: ComicTheme.inkBlack, width: 2),
+                boxShadow: const [
+                  BoxShadow(
+                    color: ComicTheme.inkBlack,
+                    offset: Offset(2, 2),
+                    blurRadius: 0,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.settings, size: 18, color: ComicTheme.inkBlack),
+            ),
           ),
         ],
       ),
@@ -637,7 +653,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
-              context.push('/course/${course.id}');
+              GoRouter.of(context).push('/course/${course.id}');
             },
             child: Container(
               width: 150,
@@ -718,12 +734,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildFAB(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? ComicTheme.darkPulp : ComicTheme.surfaceWhite;
     return FloatingActionButton(
       onPressed: () {
         HapticFeedback.lightImpact();
         showModalBottomSheet(
           context: context,
-          backgroundColor: ComicTheme.surfaceWhite,
+          backgroundColor: sheetBg,
           shape: const RoundedRectangleBorder(),
           builder: (_) => SafeArea(
             child: Padding(
@@ -739,7 +757,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
-                        backgroundColor: ComicTheme.surfaceWhite,
+                        backgroundColor: sheetBg,
                         shape: const RoundedRectangleBorder(),
                         builder: (_) => const AddCourseSheet(),
                       );
@@ -755,7 +773,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
-                        backgroundColor: ComicTheme.surfaceWhite,
+                        backgroundColor: sheetBg,
                         shape: const RoundedRectangleBorder(),
                         builder: (_) => const AddTaskSheet(),
                       );

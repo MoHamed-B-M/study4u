@@ -73,8 +73,8 @@ class FeaturePreviewScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(32, 56, 32, 32),
             child: Icon(Icons.timer_outlined, size: 120, color: accent),
           ),
-          foregroundFactor: 0.35,
-          foregroundAlignment: Alignment.topCenter,
+          foregroundFactor: 0,
+          foregroundAlignment: Alignment.center,
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -114,8 +114,8 @@ class FeaturePreviewScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(32),
             child: Icon(Icons.calendar_month_outlined, size: 120, color: accent),
           ),
-          foregroundFactor: 0.35,
-          foregroundAlignment: Alignment.topCenter,
+          foregroundFactor: 0,
+          foregroundAlignment: Alignment.center,
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -155,8 +155,8 @@ class FeaturePreviewScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(32),
             child: Icon(Icons.school_outlined, size: 120, color: accent),
           ),
-          foregroundFactor: 0.35,
-          foregroundAlignment: Alignment.topCenter,
+          foregroundFactor: 0,
+          foregroundAlignment: Alignment.center,
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -193,11 +193,23 @@ class FeaturePreviewScreen extends ConsumerWidget {
                 _PermissionButton(
                   label: 'Open Settings',
                   onTap: () async {
-                    final info = await PackageInfo.fromPlatform();
-                    await launchUrl(
-                      Uri.parse('package:${info.packageName}'),
-                      mode: LaunchMode.externalApplication,
-                    );
+                    try {
+                      final info = await PackageInfo.fromPlatform();
+                      await launchUrl(
+                        Uri.parse('package:${info.packageName}'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Please open Settings manually'),
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: ComicTheme.inkRed,
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
               ],
@@ -207,8 +219,8 @@ class FeaturePreviewScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(32),
             child: Icon(Icons.analytics_outlined, size: 120, color: accent),
           ),
-          foregroundFactor: 0.35,
-          foregroundAlignment: Alignment.topCenter,
+          foregroundFactor: 0,
+          foregroundAlignment: Alignment.center,
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -245,11 +257,23 @@ class FeaturePreviewScreen extends ConsumerWidget {
                 _PermissionButton(
                   label: 'Open Settings',
                   onTap: () async {
-                    final info = await PackageInfo.fromPlatform();
-                    await launchUrl(
-                      Uri.parse('package:${info.packageName}'),
-                      mode: LaunchMode.externalApplication,
-                    );
+                    try {
+                      final info = await PackageInfo.fromPlatform();
+                      await launchUrl(
+                        Uri.parse('package:${info.packageName}'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Please open Settings manually'),
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: ComicTheme.inkRed,
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
               ],
@@ -259,8 +283,8 @@ class FeaturePreviewScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(32),
             child: Icon(Icons.battery_charging_full, size: 120, color: accent),
           ),
-          foregroundFactor: 0.35,
-          foregroundAlignment: Alignment.topCenter,
+          foregroundFactor: 0,
+          foregroundAlignment: Alignment.center,
         ),
       ],
     );
