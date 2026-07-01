@@ -98,6 +98,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
       );
     }
     final color = Color(course.colorValue);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -152,6 +153,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
+          labelColor: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+          unselectedLabelColor: (isDark ? ComicTheme.darkText : ComicTheme.inkBlack).withValues(alpha: 0.5),
+          indicatorColor: ComicTheme.inkRed,
+          indicatorWeight: 3,
           tabs: const [
             Tab(text: 'Info'),
             Tab(text: 'Materials'),

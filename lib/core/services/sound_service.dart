@@ -4,6 +4,7 @@ import 'package:just_audio/just_audio.dart';
 class SoundService {
   SoundService._();
   static final instance = SoundService._();
+  static bool pressSoundEnabled = true;
 
   AudioPlayer? _clickPlayer;
   bool _initialized = false;
@@ -21,7 +22,7 @@ class SoundService {
   }
 
   Future<void> playClick() async {
-    if (!_initialized || _clickPlayer == null) return;
+    if (!pressSoundEnabled || !_initialized || _clickPlayer == null) return;
     try {
       await _clickPlayer!.stop();
       await _clickPlayer!.seek(Duration.zero);

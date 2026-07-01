@@ -35,7 +35,10 @@ class UpdateService {
           'User-Agent': 'stdy4u/1.0',
         },
       );
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200) {
+        debugPrint('UpdateService: API returned status ${response.statusCode}');
+        return null;
+      }
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final tagName = data['tag_name'] as String? ?? '';
@@ -60,8 +63,8 @@ class UpdateService {
         releaseNotes: body,
         isNewer: isNewer,
       );
-    } catch (e) {
-      debugPrint('UpdateService.checkForUpdate error: $e');
+    } catch (e, stack) {
+      debugPrint('UpdateService.checkForUpdate error: $e\n$stack');
       return null;
     }
   }

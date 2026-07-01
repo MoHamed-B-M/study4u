@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/services/sound_service.dart';
 import '../../../core/services/update_service.dart';
 import '../../../data/models/app_settings.dart';
 import '../../../theme/comic_theme.dart';
@@ -15,17 +16,6 @@ import '../../widgets/update_dialog.dart';
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
-
-  static const _colors = [
-    Color(0xFFA18CFF),
-    Color(0xFF8F99FB),
-    Color(0xFFFBBF24),
-    Color(0xFF60A5FA),
-    Color(0xFFF472B6),
-    Color(0xFF4ADE80),
-    Color(0xFFFB923C),
-    Color(0xFF34D399),
-  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,23 +43,6 @@ class SettingsView extends ConsumerWidget {
                         title: 'Appearance',
                         subtitle: _themeLabel(settings.themeMode),
                         onTap: () => _showThemeSheet(context, ref, settings),
-                      ),
-                      _buildSettingRow(
-                        context,
-                        icon: CupertinoIcons.paintbrush,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Accent Color',
-                        subtitle:
-                            '#${settings.primaryColorValue.toRadixString(16).toUpperCase().padLeft(8, '0').substring(2)}',
-                        trailing: Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Color(settings.primaryColorValue),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        onTap: () => _showColorSheet(context, ref, settings),
                       ),
                     ]),
                   ),
@@ -104,6 +77,21 @@ class SettingsView extends ConsumerWidget {
                           ref
                               .read(settingsProvider.notifier)
                               .setNotificationEnabled(v);
+                        },
+                      ),
+                      _buildSwitchRow(
+                        context,
+                        icon: CupertinoIcons.music_note,
+                        iconColor: ComicTheme.inkRed,
+                        title: 'Press Sound',
+                        subtitle: 'Play click sound on button press',
+                        value: settings.pressSound,
+                        onChanged: (v) {
+                          HapticFeedback.selectionClick();
+                          SoundService.pressSoundEnabled = v;
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setPressSound(v);
                         },
                       ),
                     ]),
@@ -522,129 +510,4 @@ class SettingsView extends ConsumerWidget {
     );
   }
 
-  void _showColorSheet(
-      BuildContext context, WidgetRef ref, AppSettings settings) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext modalCtx) {
-        final isDarkSheet = Theme.of(modalCtx).brightness == Brightness.dark;
-        return Container(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          decoration: BoxDecoration(
-            color: isDarkSheet ? ComicTheme.darkPulp : ComicTheme.paperBg,
-            border: Border(
-              top: BorderSide(color: ComicTheme.inkBlack, width: 3),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: isDarkSheet
-                      ? ComicTheme.darkText.withValues(alpha: 0.3)
-                      : ComicTheme.inkBlack.withValues(alpha: 0.3),
-                ),
-              ),
-              Text(
-                'Pick Accent Color',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: isDarkSheet
-                      ? ComicTheme.darkText
-                      : ComicTheme.inkBlack,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  alignment: WrapAlignment.center,
-                  children: _colors.map((color) {
-                    final isSelected =
-                        color.toARGB32() == settings.primaryColorValue;
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        ref
-                            .read(settingsProvider.notifier)
-                            .setPrimaryColor(color.toARGB32());
-                        Navigator.of(modalCtx).pop();
-                      },
-                      child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: color,
-                          border: Border.all(
-                            color: isSelected
-                                ? ComicTheme.inkBlack
-                                : Colors.transparent,
-                            width: 3,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: ComicTheme.inkBlack,
-                              offset: Offset(3, 3),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: isSelected
-                            ? Icon(
-                                isDarkSheet
-                                    ? Icons.check
-                                    : Icons.check,
-                                color: color.computeLuminance() > 0.5
-                                    ? ComicTheme.inkBlack
-                                    : ComicTheme.surfaceWhite,
-                              )
-                            : null,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => Navigator.of(modalCtx).pop(),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: ComicTheme.inkRed,
-                    border: Border.all(
-                        color: ComicTheme.inkBlack, width: 2.5),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: ComicTheme.inkBlack,
-                        offset: Offset(4, 4),
-                        blurRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: ComicTheme.surfaceWhite,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

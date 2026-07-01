@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/animation/m3e_spring.dart';
-import '../../../core/animation/spring_curve.dart';
 import '../../../core/utils/grade_calculator.dart';
 import '../../../domain/usecases/cgpa_calculator.dart';
 import '../../../shared/providers/logic_providers.dart';
@@ -30,8 +29,8 @@ class _StatsViewState extends ConsumerState<StatsView>
   late final AnimationController _fadeCtrl4;
   late final AnimationController _screenTimeCtrl;
   bool _cgpaTargetExpanded = true;
-  bool _pomodoroExpanded = false;
   bool _screenTimeExpanded = false;
+  double? _targetCgpa;
 
   @override
   void initState() {
@@ -266,17 +265,15 @@ class _StatsViewState extends ConsumerState<StatsView>
               ),
               IconButton(
                 icon: Icon(
-                  _pomodoroExpanded
-                      ? Icons.arrow_back_ios
-                      : Icons.arrow_forward_ios,
+                  Icons.arrow_forward_ios,
                   color: isDark
                       ? ComicTheme.darkText.withValues(alpha: 0.7)
                       : ComicTheme.inkBlack.withValues(alpha: 0.7),
                   size: 18,
                 ),
-                onPressed: _togglePomodoro,
+                onPressed: _showPomodoroModal,
                 visualDensity: VisualDensity.compact,
-                tooltip: _pomodoroExpanded ? 'Collapse' : 'Expand',
+                tooltip: 'Open pomodoro controls',
               ),
             ],
           ),
@@ -324,153 +321,291 @@ class _StatsViewState extends ConsumerState<StatsView>
               ),
             ),
           ),
-          AnimatedSize(
-            curve: const SpringCurve(stiffness: 400, damping: 20),
-            duration: const Duration(milliseconds: 600),
-            alignment: Alignment.topCenter,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) =>
-                  FadeTransition(opacity: animation, child: child),
-              child: _pomodoroExpanded
-                  ? SizedBox(
-                      key: const ValueKey('expanded'),
-                      width: 240,
-                      child: _buildPomodoroLeftPanel(
-                          context, pomodoro, sessions, label),
-                    )
-                  : const SizedBox.shrink(key: ValueKey('compact')),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildPomodoroLeftPanel(
-    BuildContext context,
-    PomodoroState pomodoro,
-    List<PomodoroSessionEntity> sessions,
-    String label,
-  ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = isDark
-        ? ComicTheme.darkText.withValues(alpha: 0.7)
-        : ComicTheme.inkBlack.withValues(alpha: 0.7);
-    final muted = isDark
-        ? ComicTheme.darkText.withValues(alpha: 0.5)
-        : ComicTheme.inkBlack.withValues(alpha: 0.5);
-    final primary = isDark ? ComicTheme.darkText : ComicTheme.inkBlack;
-    return SizedBox(
-      width: 240,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                ComicButton(
-                  isCta: true,
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    if (pomodoro.isActive) {
-                      ref.read(pomodoroProvider.notifier).pauseTimer();
-                    } else {
-                      ref.read(pomodoroProvider.notifier).startTimer();
-                    }
-                  },
-                  child: Icon(
-                    pomodoro.isActive ? Icons.pause : Icons.play_arrow,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                ComicButton(
-                  isCta: true,
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    ref.read(pomodoroProvider.notifier).resetTimer();
-                  },
-                  child: const Icon(Icons.restart_alt, size: 18),
-                ),
-                const SizedBox(width: 4),
-                ComicButton(
-                  isCta: true,
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    ref.read(pomodoroProvider.notifier).skipSession();
-                  },
-                  child: const Icon(Icons.nightlight_round, size: 18),
+
+
+  void _showSetTargetDialog() {
+    HapticFeedback.lightImpact();
+    final ctrl = TextEditingController(
+      text: _targetCgpa?.toStringAsFixed(2) ?? '',
+    );
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final dk = Theme.of(ctx).brightness == Brightness.dark;
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: dk ? ComicTheme.darkPulp : ComicTheme.paperBg,
+              border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: ComicTheme.inkBlack,
+                  offset: Offset(4, 4),
+                  blurRadius: 0,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Divider(
-              color: isDark ? Colors.white24 : Colors.black26,
-              height: 1,
-            ),
-            const SizedBox(height: 12),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...sessions.reversed.take(10).map((s) {
-                      final dur = s.durationSeconds;
-                      final dh = dur ~/ 3600;
-                      final dm = (dur % 3600) ~/ 60;
-                      final date =
-                          '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              date,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: secondary,
-                              ),
-                            ),
-                            Text(
-                              dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: primary,
-                              ),
-                            ),
-                          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Set Target CGPA',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: dk ? ComicTheme.darkText : ComicTheme.inkBlack,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: dk ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                    border: Border.all(color: ComicTheme.inkBlack, width: 2),
+                  ),
+                  child: TextField(
+                    controller: ctrl,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: TextStyle(
+                      color: dk ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'e.g. 3.50',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(
+                        color: dk ? ComicTheme.darkText.withValues(alpha: 0.4) : ComicTheme.inkBlack.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    final text = ctrl.text.trim();
+                    final val = double.tryParse(text);
+                    if (val != null && val >= 0 && val <= 4) {
+                      setState(() => _targetCgpa = val);
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: ComicTheme.inkRed,
+                      border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: ComicTheme.inkBlack,
+                          offset: Offset(4, 4),
+                          blurRadius: 0,
                         ),
-                      );
-                    }),
-                    if (sessions.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          'No sessions yet',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: muted,
-                          ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Save',
+                        style: TextStyle(
+                          color: ComicTheme.surfaceWhite,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
                         ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  void _togglePomodoro() {
+  void _showPomodoroModal() {
     HapticFeedback.lightImpact();
-    setState(() => _pomodoroExpanded = !_pomodoroExpanded);
+    final pomodoro = ref.read(pomodoroProvider);
+    final sessions = ref.read(pomodoroSessionsProvider);
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        final dk = Theme.of(ctx).brightness == Brightness.dark;
+        final label = switch (pomodoro.status) {
+          PomodoroStatus.focus => 'FOCUS',
+          PomodoroStatus.shortBreak || PomodoroStatus.longBreak => 'BREAK',
+          PomodoroStatus.idle => 'READY',
+        };
+        final secondary = dk
+            ? ComicTheme.darkText.withValues(alpha: 0.7)
+            : ComicTheme.inkBlack.withValues(alpha: 0.7);
+        final muted = dk
+            ? ComicTheme.darkText.withValues(alpha: 0.5)
+            : ComicTheme.inkBlack.withValues(alpha: 0.5);
+        final primary = dk ? ComicTheme.darkText : ComicTheme.inkBlack;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          child: Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: dk ? ComicTheme.darkPulp : ComicTheme.paperBg,
+                border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+                boxShadow: const [
+                  BoxShadow(
+                    color: ComicTheme.inkBlack,
+                    offset: Offset(4, 4),
+                    blurRadius: 0,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 24),
+                      Text(
+                        'Pomodoro',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: primary,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(ctx),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: ComicTheme.inkRed,
+                            border: Border.all(color: ComicTheme.inkBlack, width: 2),
+                          ),
+                          child: const Icon(Icons.close, size: 16, color: ComicTheme.surfaceWhite),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    pomodoro.timerString,
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w800,
+                      color: primary,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: secondary,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ComicButton(
+                        isCta: true,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          if (pomodoro.isActive) {
+                            ref.read(pomodoroProvider.notifier).pauseTimer();
+                          } else {
+                            ref.read(pomodoroProvider.notifier).startTimer();
+                          }
+                          Navigator.pop(ctx);
+                        },
+                        child: Icon(
+                          pomodoro.isActive ? Icons.pause : Icons.play_arrow,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ComicButton(
+                        isCta: true,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          ref.read(pomodoroProvider.notifier).resetTimer();
+                          Navigator.pop(ctx);
+                        },
+                        child: const Icon(Icons.restart_alt, size: 18),
+                      ),
+                      const SizedBox(width: 8),
+                      ComicButton(
+                        isCta: true,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          ref.read(pomodoroProvider.notifier).skipSession();
+                          Navigator.pop(ctx);
+                        },
+                        child: const Icon(Icons.nightlight_round, size: 18),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (sessions.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'No sessions yet',
+                        style: TextStyle(fontSize: 11, color: muted),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: 160,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: sessions.reversed.take(10).map((s) {
+                            final dur = s.durationSeconds;
+                            final dh = dur ~/ 3600;
+                            final dm = (dur % 3600) ~/ 60;
+                            final date = '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(date, style: TextStyle(fontSize: 11, color: secondary)),
+                                  Text(
+                                    dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primary),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildCgpaTargetCard(BuildContext context, bool isDark) {
@@ -509,11 +644,11 @@ class _StatsViewState extends ConsumerState<StatsView>
               ),
             ),
           ),
-          if (_cgpaTargetExpanded) ...[
+            if (_cgpaTargetExpanded) ...[
             const SizedBox(height: 16),
             Center(
               child: Text(
-                'No Target CGPA Set',
+                _targetCgpa != null ? 'Target: ${_targetCgpa!.toStringAsFixed(2)}' : 'No Target CGPA Set',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -524,26 +659,31 @@ class _StatsViewState extends ConsumerState<StatsView>
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4ADE80),
-                  foregroundColor: const Color(0xFF1B5E20),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
+            GestureDetector(
+              onTap: _showSetTargetDialog,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: ComicTheme.inkRed,
+                  border: Border.all(
+                      color: ComicTheme.inkBlack, width: 2.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: ComicTheme.inkBlack,
+                      offset: Offset(4, 4),
+                      blurRadius: 0,
+                    ),
+                  ],
                 ),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                },
-                child: const Text(
-                  'Set Target (e.g. 3.50)',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                child: Center(
+                  child: Text(
+                    _targetCgpa != null ? 'Change Target' : 'Set Target (e.g. 3.50)',
+                    style: const TextStyle(
+                      color: ComicTheme.surfaceWhite,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ),
