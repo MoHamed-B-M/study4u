@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
+import 'core/services/sound_service.dart';
 import 'data/datasources/local_storage.dart';
 import 'theme/comic_theme.dart';
 import 'presentation/theme/theme_provider.dart';
@@ -16,6 +16,7 @@ import 'presentation/features/course_detail/course_detail_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
+import 'widgets/manga_nav_bar.dart';
 import 'core/animation/page_scale.dart';
 import 'core/animation/m3e_spring.dart';
 import 'data/models/app_settings.dart';
@@ -33,6 +34,7 @@ void main() {
     },
   );
   LocalStorage.init();
+  SoundService.instance.init();
   runApp(const StartupApp());
 }
 
@@ -292,46 +294,14 @@ class _MainScreenState extends ConsumerState<MainScreen>
             ),
           );
         },
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: GNav(
-            rippleColor: Colors.grey[800]!,
-            hoverColor: Colors.grey[700]!,
-            haptic: true,
-            tabBorderRadius: 15,
-            curve: Curves.easeOutExpo,
-            duration: const Duration(milliseconds: 900),
-            gap: 8,
-            color: isDark ? Colors.grey[600]! : Colors.grey[700]!,
-            activeColor: const Color(0xFF4ADE80),
-            iconSize: 24,
-            tabBackgroundColor:
-                const Color(0xFF4ADE80).withValues(alpha: 0.1),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            selectedIndex: _currentIndex,
-            onTabChange: (index) {
-              HapticFeedback.lightImpact();
-              setState(() => _currentIndex = index);
-              if (index == 0) context.go('/');
-              if (index == 1) context.go('/tracker');
-              if (index == 2) context.go('/stats');
-            },
-            tabs: const [
-              GButton(
-                icon: Icons.home_outlined,
-                text: 'Home',
-              ),
-              GButton(
-                icon: Icons.calendar_today_outlined,
-                text: 'Tracker',
-              ),
-              GButton(
-                icon: Icons.analytics_outlined,
-                text: 'Stats',
-              ),
-            ],
-          ),
+        child: MangaNavBar(
+          selectedIndex: _currentIndex,
+          onTabChange: (index) {
+            setState(() => _currentIndex = index);
+            if (index == 0) context.go('/');
+            if (index == 1) context.go('/tracker');
+            if (index == 2) context.go('/stats');
+          },
         ),
       ),
     );

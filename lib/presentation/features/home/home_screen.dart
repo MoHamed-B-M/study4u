@@ -507,10 +507,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () => HapticFeedback.lightImpact(),
             padding: EdgeInsets.zero,
             child: Text(action,
-                style: TextStyle(
-                    color: ComicTheme.surfaceWhite,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13)),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 13)),
           ),
       ],
     );

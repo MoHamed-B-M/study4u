@@ -48,7 +48,13 @@ class ComicCard extends StatelessWidget {
               ),
             ],
       ),
-      child: child,
+      child: DefaultTextStyle(
+        style: TextStyle(
+          color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+          fontWeight: FontWeight.w600,
+        ),
+        child: child,
+      ),
     );
   }
 }

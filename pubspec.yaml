@@ -29,7 +29,6 @@ dependencies:
   fab_m3e: ^0.1.1
   toolbar_m3e: ^0.1.1
   app_bar_m3e: ^0.1.2
-  google_nav_bar: ^5.0.7
   expressive_loading_indicator: ^0.0.1
   button_group_m3e: ^0.3.1
   m3e_card_list: ^0.1.0
@@ -78,3 +77,4 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/audio/

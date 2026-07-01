@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/comic_theme.dart';
+import '../core/services/sound_service.dart';
 
 class ComicButton extends StatefulWidget {
   final Widget child;
@@ -12,6 +13,7 @@ class ComicButton extends StatefulWidget {
   final double? width;
   final double? height;
   final bool isCta;
+  final bool enableSound;
 
   const ComicButton({
     super.key,
@@ -25,6 +27,7 @@ class ComicButton extends StatefulWidget {
     this.width,
     this.height,
     this.isCta = false,
+    this.enableSound = true,
   });
 
   @override
@@ -41,8 +44,7 @@ class _ComicButtonState extends State<ComicButton> {
   }
 
   Color get _fgColor {
-    if (_isPressed && !widget.isCta) return ComicTheme.surfaceWhite;
-    if (widget.isCta) return ComicTheme.surfaceWhite;
+    if (_isPressed || widget.isCta) return ComicTheme.surfaceWhite;
     return ComicTheme.inkBlack;
   }
 
@@ -51,11 +53,13 @@ class _ComicButtonState extends State<ComicButton> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Color resolveBg(Color c) {
       if (c == ComicTheme.surfaceWhite && isDark) return ComicTheme.darkSurface;
+      if (c == ComicTheme.inkRed && isDark) return ComicTheme.inkRed;
       return c;
     }
 
     Color resolveFg(Color c) {
       if (c == ComicTheme.inkBlack && isDark) return ComicTheme.darkText;
+      if (c == ComicTheme.surfaceWhite && isDark) return ComicTheme.darkText;
       return c;
     }
 
@@ -65,6 +69,9 @@ class _ComicButtonState extends State<ComicButton> {
           : null,
       onTapUp: widget.onPressed != null
           ? (_) {
+              if (widget.enableSound) {
+                SoundService.instance.playClickWithHaptic();
+              }
               widget.onPressed?.call();
               setState(() => _isPressed = false);
             }
