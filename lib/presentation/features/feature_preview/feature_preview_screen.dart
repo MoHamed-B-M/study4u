@@ -74,7 +74,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
             child: Icon(Icons.timer_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0,
-          foregroundAlignment: Alignment.center,
+          foregroundAlignment: Alignment(0, -0.4),
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -115,7 +115,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
             child: Icon(Icons.calendar_month_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0,
-          foregroundAlignment: Alignment.center,
+          foregroundAlignment: Alignment(0, -0.4),
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -156,7 +156,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
             child: Icon(Icons.school_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0,
-          foregroundAlignment: Alignment.center,
+          foregroundAlignment: Alignment(0, -0.4),
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -220,7 +220,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
             child: Icon(Icons.analytics_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0,
-          foregroundAlignment: Alignment.center,
+          foregroundAlignment: Alignment(0, -0.4),
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
@@ -284,7 +284,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
             child: Icon(Icons.battery_charging_full, size: 120, color: accent),
           ),
           foregroundFactor: 0,
-          foregroundAlignment: Alignment.center,
+          foregroundAlignment: Alignment(0, -0.4),
         ),
       ],
     );
