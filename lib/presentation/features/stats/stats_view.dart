@@ -574,7 +574,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                     )
                   else
                     SizedBox(
-                      height: 160,
+                      height: 240,
                       child: SingleChildScrollView(
                         child: Column(
                           children: sessions.reversed.take(10).map((s) {
@@ -937,7 +937,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                 Expanded(
                   flex: 3,
                   child: Text(
-                    info.appName,
+                    _friendlyAppName(info.appName),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -1115,4 +1115,49 @@ class _StatsViewState extends ConsumerState<StatsView>
       ),
     );
   }
+}
+
+
+String _friendlyAppName(String packageName) {
+  const names = <String, String>{
+    'com.android.chrome': 'Chrome',
+    'com.google.android.youtube': 'YouTube',
+    'com.instagram.android': 'Instagram',
+    'com.twitter.android': 'X',
+    'com.facebook.katana': 'Facebook',
+    'com.facebook.orca': 'Messenger',
+    'com.whatsapp': 'WhatsApp',
+    'com.spotify.music': 'Spotify',
+    'com.google.android.apps.maps': 'Google Maps',
+    'com.google.android.gm': 'Gmail',
+    'com.android.vending': 'Play Store',
+    'com.google.android.apps.docs': 'Google Docs',
+    'com.google.android.apps.photos': 'Google Photos',
+    'com.google.android.apps.plus': 'Google+',
+    'com.google.android.deskclock': 'Clock',
+    'com.android.settings': 'Settings',
+    'com.google.android.calculator': 'Calculator',
+    'com.google.android.calendar': 'Calendar',
+    'com.google.android.apps.messaging': 'Messages',
+    'com.android.dialer': 'Phone',
+    'com.android.contacts': 'Contacts',
+    'com.android.camera2': 'Camera',
+    'com.android.gallery3d': 'Gallery',
+    'com.android.filemanager': 'Files',
+    'com.android.documentsui': 'Files',
+    'com.google.android.apps.docs.editors.docs': 'Google Docs',
+    'com.google.android.apps.docs.editors.sheets': 'Google Sheets',
+    'com.google.android.apps.docs.editors.slides': 'Google Slides',
+    'com.google.android.apps.tasks': 'Google Tasks',
+    'com.google.android.keep': 'Google Keep',
+    'com.google.android.apps.books': 'Google Play Books',
+    'com.netflix.mediaclient': 'Netflix',
+    'com.snapchat.android': 'Snapchat',
+    'com.tiktok': 'TikTok',
+    'com.zhiliaoapp.musically': 'TikTok',
+    'com.android.systemui': 'System UI',
+    'com.example.study4u': 'study4u',
+    'com.stdy4u': 'study4u',
+  };
+  return names[packageName] ?? packageName;
 }

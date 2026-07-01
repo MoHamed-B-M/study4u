@@ -74,7 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 320,
+              height: 380,
               child: PageView(
                 controller: _pageController,
                 physics: const BouncingScrollPhysics(),

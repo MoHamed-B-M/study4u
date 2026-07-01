@@ -9,5 +9,6 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(ScreenTimePlugin())
         flutterEngine.plugins.add(CalendarPlugin())
         flutterEngine.plugins.add(AlarmPlugin())
+        flutterEngine.plugins.add(SettingsPlugin())
     }
 }

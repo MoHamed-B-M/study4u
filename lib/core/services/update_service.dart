@@ -32,9 +32,9 @@ class UpdateService {
         Uri.parse(_apiUrl),
         headers: {
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'stdy4u/1.0',
+          'User-Agent': 'stdy4u/2.0',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
       if (response.statusCode != 200) {
         debugPrint('UpdateService: API returned status ${response.statusCode}');
         return null;

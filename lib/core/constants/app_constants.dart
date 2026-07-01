@@ -19,6 +19,7 @@ class AppConstants {
   static const String channelScreenTime = 'com.stdy4u/screen_time';
   static const String channelCalendar = 'com.stdy4u/calendar';
   static const String channelAlarm = 'com.stdy4u/alarm';
+  static const String channelSettings = 'com.stdy4u/settings';
 
   static const String androidAlarmChannelId = 'stdy4u_alarm_channel';
   static const String androidPomodoroChannelId = 'stdy4u_pomodoro_channel';

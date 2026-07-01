@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:parallax_onboarding/parallax_onboarding.dart';
+import '../../../data/platform/settings_bridge.dart';
 import '../../../theme/comic_theme.dart';
 import '../../theme/theme_provider.dart';
 import '../../../main.dart';
@@ -74,11 +74,11 @@ class FeaturePreviewScreen extends ConsumerWidget {
             child: Icon(Icons.timer_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0,
-          foregroundAlignment: Alignment(0, -0.4),
+          foregroundAlignment: Alignment(0, -0.6),
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
-          backgroundFactor: -0.2,
+          backgroundFactor: -0.4,
           content: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -115,11 +115,11 @@ class FeaturePreviewScreen extends ConsumerWidget {
             child: Icon(Icons.calendar_month_outlined, size: 120, color: accent),
           ),
           foregroundFactor: 0,
-          foregroundAlignment: Alignment(0, -0.4),
+          foregroundAlignment: Alignment(0, -0.6),
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
-          backgroundFactor: -0.2,
+          backgroundFactor: -0.4,
           content: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -195,10 +195,16 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   onTap: () async {
                     try {
                       final info = await PackageInfo.fromPlatform();
-                      await launchUrl(
-                        Uri.parse('package:${info.packageName}'),
-                        mode: LaunchMode.externalApplication,
-                      );
+                      final opened = await SettingsBridge.openAppSettings(packageName: info.packageName);
+                      if (!opened && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Please open Settings manually'),
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: ComicTheme.inkRed,
+                          ),
+                        );
+                      }
                     } catch (_) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -219,12 +225,12 @@ class FeaturePreviewScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(32),
             child: Icon(Icons.analytics_outlined, size: 120, color: accent),
           ),
-          foregroundFactor: 0,
-          foregroundAlignment: Alignment(0, -0.4),
+          foregroundFactor: -0.2,
+          foregroundAlignment: Alignment(0, -0.6),
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
-          backgroundFactor: -0.2,
+          backgroundFactor: -0.4,
           content: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -259,10 +265,16 @@ class FeaturePreviewScreen extends ConsumerWidget {
                   onTap: () async {
                     try {
                       final info = await PackageInfo.fromPlatform();
-                      await launchUrl(
-                        Uri.parse('package:${info.packageName}'),
-                        mode: LaunchMode.externalApplication,
-                      );
+                      final opened = await SettingsBridge.openAppSettings(packageName: info.packageName);
+                      if (!opened && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Please open Settings manually'),
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: ComicTheme.inkRed,
+                          ),
+                        );
+                      }
                     } catch (_) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -283,8 +295,8 @@ class FeaturePreviewScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(32),
             child: Icon(Icons.battery_charging_full, size: 120, color: accent),
           ),
-          foregroundFactor: 0,
-          foregroundAlignment: Alignment(0, -0.4),
+          foregroundFactor: -0.2,
+          foregroundAlignment: Alignment(0, -0.6),
         ),
       ],
     );
