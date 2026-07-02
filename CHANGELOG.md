@@ -12,6 +12,9 @@ All notable changes to stdy4u will be documented in this file.
 - **Mechanical Keyboard Click Sound**: Synthesized 44.1kHz 16-bit WAV (800Hz + 3.5kHz + 6kHz mixed with rapid decay) preloaded at startup via `just_audio`, fires in parallel with 60ms shadow-snapping animation — by **Hamma**
 - **High-Contrast Text Enforcement**: `ComicCard` wraps children in `DefaultTextStyle` forcing `Color(0xFF000000)` (Ink Black) in light mode; all titles use `GoogleFonts.luckiestGuy()` explicitly — by **Hamma**
 - **SpringCurve utility**: Underdamped spring approximation as a `Curve` subclass for `AnimatedSize` — by **Hamma**
+- **Press Sound Toggle**: New `pressSound` setting (Hive field 9) — global on/off for mechanical click sound, checked in `SoundService.playClick()` — by **Hamma**
+- **Settings Plugin**: Native Android `SettingsPlugin.kt` + `SettingsBridge` Dart bridge — opens system app info screen via `Settings.ACTION_APPLICATION_DETAILS_SETTINGS` intent — by **Hamma**
+- **App Name Mapping**: `_friendlyAppName()` maps 30+ Android package names (Chrome, YouTube, Instagram, WhatsApp, etc.) to human-readable labels in screen time Top Apps — by **Hamma**
 
 ### Changed
 - **All feature screens refactored**: Home, Dashboard, Tracker, Stats, Settings, Course Detail, Splash, Feature Preview — all use `ComicTheme` constants, `ComicCard`/`ComicButton` instead of Material 3 / M3E widgets — by **Hamma**
@@ -21,6 +24,17 @@ All notable changes to stdy4u will be documented in this file.
 - **Nav bar visibility**: Removes nav bar on non-tab routes (Settings, Course Detail) instead of animating it — by **Hamma**
 - **APK size optimization**: Universal APK disabled → per-ABI split APKs via `--split-per-abi`; added `--split-debug-info` to CI build command — each APK now ~20–25 MB instead of ~55 MB — by **Hamma**
 - **Settings page**: Removed "Show Labels" switch (nav labels are always shown in ALL-CAPS manga style) — by **Hamma**
+- **Settings page redesigned**: Replaced `CupertinoAlertDialog`/`CupertinoActionSheet` with comic-themed dialogs; section headers get ink red underline; removed `Accent Color` picker — by **Hamma**
+- **Settings gear icon**: Plain `IconButton` replaced with comic-styled `GestureDetector` + `Container` (36×36, 2px border, hard shadow, adaptive background) — by **Hamma**
+- **Update dialog redesigned**: Removed `AppTheme`/`DesignTokens`/`M3ESpring`/`_SquishActionButton` — uses sharp borders, ink red CTA, hard shadows, Luckiest Guy title — by **Hamma**
+- **Onboarding intro redesigned**: Comic-styled content containers with 2.5px ink border + hard shadow; Luckiest Guy titles; comic-styled icon containers with border/shadow; adjusted parallax factors (`-0.3` to `-0.4`) for deeper zoom effect — by **Hamma**
+- **Course detail TabBar**: Added explicit `labelColor`/`unselectedLabelColor`/`indicatorColor` using `ComicTheme.inkBlack`/`darkText` — fixes invisible tabs in light mode — by **Hamma**
+- **Pomodoro pop-up modal**: Replaced inline expand/collapse arrow with full comic-styled `Dialog` — dimmed backdrop, X close button, wider layout (`maxWidth: 85vw`), compact session history (240→140px) — by **Hamma**
+- **Set Target CGPA button**: Replaced `ElevatedButton` with comic `GestureDetector` + `Container` (ink red bg, 2.5px border, hard shadow); opens dialog with text field for target input; stored in `_targetCgpa` state — by **Hamma**
+- **Stats text contrast**: 20+ hardcoded `Colors.white` replaced with `isDark ? ComicTheme.darkText : ComicTheme.inkBlack` in CGPA, pomodoro, screen time cards — by **Hamma**
+- **Add course sheet FAB**: Sheet backgrounds now adaptive (`isDark ? ComicTheme.darkPulp : ComicTheme.surfaceWhite`) instead of always white; removed `AppTheme` dependency — by **Hamma**
+- **Home screen**: PageView section height increased (320→380) for full visibility of courses/pending cards; spacer before current courses increased (`0.04`→`0.08` screen height) — by **Hamma**
+- **`Check for Updates` button**: Added 10-second HTTP timeout to `checkForUpdate()`; updated `User-Agent` to `stdy4u/2.0` — by **Hamma**
 
 ### Fixed
 - **White-on-white text**: `_buildSectionHeader` action button explicitly set `color: ComicTheme.surfaceWhite` on light background — now uses ComicButton's `DefaultTextStyle` which correctly resolves to `ComicTheme.inkBlack` — by **Hamma**
@@ -28,12 +42,17 @@ All notable changes to stdy4u will be documented in this file.
 - **Splash screen zoom**: Added `addListener(_onUpdate)` → `setState()` to all three animation controllers so the widget rebuilds on animation ticks — by **Hamma**
 - **Nav bar hide on Settings**: Reads `GoRouterState.of(context).matchedLocation` directly in `build()` instead of relying on `didUpdateWidget` — by **Hamma**
 - **Pomodoro card jitter**: Replaced `SizeTransition` + spring controller with `AnimatedSize` + `SpringCurve(stiffness: 400, damping: 20)` + `AnimatedSwitcher` + `FadeTransition` — by **Hamma**
+- **33 broken import paths**: All `../../../../` relative imports from `lib/presentation/features/X/` depth fixed to `../../../` — was resolving above `lib/` — by **Hamma**
+- **Navigation from IndexedStack children**: Settings and course detail routes moved outside `ShellRoute` to root navigator level; uses `GoRouter.of(context).push()` instead of `context.push()` — by **Hamma**
+- **Notification permission on Android 13+**: Added `androidPlugin?.requestNotificationsPermission()` in `NotificationService.init()` — requested at startup on Android 13+ — by **Hamma**
+- **Permission "Open Settings" buttons**: Replaced broken `launchUrl(Uri.parse('package:...'))` with native `SettingsPlugin` platform channel calling `ACTION_APPLICATION_DETAILS_SETTINGS` — by **Hamma**
 
 ### Removed
 - `google_nav_bar` — replaced by custom `MangaNavBar`
 - `m3e_design`, `m3e_buttons`, `icon_button_m3e`, `fab_m3e`, `toolbar_m3e`, `app_bar_m3e`, `expressive_loading_indicator`, `button_group_m3e`, `m3e_card_list` — replaced by atomic `Comic*` widgets
 - `riverpod_annotation`, `flutter_svg`, `animate_do`, `m3e_collection`, `fl_chart`, `workmanager`, `flutter_background_service`, `home_widget`, `ota_update` — unused dependencies
 - "Show Labels" setting — manga nav bar always shows labels
+- Accent Color picker from settings — replaced by press sound toggle
 
 ---
 
