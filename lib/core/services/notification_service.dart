@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'dart:ui' show Color;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -38,6 +39,10 @@ class NotificationService {
 
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
+
+    if (Platform.isAndroid) {
+      await androidPlugin?.requestNotificationsPermission();
+    }
 
     await androidPlugin?.createNotificationChannel(
       const AndroidNotificationChannel(

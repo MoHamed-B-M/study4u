@@ -453,13 +453,15 @@ class _StatsViewState extends ConsumerState<StatsView>
             ? ComicTheme.darkText.withValues(alpha: 0.5)
             : ComicTheme.inkBlack.withValues(alpha: 0.5);
         final primary = dk ? ComicTheme.darkText : ComicTheme.inkBlack;
+        final screenW = MediaQuery.of(ctx).size.width;
         return Dialog(
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
           child: Center(
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              padding: const EdgeInsets.all(24),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              constraints: BoxConstraints(maxWidth: screenW * 0.85),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: dk ? ComicTheme.darkPulp : ComicTheme.paperBg,
                 border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
@@ -574,7 +576,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                     )
                   else
                     SizedBox(
-                      height: 240,
+                      height: 140,
                       child: SingleChildScrollView(
                         child: Column(
                           children: sessions.reversed.take(10).map((s) {
