@@ -2,7 +2,7 @@
   <br>
   <h1>📚 stdy4u</h1>
   <h3><em>STUDY SMARTER</em></h3>
-  <p><strong>v1.2.0</strong> — Local-first student productivity companion</p>
+  <p><strong>v2.0.0-beta.1</strong> — Comic-Print Manga Design System</p>
   <br>
 </div>
 
@@ -11,21 +11,10 @@
 ## 📱 Preview
 
 <p align="center">
-  <img src="screenshot/Skreenup_1779140422542.png" width="180" alt="Dashboard">
-  <img src="screenshot/Skreenup_1779140432966.png" width="180" alt="Attendance Tracker">
-  <img src="screenshot/Skreenup_1779140444045.png" width="180" alt="Statistics">
-  <img src="screenshot/Skreenup_1779140457709.png" width="180" alt="Settings">
-  <img src="screenshot/Skreenup_1779140469510.png" width="180" alt="Course Detail">
-</p>
-
-### 🎬 App Preview
-<p align="center">
-  <video src="videos/preview.mp4" type="video/mp4" controls width="300" height="500"></video>
-</p>
-
-### 📖 App Explanation
-<p align="center">
-  <video src="videos/study4u__Master_Focus.mp4" type="video/mp4" controls width="300"></video>
+  <img src="screenshot/intro.png" width="180" alt="Onboarding">
+  <img src="screenshot/home.jpg" width="180" alt="Home Dashboard">
+  <img src="screenshot/tasks.jpg" width="180" alt="Tasks">
+  <img src="screenshot/stats.jpg" width="180" alt="Statistics">
 </p>
 
 ---
@@ -71,10 +60,9 @@
 
 ### 🎨 Theming & Personalization
 - Light, Dark, and System Default modes
-- 8 accent colors to personalize the UI
-- **Floating Navigation Bar** — glassmorphism frosted glass effect
-- Haptic feedback toggle
-- Material 3 expressive design
+- **Comic-Print Manga Design System** — Luckiest Guy typography, sharp 2.5px ink borders, hard offset shadows, ink red (`#E63946`) accents
+- Haptic feedback toggle with mechanical keyboard click sound
+- Press sound toggle for button interaction audio
 
 ### 🔔 Notifications
 - Weekly recurring class reminders (15 min before each class)
@@ -147,9 +135,8 @@ Tap any course card to open its detail screen with three tabs:
 ### 8. Customizing the App
 
 - Open **Settings** to switch between Light, Dark, or System theme
-- Pick from **8 accent colors** to personalize the look
-- Toggle the **Floating Navigation Bar** for a glassmorphism effect
-- Enable or disable haptic feedback
+- Toggle **Haptic Feedback** and **Press Sound** for interaction feedback
+- Enable or disable notifications for class reminders
 
 ### 9. App Updates
 
@@ -163,11 +150,9 @@ When a new version is available, a **native system notification** pops up in you
 |-------|-----------|
 | **Framework** | Flutter 3.44 + Dart |
 | **State Management** | Riverpod (`flutter_riverpod`) |
-| **Navigation** | GoRouter with ShellRoute |
+| **Navigation** | GoRouter with ShellRoute + IndexedStack |
 | **Local Storage** | Hive (`hive_flutter`) |
-| **Charts** | fl_chart |
 | **Calendar** | table_calendar |
-| **Animations** | flutter_animate, animate_do |
 | **Notifications** | flutter_local_notifications |
 | **Audio** | just_audio |
 | **File Picker** | file_picker |
@@ -234,8 +219,8 @@ dart run build_runner build --delete-conflicting-outputs
 # Run in debug mode
 flutter run
 
-# Build release APK
-flutter build apk --release
+# Build release APK (split per ABI)
+flutter build apk --release --split-per-abi
 ```
 
 
@@ -245,10 +230,10 @@ flutter build apk --release
 
 ```bash
 # Increment version in pubspec.yaml, then:
-flutter build apk --release --build-number=$YOUR_BUILD_NUMBER
+flutter build apk --release --split-per-abi --build-number=$YOUR_BUILD_NUMBER
 
 # Or with signing env vars (CI):
-flutter build apk --release --build-number=$CI_PIPELINE_ID
+flutter build apk --release --split-per-abi --build-number=$CI_PIPELINE_ID
 ```
 
 > The repository includes a GitHub Actions workflow (`.github/workflows/build_apk.yml`) that builds a release APK automatically on every push.
