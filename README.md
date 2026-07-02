@@ -11,8 +11,8 @@
 ## 📱 Preview
 
 <p align="center">
-  <img src="screenshot/intro.png" width="180" alt="Onboarding">
-  <img src="screenshot/home.jpg" width="180" alt="Home Dashboard">
+  
+  <img src="screenshot/home.jpg" width="180"  alt="Home Dashboard">
   <img src="screenshot/tasks.jpg" width="180" alt="Tasks">
   <img src="screenshot/stats.jpg" width="180" alt="Statistics">
 </p>
