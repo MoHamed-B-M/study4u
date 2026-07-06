@@ -170,11 +170,6 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                       fontWeight: FontWeight.w700,
                       height: 1.3,
                     ),
-                    li: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontSize: 13,
-                      height: 1.5,
-                    ),
                     code: TextStyle(
                       color: ComicTheme.inkRed,
                       fontSize: 12,
@@ -211,8 +206,9 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                   ),
                 ),
               ),
+            ),
+          ),
         ],
-        const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Row(
