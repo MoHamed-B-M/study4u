@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:solar_icons/solar_icons.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../presentation/theme/theme_provider.dart';
 import '../../../domain/entities/course.dart';
@@ -33,7 +34,7 @@ class DashboardView extends ConsumerWidget {
         title: Text('Hi! $userName'),
         actions: [
           IconButton(
-            icon: const Icon(CupertinoIcons.bell),
+            icon: const Icon(SolarIconsBold.bell),
             onPressed: () {
               HapticFeedback.lightImpact();
               context.push('/settings');
@@ -66,7 +67,7 @@ class DashboardView extends ConsumerWidget {
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
-                                  CupertinoIcons.checkmark_seal,
+                                  SolarIconsBold.diploma,
                                   size: 18,
                                   color: ComicTheme.inkRed,
                                 ),
@@ -256,7 +257,7 @@ class DashboardView extends ConsumerWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              CupertinoIcons.book,
+              SolarIconsBold.book,
               size: 18,
               color: ComicTheme.inkRed,
             ),
@@ -304,7 +305,7 @@ class DashboardView extends ConsumerWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                CupertinoIcons.checkmark_seal_fill,
+                SolarIconsBold.diploma,
                 size: 18,
                 color: ComicTheme.inkRed,
               ),
@@ -373,7 +374,7 @@ class DashboardView extends ConsumerWidget {
                     ),
                     child: task.isCompleted
                         ? const Icon(
-                            CupertinoIcons.check_mark,
+                            SolarIconsBold.checkCircle,
                             size: 12,
                             color: ComicTheme.surfaceWhite,
                           )

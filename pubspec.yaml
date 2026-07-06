@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  solar_icons: ^0.1.0
 
   # State Management
   flutter_riverpod: ^2.5.1

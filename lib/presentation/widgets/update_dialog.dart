@@ -150,25 +150,25 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                     p: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 13,
-                      height: 1.5,
+                      height: 1.3,
                     ),
                     h1: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
-                      height: 1.3,
+                      height: 1.2,
                     ),
                     h2: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      height: 1.3,
+                      height: 1.2,
                     ),
                     h3: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      height: 1.3,
+                      height: 1.2,
                     ),
                     code: TextStyle(
                       color: ComicTheme.inkRed,

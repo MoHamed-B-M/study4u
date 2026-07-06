@@ -49,6 +49,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? showNavLabels,
     bool? pressSound,
     bool? betaUpdates,
+    double? targetCgpa,
   }) {
     return AppSettings(
       id: state.id,
@@ -62,6 +63,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       showNavLabels: showNavLabels ?? state.showNavLabels,
       pressSound: pressSound ?? state.pressSound,
       betaUpdates: betaUpdates ?? state.betaUpdates,
+      targetCgpa: targetCgpa ?? state.targetCgpa,
     );
   }
 
@@ -94,6 +96,8 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       _saveAndUpdate(_copy(pressSound: value));
   void setBetaUpdates(bool value) =>
       _saveAndUpdate(_copy(betaUpdates: value));
+  void setTargetCgpa(double value) =>
+      _saveAndUpdate(_copy(targetCgpa: value));
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {

@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
@@ -87,7 +87,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                CupertinoIcons.checkmark_seal,
+                SolarIconsBold.diploma,
                 size: 32,
                 color: Color(0xFF64B5F6),
               ),
@@ -257,12 +257,12 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
             color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
           ),
           leftChevronIcon: Icon(
-            CupertinoIcons.chevron_left,
+            SolarIconsBold.arrowLeft,
             size: 18,
             color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
           ),
           rightChevronIcon: Icon(
-            CupertinoIcons.chevron_right,
+            SolarIconsBold.arrowRight,
             size: 18,
             color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
           ),
@@ -314,7 +314,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        CupertinoIcons.book,
+                        SolarIconsBold.book,
                         color: Color(course.colorValue),
                         size: 20,
                       ),
@@ -347,14 +347,14 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                       children: [
                         _buildMarkButton(
                             'P',
-                            CupertinoIcons.checkmark,
+                            SolarIconsBold.checkCircle,
                             const Color(0xFF66BB6A),
                             () => _markAttendance(
                                 course.id, AttendanceStatus.present)),
                         const SizedBox(height: 6),
                         _buildMarkButton(
                             'L',
-                            CupertinoIcons.clock,
+                            SolarIconsBold.clockCircle,
                             const Color(0xFFFFB74D),
                             () => _markAttendance(
                                 course.id, AttendanceStatus.late)),

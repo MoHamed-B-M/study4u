@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:solar_icons/solar_icons.dart';
 import '../theme/design_tokens.dart';
 
 class StudyBottomNav extends StatelessWidget {
@@ -35,15 +36,15 @@ class StudyBottomNav extends StatelessWidget {
           child: Row(
             children: [
               _NavItem(
-                icon: CupertinoIcons.house,
-                activeIcon: CupertinoIcons.house_fill,
+                icon: SolarIconsBold.home,
+                activeIcon: SolarIconsBold.home,
                 label: 'Home',
                 isActive: currentIndex == 0,
                 onTap: () => onDestinationSelected(0),
               ),
               _NavItem(
-                icon: CupertinoIcons.chart_bar,
-                activeIcon: CupertinoIcons.chart_bar_fill,
+                icon: SolarIconsBold.chartSquare,
+                activeIcon: SolarIconsBold.chartSquare,
                 label: 'Stats',
                 isActive: currentIndex == 1,
                 onTap: () => onDestinationSelected(1),
@@ -75,7 +76,7 @@ class StudyBottomNav extends StatelessWidget {
                     ],
                   ),
                   child: const Icon(
-                    CupertinoIcons.add,
+                    SolarIconsBold.addCircle
                     color: DesignTokens.textWhite,
                     size: 24,
                   ),
@@ -83,15 +84,15 @@ class StudyBottomNav extends StatelessWidget {
               ),
               const Spacer(),
               _NavItem(
-                icon: CupertinoIcons.calendar,
-                activeIcon: CupertinoIcons.calendar_circle_fill,
+                icon: SolarIconsBold.calendar,
+                activeIcon: SolarIconsBold.calendar,
                 label: 'Tracker',
                 isActive: currentIndex == 2,
                 onTap: () => onDestinationSelected(2),
               ),
               _NavItem(
-                icon: CupertinoIcons.gear,
-                activeIcon: CupertinoIcons.gear_solid,
+                icon: SolarIconsBold.settings,
+                activeIcon: SolarIconsBold.settings,
                 label: 'Settings',
                 isActive: currentIndex == 3,
                 onTap: () => onDestinationSelected(3),

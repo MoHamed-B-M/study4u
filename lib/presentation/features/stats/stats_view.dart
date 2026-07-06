@@ -11,6 +11,7 @@ import '../../../shared/providers/app_usage_provider.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/entities/pomodoro_session.dart';
 import '../../../theme/comic_theme.dart';
+import '../../theme/theme_provider.dart';
 import '../../../widgets/comic_card.dart';
 import '../../../widgets/comic_button.dart';
 
@@ -30,7 +31,11 @@ class _StatsViewState extends ConsumerState<StatsView>
   late final AnimationController _screenTimeCtrl;
   bool _cgpaTargetExpanded = true;
   bool _screenTimeExpanded = false;
-  double? _targetCgpa;
+
+  double? get _targetCgpa {
+    final val = ref.read(settingsProvider).targetCgpa;
+    return val >= 0 ? val : null;
+  }
 
   @override
   void initState() {
@@ -396,7 +401,8 @@ class _StatsViewState extends ConsumerState<StatsView>
                     final text = ctrl.text.trim();
                     final val = double.tryParse(text);
                     if (val != null && val >= 0 && val <= 4) {
-                      setState(() => _targetCgpa = val);
+                      ref.read(settingsProvider.notifier).setTargetCgpa(val);
+                      setState(() {});
                       Navigator.pop(ctx);
                     }
                   },

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/sound_service.dart';
@@ -31,7 +32,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: CustomScrollView(
+      body: Stack(
+        children: [
+          CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverToBoxAdapter(
@@ -46,7 +49,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     child: Column(children: [
                       _buildSettingRow(
                         context,
-                        icon: CupertinoIcons.circle_lefthalf_fill,
+                        icon: SolarIconsBold.moon,
                         iconColor: ComicTheme.inkRed,
                         title: 'Appearance',
                         subtitle: _themeLabel(settings.themeMode),
@@ -61,7 +64,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     child: Column(children: [
                       _buildSwitchRow(
                         context,
-                        icon: CupertinoIcons.hand_raised,
+                        icon: SolarIconsBold.smartphoneVibration,
                         iconColor: ComicTheme.inkRed,
                         title: 'Haptic Feedback',
                         subtitle: 'Vibration on interactions',
@@ -75,7 +78,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                       ),
                       _buildSwitchRow(
                         context,
-                        icon: CupertinoIcons.bell,
+                        icon: SolarIconsBold.bell,
                         iconColor: ComicTheme.inkRed,
                         title: 'Notifications',
                         subtitle: 'Get reminded about classes and tasks',
@@ -89,7 +92,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                       ),
                       _buildSwitchRow(
                         context,
-                        icon: CupertinoIcons.music_note,
+                        icon: SolarIconsBold.musicNote,
                         iconColor: ComicTheme.inkRed,
                         title: 'Press Sound',
                         subtitle: 'Play click sound on button press',
@@ -111,7 +114,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     child: Column(children: [
                       _buildSettingRow(
                         context,
-                        icon: CupertinoIcons.book,
+                        icon: SolarIconsBold.book,
                         iconColor: ComicTheme.inkRed,
                         title: 'stdy4u',
                         subtitle: 'Tap for version info',
@@ -131,7 +134,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                       ),
                       _buildSwitchRow(
                         context,
-                        icon: CupertinoIcons.ant,
+                        icon: SolarIconsBold.bug,
                         iconColor: ComicTheme.inkRed,
                         title: 'Include Beta Releases',
                         subtitle: 'Check for pre-release updates too',
@@ -147,29 +150,19 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                         child: ComicButton(
                           isCta: true,
                           onPressed: _checking ? null : () => _checkForUpdate(context),
-                          child: _checking
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: ComicLoader(
-                                    size: 18,
-                                    colorA: ComicTheme.surfaceWhite,
-                                    colorB: ComicTheme.inkRed,
-                                  ),
-                                )
-                              : const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.download_rounded, size: 18, color: ComicTheme.surfaceWhite),
-                                    SizedBox(width: 8),
-                                    Text('Check for Updates'),
-                                  ],
-                                ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.download_rounded, size: 18, color: ComicTheme.surfaceWhite),
+                              SizedBox(width: 8),
+                              Text('Check for Updates'),
+                            ],
+                          ),
                         ),
                       ),
                       _buildSettingRow(
                         context,
-                        icon: CupertinoIcons.book,
+                        icon: SolarIconsBold.book,
                         iconColor: ComicTheme.inkRed,
                         title: 'GitHub Repository',
                         subtitle: 'MoHamed-B-M/study4u',
@@ -178,7 +171,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                       ),
                       _buildSettingRow(
                         context,
-                        icon: CupertinoIcons.hand_thumbsup,
+                        icon: SolarIconsBold.like,
                         iconColor: ComicTheme.inkRed,
                         title: 'Submit Feedback',
                         subtitle: 'Report issues or suggest features',
@@ -194,7 +187,16 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
           ),
         ],
       ),
-    );
+      if (_checking)
+        Container(
+          color: Colors.black54,
+          child: Center(
+            child: ComicLoader(size: 48),
+          ),
+        ),
+    ],
+  ),
+);
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
@@ -286,7 +288,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
             ],
             if (onTap != null)
               Icon(
-                CupertinoIcons.chevron_right,
+                SolarIconsBold.arrowRight,
                 size: 16,
                 color: tertiaryText,
               ),

@@ -26,6 +26,8 @@ class AppSettings extends HiveObject {
   final bool pressSound;
   @HiveField(10)
   final bool betaUpdates;
+  @HiveField(11)
+  final double targetCgpa;
 
   AppSettings({
     this.id = 'default',
@@ -39,5 +41,6 @@ class AppSettings extends HiveObject {
     this.showNavLabels = true,
     this.pressSound = true,
     this.betaUpdates = false,
+    this.targetCgpa = -1,
   });
 }
