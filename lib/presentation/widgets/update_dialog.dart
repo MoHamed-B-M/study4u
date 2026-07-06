@@ -8,10 +8,10 @@ import '../../theme/comic_theme.dart';
 String _stripMarkdown(String text) {
   return text
       .replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '')
-      .replaceAll(RegExp(r'\*\*(.+?)\*\*'), '$1')
-      .replaceAll(RegExp(r'\*(.+?)\*'), '$1')
-      .replaceAll(RegExp(r'`(.+?)`'), '$1')
-      .replaceAll(RegExp(r'\[(.+?)\]\(.+?\)'), '$1')
+      .replaceAll(RegExp(r'\*\*(.+?)\*\*'), r'$1')
+      .replaceAll(RegExp(r'\*(.+?)\*'), r'$1')
+      .replaceAll(RegExp(r'`(.+?)`'), r'$1')
+      .replaceAll(RegExp(r'\[(.+?)\]\(.+?\)'), r'$1')
       .replaceAll(RegExp(r'^[-*]\s+', multiLine: true), '')
       .replaceAll(RegExp(r'^---+\s*$', multiLine: true), '')
       .trim();
