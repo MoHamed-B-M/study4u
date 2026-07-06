@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
+enum UpdateChannel { stable, beta }
+
 class UpdateInfo {
   final String latestVersion;
   final String downloadUrl;
@@ -21,9 +23,9 @@ class UpdateInfo {
 
 class UpdateService {
   static UpdateInfo? lastKnownUpdate;
-  static const _apiUrl = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases?per_page=5';
+  static const _apiUrl = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases?per_page=10';
 
-  Future<UpdateInfo?> checkForUpdate() async {
+  Future<UpdateInfo?> checkForUpdate({UpdateChannel channel = UpdateChannel.stable}) async {
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version;
@@ -40,15 +42,19 @@ class UpdateService {
         return null;
       }
 
-      final releases = jsonDecode(response.body) as List<dynamic>;
-      if (releases.isEmpty) return null;
+      final allReleases = jsonDecode(response.body) as List<dynamic>;
+      if (allReleases.isEmpty) return null;
 
       Map<String, dynamic>? latestRelease;
       DateTime? latestDate;
-      for (final r in releases) {
-        final published = DateTime.tryParse(r['published_at'] as String? ?? '');
+      for (final r in allReleases) {
+        final release = r as Map<String, dynamic>;
+        if (channel == UpdateChannel.stable && release['prerelease'] == true) {
+          continue;
+        }
+        final published = DateTime.tryParse(release['published_at'] as String? ?? '');
         if (published != null && (latestDate == null || published.isAfter(latestDate))) {
-          latestRelease = r as Map<String, dynamic>;
+          latestRelease = release;
           latestDate = published;
         }
       }

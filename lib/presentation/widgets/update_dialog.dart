@@ -5,6 +5,18 @@ import 'package:open_filex/open_filex.dart';
 import '../../core/services/update_service.dart';
 import '../../theme/comic_theme.dart';
 
+String _stripMarkdown(String text) {
+  return text
+      .replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '')
+      .replaceAll(RegExp(r'\*\*(.+?)\*\*'), '$1')
+      .replaceAll(RegExp(r'\*(.+?)\*'), '$1')
+      .replaceAll(RegExp(r'`(.+?)`'), '$1')
+      .replaceAll(RegExp(r'\[(.+?)\]\(.+?\)'), '$1')
+      .replaceAll(RegExp(r'^[-*]\s+', multiLine: true), '')
+      .replaceAll(RegExp(r'^---+\s*$', multiLine: true), '')
+      .trim();
+}
+
 class UpdateDialog {
   static Future<void> show({
     required BuildContext context,
@@ -142,7 +154,7 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  widget.update.releaseNotes!,
+                  _stripMarkdown(widget.update.releaseNotes!),
                   style: TextStyle(
                     color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                     fontSize: 13,

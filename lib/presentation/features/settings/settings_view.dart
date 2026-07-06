@@ -14,11 +14,18 @@ import '../../../widgets/comic_button.dart';
 import '../../theme/theme_provider.dart';
 import '../../widgets/update_dialog.dart';
 
-class SettingsView extends ConsumerWidget {
+class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsView> createState() => _SettingsViewState();
+}
+
+class _SettingsViewState extends ConsumerState<SettingsView> {
+  bool _includeBeta = false;
+
+  @override
+  Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
@@ -121,13 +128,31 @@ class SettingsView extends ConsumerWidget {
                           },
                         ),
                       ),
-                      _buildSettingRow(
+                      _buildSwitchRow(
                         context,
-                        icon: CupertinoIcons.arrow_down_circle,
+                        icon: CupertinoIcons.ant,
                         iconColor: ComicTheme.inkRed,
-                        title: 'Check for Updates',
-                        subtitle: 'Download the latest version',
-                        onTap: () => _checkForUpdate(context),
+                        title: 'Include Beta Releases',
+                        subtitle: 'Check for pre-release updates too',
+                        value: _includeBeta,
+                        onChanged: (v) {
+                          setState(() => _includeBeta = v);
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: ComicButton(
+                          isCta: true,
+                          onPressed: () => _checkForUpdate(context),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.download_rounded, size: 18, color: ComicTheme.surfaceWhite),
+                              SizedBox(width: 8),
+                              Text('Check for Updates'),
+                            ],
+                          ),
+                        ),
                       ),
                       _buildSettingRow(
                         context,
@@ -332,7 +357,8 @@ class SettingsView extends ConsumerWidget {
 
   Future<void> _checkForUpdate(BuildContext context) async {
     final service = UpdateService();
-    final update = await service.checkForUpdate();
+    final channel = _includeBeta ? UpdateChannel.beta : UpdateChannel.stable;
+    final update = await service.checkForUpdate(channel: channel);
     if (!context.mounted) return;
 
     if (update == null || !update.isNewer) {

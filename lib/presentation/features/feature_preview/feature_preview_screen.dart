@@ -205,7 +205,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
 
 class _PermissionButton extends StatefulWidget {
   final String label;
-  final VoidCallback onTap;
+  final Future<void> Function() onTap;
 
   const _PermissionButton({
     required this.label,
@@ -217,27 +217,31 @@ class _PermissionButton extends StatefulWidget {
 }
 
 class _PermissionButtonState extends State<_PermissionButton> {
-  bool _pressed = false;
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
+      onTap: _loading
+          ? null
+          : () async {
+              setState(() => _loading = true);
+              try {
+                await widget.onTap();
+              } finally {
+                if (mounted) setState(() => _loading = false);
+              }
+            },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: _pressed
+          color: _loading
               ? (isDark ? ComicTheme.darkText : ComicTheme.surfaceWhite)
               : ComicTheme.inkRed,
           border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
-          boxShadow: _pressed
+          boxShadow: _loading
               ? []
               : [
                   BoxShadow(
@@ -247,16 +251,25 @@ class _PermissionButtonState extends State<_PermissionButton> {
                   ),
                 ],
         ),
-        child: Text(
-          widget.label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: _pressed
-                ? (isDark ? ComicTheme.darkPulp : ComicTheme.inkBlack)
-                : ComicTheme.surfaceWhite,
-          ),
-        ),
+        child: _loading
+            ? SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isDark ? ComicTheme.darkPulp : ComicTheme.inkBlack,
+                  ),
+                ),
+              )
+            : Text(
+                widget.label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: ComicTheme.surfaceWhite,
+                ),
+              ),
       ),
     );
   }
