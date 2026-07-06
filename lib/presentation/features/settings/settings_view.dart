@@ -22,8 +22,6 @@ class SettingsView extends ConsumerStatefulWidget {
 }
 
 class _SettingsViewState extends ConsumerState<SettingsView> {
-  bool _includeBeta = false;
-
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
@@ -134,9 +132,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                         iconColor: ComicTheme.inkRed,
                         title: 'Include Beta Releases',
                         subtitle: 'Check for pre-release updates too',
-                        value: _includeBeta,
+                        value: settings.betaUpdates,
                         onChanged: (v) {
-                          setState(() => _includeBeta = v);
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setBetaUpdates(v);
                         },
                       ),
                       Padding(
@@ -357,7 +357,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
   Future<void> _checkForUpdate(BuildContext context) async {
     final service = UpdateService();
-    final channel = _includeBeta ? UpdateChannel.beta : UpdateChannel.stable;
+    final settings = ref.read(settingsProvider);
+    final channel = settings.betaUpdates ? UpdateChannel.beta : UpdateChannel.stable;
     final update = await service.checkForUpdate(channel: channel);
     if (!context.mounted) return;
 

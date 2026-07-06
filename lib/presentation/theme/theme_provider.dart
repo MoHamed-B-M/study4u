@@ -48,6 +48,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? hapticFeedback,
     bool? showNavLabels,
     bool? pressSound,
+    bool? betaUpdates,
   }) {
     return AppSettings(
       id: state.id,
@@ -60,6 +61,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       hapticFeedback: hapticFeedback ?? state.hapticFeedback,
       showNavLabels: showNavLabels ?? state.showNavLabels,
       pressSound: pressSound ?? state.pressSound,
+      betaUpdates: betaUpdates ?? state.betaUpdates,
     );
   }
 
@@ -90,6 +92,8 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       _saveAndUpdate(_copy(showNavLabels: value));
   void setPressSound(bool value) =>
       _saveAndUpdate(_copy(pressSound: value));
+  void setBetaUpdates(bool value) =>
+      _saveAndUpdate(_copy(betaUpdates: value));
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {

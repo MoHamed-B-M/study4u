@@ -10,10 +10,15 @@ String _stripMarkdown(String text) {
       .replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '')
       .replaceAll(RegExp(r'\*\*(.+?)\*\*'), r'$1')
       .replaceAll(RegExp(r'\*(.+?)\*'), r'$1')
+      .replaceAll(RegExp(r'~~(.+?)~~'), r'$1')
       .replaceAll(RegExp(r'`(.+?)`'), r'$1')
       .replaceAll(RegExp(r'\[(.+?)\]\(.+?\)'), r'$1')
-      .replaceAll(RegExp(r'^[-*]\s+', multiLine: true), '')
+      .replaceAll(RegExp(r'<[^>]+>'), '')
+      .replaceAll(RegExp(r'https?://\S+'), '')
+      .replaceAll(RegExp(r'^[-*]\s+', multiLine: true), '• ')
+      .replaceAll(RegExp(r'^\d+\.\s+', multiLine: true), '• ')
       .replaceAll(RegExp(r'^---+\s*$', multiLine: true), '')
+      .replaceAll(RegExp(r'\n{3,}'), '\n\n')
       .trim();
 }
 
@@ -159,6 +164,7 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                     color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                     fontSize: 13,
                     height: 1.5,
+                    decoration: TextDecoration.none,
                   ),
                 ),
               ),

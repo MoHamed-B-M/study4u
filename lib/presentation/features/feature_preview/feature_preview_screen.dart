@@ -83,6 +83,33 @@ class FeaturePreviewScreen extends ConsumerWidget {
       );
     }
 
+    void _showBatteryHelp(BuildContext ctx, bool dark) {
+      showDialog(
+        context: ctx,
+        builder: (dCtx) => AlertDialog(
+          backgroundColor: dark ? ComicTheme.darkPulp : ComicTheme.paperBg,
+          title: Text('Battery Settings',
+            style: TextStyle(
+              color: dark ? ComicTheme.darkText : ComicTheme.inkBlack,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Text(
+            'Please go to Settings → Apps → study4u → Battery and disable battery optimization manually.',
+            style: TextStyle(
+              color: dark ? ComicTheme.darkText : ComicTheme.inkBlack,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dCtx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+
     Widget _foregroundIcon(IconData icon) {
       return Container(
         padding: const EdgeInsets.all(20),
@@ -156,10 +183,14 @@ class FeaturePreviewScreen extends ConsumerWidget {
             action: _PermissionButton(
               label: 'Auto Start',
               onTap: () async {
-                await DisableBatteryOptimization.showEnableAutoStartSettings(
-                  'Enable Auto Start',
-                  'Follow the steps and enable the auto start of this app',
-                );
+                try {
+                  await DisableBatteryOptimization.showEnableAutoStartSettings(
+                    'Enable Auto Start',
+                    'Follow the steps and enable the auto start of this app',
+                  );
+                } catch (e) {
+                  if (context.mounted) _showBatteryHelp(context, isDark);
+                }
               },
             ),
           ),
@@ -179,14 +210,18 @@ class FeaturePreviewScreen extends ConsumerWidget {
             action: _PermissionButton(
               label: 'Disable Optimization',
               onTap: () async {
-                final isDisabled = await DisableBatteryOptimization
-                    .isManufacturerBatteryOptimizationDisabled;
-                if (isDisabled != true) {
-                  await DisableBatteryOptimization
-                      .showDisableManufacturerBatteryOptimizationSettings(
-                    'Your device has additional battery optimization',
-                    'Follow the steps and disable the optimizations to allow smooth functioning of this app',
-                  );
+                try {
+                  final isDisabled = await DisableBatteryOptimization
+                      .isManufacturerBatteryOptimizationDisabled;
+                  if (isDisabled != true) {
+                    await DisableBatteryOptimization
+                        .showDisableManufacturerBatteryOptimizationSettings(
+                      'Your device has additional battery optimization',
+                      'Follow the steps and disable the optimizations to allow smooth functioning of this app',
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) _showBatteryHelp(context, isDark);
                 }
               },
             ),

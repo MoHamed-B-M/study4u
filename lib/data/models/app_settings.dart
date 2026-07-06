@@ -24,6 +24,8 @@ class AppSettings extends HiveObject {
   final bool showNavLabels;
   @HiveField(9)
   final bool pressSound;
+  @HiveField(10)
+  final bool betaUpdates;
 
   AppSettings({
     this.id = 'default',
@@ -36,5 +38,6 @@ class AppSettings extends HiveObject {
     this.hapticFeedback = true,
     this.showNavLabels = true,
     this.pressSound = true,
+    this.betaUpdates = false,
   });
 }
