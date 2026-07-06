@@ -1,25 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:open_filex/open_filex.dart';
 import '../../core/services/update_service.dart';
 import '../../theme/comic_theme.dart';
-
-String _stripMarkdown(String text) {
-  return text
-      .replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '')
-      .replaceAll(RegExp(r'\*{1,2}(.+?)\*{1,2}'), r'$1')
-      .replaceAll(RegExp(r'~{2}(.+?)~{2}'), r'$1')
-      .replaceAll(RegExp(r'`(.+?)`'), r'$1')
-      .replaceAll(RegExp(r'\[(.+?)\]\(.+?\)'), r'$1')
-      .replaceAll(RegExp(r'<[^>]+>'), '')
-      .replaceAll(RegExp(r'https?://\S+'), '')
-      .replaceAll(RegExp(r'^[-*+]\s+', multiLine: true), '- ')
-      .replaceAll(RegExp(r'^\d+[.)]\s+', multiLine: true), '- ')
-      .replaceAll(RegExp(r'^---+$', multiLine: true), '')
-      .replaceAll(RegExp(r'\n{3,}'), '\n\n')
-      .trim();
-}
 
 class UpdateDialog {
   static Future<void> show({
@@ -157,18 +142,75 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                  _stripMarkdown(widget.update.releaseNotes!),
-                  style: TextStyle(
-                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                    fontSize: 13,
-                    height: 1.5,
-                    decoration: TextDecoration.none,
+                child: MarkdownBody(
+                  data: widget.update.releaseNotes!,
+                  selectable: true,
+                  shrinkWrap: true,
+                  styleSheet: MarkdownStyleSheet(
+                    p: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                    h1: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      height: 1.3,
+                    ),
+                    h2: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                    ),
+                    h3: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                    ),
+                    li: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                    code: TextStyle(
+                      color: ComicTheme.inkRed,
+                      fontSize: 12,
+                      backgroundColor: Colors.transparent,
+                    ),
+                    codeblockDecoration: BoxDecoration(
+                      color: isDark
+                          ? ComicTheme.darkPulp
+                          : ComicTheme.paperBg,
+                      border: Border.all(color: ComicTheme.inkBlack, width: 1),
+                    ),
+                    codeblockPadding: const EdgeInsets.all(12),
+                    horizontalRuleDecoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: ComicTheme.inkBlack, width: 1),
+                      ),
+                    ),
+                    listBullet: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontSize: 13,
+                    ),
+                    strong: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    em: TextStyle(
+                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    a: TextStyle(
+                      color: ComicTheme.inkRed,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
         ],
         const SizedBox(height: 24),
         Padding(

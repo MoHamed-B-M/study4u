@@ -21,6 +21,7 @@ dependencies:
   # UI & Design
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.17
+  flutter_markdown: ^0.7.6
 
   # Onboarding
   parallax_onboarding: ^0.1.0

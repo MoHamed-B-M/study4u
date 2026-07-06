@@ -370,11 +370,14 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
   Future<void> _checkForUpdate(BuildContext context) async {
     setState(() => _checking = true);
+    final started = DateTime.now();
     try {
       final service = UpdateService();
       final settings = ref.read(settingsProvider);
       final channel = settings.betaUpdates ? UpdateChannel.beta : UpdateChannel.stable;
       final update = await service.checkForUpdate(channel: channel);
+      final elapsed = DateTime.now().difference(started).inMilliseconds;
+      if (elapsed < 1000) await Future.delayed(Duration(milliseconds: 1000 - elapsed));
       if (!context.mounted) return;
 
       if (update == null || !update.isNewer) {
