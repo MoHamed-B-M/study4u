@@ -56,14 +56,20 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
-## [2.0.1] - 2026-07-06
+## [2.0.1-beta] - 2026-07-06
 
 ### Added
 - **Battery Optimization Onboarding**: Replaced "Usage Access" onboarding page with proper `DisableBatteryOptimization` API calls — auto-start dialog, manufacturer battery optimization dialog with step-by-step instructions — by **Hamma**
 - **`disable_battery_optimization: ^1.1.2`**: New dependency for requesting battery optimization, auto-start, and manufacturer-specific power settings — by **Hamma**
+- **Beta/Stable Update Channel**: Settings now has "Include Beta Releases" toggle — checks pre-release or stable depending on selection; startup auto-check only detects stable releases — by **Hamma**
+- **`UpdateChannel` enum**: `checkForUpdate()` accepts `channel` param (`stable` skips prereleases, `beta` includes all) — by **Hamma**
+
+### Changed
+- **Onboarding permission buttons**: `_PermissionButton` now handles async correctly — shows loading spinner while the battery optimization dialog is open, disables double-taps — by **Hamma**
+- **Release notes in update dialog**: Markdown syntax (`#`, `**`, `*`, `` ` ``, `[text](url)`, `-`) stripped to plain text via `_stripMarkdown()` — by **Hamma**
 
 ### Fixed
-- **Update Service not detecting pre-releases**: Changed GitHub API endpoint from `/releases/latest` (ignores pre-releases) to `/releases?per_page=5` with date-based sorting — now detects beta/prerelease tags — by **Hamma**
+- **Update Service not detecting pre-releases**: Changed GitHub API endpoint from `/releases/latest` (ignores pre-releases) to `/releases?per_page=10` with date-based sorting — now detects beta/prerelease tags — by **Hamma**
 - **APK download not following redirects**: Set `request.followRedirects = true` in `HttpClient` download — GitHub asset URLs redirect to CDN — by **Hamma**
 - **Materials open button not working**: Replaced `launchUrl(Uri.file(...))` with `OpenFilex.open()` for file materials (external apps can't access internal storage paths); added try-catch error handling for link launching — by **Hamma**
 - **Usage access removed from onboarding**: Usage Access page (page 4) removed from `FeaturePreviewScreen` — battery optimization pages now use the actual `DisableBatteryOptimization` plugin instead of just opening Settings — by **Hamma**
