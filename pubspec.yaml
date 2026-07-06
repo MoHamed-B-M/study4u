@@ -20,20 +20,7 @@ dependencies:
 
   # UI & Design
   google_fonts: ^6.2.1
-  flutter_animate: ^4.5.0
   flutter_svg: ^2.0.17
-
-  # Material 3 Expressive
-  m3e_design: ^0.2.1
-  m3e_buttons: ^0.0.3
-  icon_button_m3e: ^0.2.1
-  fab_m3e: ^0.1.1
-  toolbar_m3e: ^0.1.1
-  app_bar_m3e: ^0.1.2
-  expressive_loading_indicator: ^0.0.1
-  button_group_m3e: ^0.3.1
-  m3e_card_list: ^0.1.0
-  material_color_utilities: ^0.13.0
 
   # Onboarding
   parallax_onboarding: ^0.1.0
@@ -51,8 +38,7 @@ dependencies:
   intl: ^0.19.0
   just_audio: ^0.9.39
 
-  # Analytics & Charts
-  percent_indicator: ^4.2.3
+  # Calendar
   table_calendar: ^3.1.2
 
   # System & Logic
@@ -64,8 +50,6 @@ dependencies:
   http: ^1.2.0
   open_filex: ^4.7.0
   timezone: ^0.9.2
-  animations: ^2.2.0
-  dynamic_color: ^1.7.0
 
 dev_dependencies:
   flutter_test:

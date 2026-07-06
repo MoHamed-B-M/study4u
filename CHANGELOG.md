@@ -15,6 +15,7 @@ All notable changes to stdy4u will be documented in this file.
 ### Changed
 - **Onboarding permission buttons**: `_PermissionButton` now handles async correctly — shows loading spinner while the battery optimization dialog is open, disables double-taps — by **Hamma**
 - **Release notes in update dialog**: Markdown syntax (`#`, `**`, `*`, `` ` ``, `[text](url)`, `-`) stripped to plain text via `_stripMarkdown()` — by **Hamma**
+- **Dependency cleanup**: Removed 14 unused packages — `m3e_design`, `m3e_buttons`, `icon_button_m3e`, `fab_m3e`, `toolbar_m3e`, `app_bar_m3e`, `expressive_loading_indicator`, `button_group_m3e`, `m3e_card_list`, `material_color_utilities`, `flutter_animate`, `percent_indicator`, `animations`, `dynamic_color` — reduces APK size — by **Hamma**
 
 ### Fixed
 - **Update Service not detecting pre-releases**: Changed GitHub API endpoint from `/releases/latest` (ignores pre-releases) to `/releases?per_page=10` with date-based sorting — now detects beta/prerelease tags — by **Hamma**
