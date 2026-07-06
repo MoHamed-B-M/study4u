@@ -58,6 +58,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
                   style: Theme.of(context).textTheme.titleLarge)),
           const SizedBox(height: 20),
           TextField(
+            enableSuggestions: false,
             controller: _titleController,
             decoration: const InputDecoration(
               labelText: 'What needs to be done?',

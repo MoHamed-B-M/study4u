@@ -373,6 +373,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                     border: Border.all(color: ComicTheme.inkBlack, width: 2),
                   ),
                   child: TextField(
+                    enableSuggestions: false,
                     controller: ctrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     style: TextStyle(

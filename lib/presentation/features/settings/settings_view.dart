@@ -22,6 +22,8 @@ class SettingsView extends ConsumerStatefulWidget {
 }
 
 class _SettingsViewState extends ConsumerState<SettingsView> {
+  bool _checking = false;
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
@@ -143,15 +145,24 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                         child: ComicButton(
                           isCta: true,
-                          onPressed: () => _checkForUpdate(context),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.download_rounded, size: 18, color: ComicTheme.surfaceWhite),
-                              SizedBox(width: 8),
-                              Text('Check for Updates'),
-                            ],
-                          ),
+                          onPressed: _checking ? null : () => _checkForUpdate(context),
+                          child: _checking
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    valueColor: AlwaysStoppedAnimation<Color>(ComicTheme.surfaceWhite),
+                                  ),
+                                )
+                              : const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.download_rounded, size: 18, color: ComicTheme.surfaceWhite),
+                                    SizedBox(width: 8),
+                                    Text('Check for Updates'),
+                                  ],
+                                ),
                         ),
                       ),
                       _buildSettingRow(
@@ -356,25 +367,30 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   }
 
   Future<void> _checkForUpdate(BuildContext context) async {
-    final service = UpdateService();
-    final settings = ref.read(settingsProvider);
-    final channel = settings.betaUpdates ? UpdateChannel.beta : UpdateChannel.stable;
-    final update = await service.checkForUpdate(channel: channel);
-    if (!context.mounted) return;
-
-    if (update == null || !update.isNewer) {
+    setState(() => _checking = true);
+    try {
+      final service = UpdateService();
+      final settings = ref.read(settingsProvider);
+      final channel = settings.betaUpdates ? UpdateChannel.beta : UpdateChannel.stable;
+      final update = await service.checkForUpdate(channel: channel);
       if (!context.mounted) return;
-      _showComicAlert(
-        context,
-        'Update Check',
-        update == null
-            ? 'Could not check for updates.'
-            : 'You are on the latest version!',
-      );
-      return;
-    }
 
-    await UpdateDialog.show(context: context, update: update);
+      if (update == null || !update.isNewer) {
+        if (!context.mounted) return;
+        _showComicAlert(
+          context,
+          'Update Check',
+          update == null
+              ? 'Could not check for updates.'
+              : 'You are on the latest version!',
+        );
+        return;
+      }
+
+      await UpdateDialog.show(context: context, update: update);
+    } finally {
+      if (mounted) setState(() => _checking = false);
+    }
   }
 
   void _showComicAlert(BuildContext context, String title, String message) {

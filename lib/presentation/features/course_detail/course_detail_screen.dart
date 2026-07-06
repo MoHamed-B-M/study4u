@@ -699,6 +699,7 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
           ),
           const SizedBox(height: 20),
           TextField(
+            enableSuggestions: false,
             controller: _titleController,
             decoration: InputDecoration(
               labelText: 'Title',
@@ -709,6 +710,7 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
           const SizedBox(height: 16),
           if (_type == 'link')
             TextField(
+              enableSuggestions: false,
               controller: _urlController,
               decoration: InputDecoration(
                 labelText: 'URL',
@@ -718,6 +720,7 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
             ),
           if (_type == 'note')
             TextField(
+              enableSuggestions: false,
               controller: _noteController,
               decoration: InputDecoration(
                 labelText: 'Write your note...',
@@ -944,11 +947,13 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
                   style: Theme.of(context).textTheme.titleLarge)),
           const SizedBox(height: 20),
           TextField(
+            enableSuggestions: false,
             controller: _titleController,
             decoration: const InputDecoration(labelText: 'Title', filled: true),
           ),
           const SizedBox(height: 16),
           TextField(
+            enableSuggestions: false,
             controller: _contentController,
             decoration: const InputDecoration(
                 labelText: 'Write your note...', filled: true),

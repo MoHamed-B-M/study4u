@@ -93,7 +93,7 @@ class NotificationService {
     );
 
     await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
+      (DateTime.now().millisecondsSinceEpoch % 100000).abs(),
       'New Update Available!',
       'Version v$version is now ready to download. Tap to view release notes and upgrade.',
       details,

@@ -1,7 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
@@ -123,26 +123,32 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          CircularPercentIndicator(
-            radius: 72,
-            lineWidth: 12,
-            percent: analytics.percentage / 100,
-            center: Text(
-              '${analytics.percentage.toInt()}%',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-              ),
+          SizedBox(
+            width: 144,
+            height: 144,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: const Size(144, 144),
+                  painter: _CircleProgressPainter(
+                    percent: analytics.percentage / 100,
+                    progressColor: ComicTheme.inkRed,
+                    backgroundColor: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  ),
+                ),
+                Text(
+                  '${analytics.percentage.toInt()}%',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                  ),
+                ),
+              ],
             ),
-            progressColor: analytics.isBelowThreshold
-                ? ComicTheme.inkRed
-                : ComicTheme.inkRed,
-            backgroundColor: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            circularStrokeCap: CircularStrokeCap.round,
-            animation: true,
           ),
           const SizedBox(height: 16),
           Text(
@@ -371,6 +377,48 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
       ),
     );
   }
+}
+
+class _CircleProgressPainter extends CustomPainter {
+  final double percent;
+  final Color progressColor;
+  final Color backgroundColor;
+
+  _CircleProgressPainter({
+    required this.percent,
+    required this.progressColor,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - 12) / 2;
+    const strokeWidth = 12.0;
+
+    final bgPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, bgPaint);
+
+    final progressPaint = Paint()
+      ..color = progressColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      2 * pi * percent,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CircleProgressPainter old) => old.percent != percent;
 }
 
 bool isSameDay2(DateTime? a, DateTime? b) {
