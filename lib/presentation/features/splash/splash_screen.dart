@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../theme/comic_theme.dart';
 import '../../../core/animation/m3e_spring.dart';
 
@@ -20,6 +22,7 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _fadeCtrl;
   late final AnimationController _scaleCtrl;
   late final AnimationController _glowCtrl;
+  late final AnimationController _borderCtrl;
 
   bool _navigated = false;
 
@@ -30,6 +33,7 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
     _scaleCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
     _glowCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
+    _borderCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
 
     M3ESpring.animate(
       _fadeCtrl,
@@ -55,7 +59,16 @@ class _SplashScreenState extends State<SplashScreen>
       );
     });
 
-    Timer(const Duration(milliseconds: 2800), _navigateToApp);
+    Timer(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      M3ESpring.animate(
+        _borderCtrl,
+        to: 1,
+        spring: M3ESpring.spatial(stiffness: 400, damping: 22),
+      );
+    });
+
+    Timer(const Duration(milliseconds: 3200), _navigateToApp);
   }
 
   void _onUpdate() {
@@ -81,6 +94,7 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeCtrl.dispose();
     _scaleCtrl.dispose();
     _glowCtrl.dispose();
+    _borderCtrl.dispose();
     super.dispose();
   }
 
@@ -92,6 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
     final fVal = reduced ? 1.0 : _fadeCtrl.value;
     final sVal = reduced ? 1.0 : _scaleCtrl.value;
     final gVal = reduced ? 1.0 : _glowCtrl.value;
+    final bVal = reduced ? 1.0 : _borderCtrl.value;
 
     return Scaffold(
       backgroundColor: _bgColor,
@@ -123,47 +138,66 @@ class _SplashScreenState extends State<SplashScreen>
               scale: sVal,
               child: Opacity(
                 opacity: fVal,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.menu_book_rounded,
-                          size: 52,
-                          color: Colors.white,
-                        ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _borderCtrl,
+                      builder: (context, _) {
+                        final borderWidth = 1.5 + (bVal * 1.5);
+                        final shadowOffset = 3.0 + (bVal * 3.0);
+                        return Container(
+                          width: 120,
+                          height: 120,
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            color: _bgColor,
+                            border: Border.all(
+                              color: ComicTheme.surfaceWhite,
+                              width: borderWidth,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: ComicTheme.inkRed.withAlpha((80 * bVal).toInt()),
+                                offset: Offset(shadowOffset, shadowOffset),
+                                blurRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/book.svg',
+                            colorFilter: ColorFilter.mode(
+                              ComicTheme.inkRed,
+                              BlendMode.srcIn,
+                            ),
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'stdy4u',
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 42,
+                        color: ComicTheme.surfaceWhite,
+                        height: 1,
                       ),
-                      const SizedBox(height: 28),
-                      const Text(
-                        'stdy4u',
-                        style: TextStyle(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: -1.2,
-                          height: 1,
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'STUDY SMARTER',
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 13,
+                        color: ComicTheme.surfaceWhite.withAlpha(140),
+                        letterSpacing: 3,
+                        height: 1,
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'STUDY SMARTER',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withAlpha(115),
-                          letterSpacing: 3.5,
-                        ),
-                      ),
-                    ],
-          ),
-          ),
-          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
