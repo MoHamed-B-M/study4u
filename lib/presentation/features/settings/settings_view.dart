@@ -11,6 +11,7 @@ import '../../../data/models/app_settings.dart';
 import '../../../theme/comic_theme.dart';
 import '../../../widgets/comic_card.dart';
 import '../../../widgets/comic_button.dart';
+import '../../../widgets/comic_loader.dart';
 import '../../theme/theme_provider.dart';
 import '../../widgets/update_dialog.dart';
 
@@ -150,9 +151,10 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               ? const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    valueColor: AlwaysStoppedAnimation<Color>(ComicTheme.surfaceWhite),
+                                  child: ComicLoader(
+                                    size: 18,
+                                    colorA: ComicTheme.surfaceWhite,
+                                    colorB: ComicTheme.inkRed,
                                   ),
                                 )
                               : const Row(
