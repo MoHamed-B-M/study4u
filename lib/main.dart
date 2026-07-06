@@ -28,19 +28,20 @@ void main() {
     systemNavigationBarColor: Colors.transparent,
     systemNavigationBarDividerColor: Colors.transparent,
   ));
-  NotificationService.instance.init(
-    onNotificationTap: (payload) {
-      if (payload != 'app_update') return;
-      final update = UpdateService.lastKnownUpdate;
-      if (update == null) return;
-      final ctx = rootNavigatorKey.currentContext;
-      if (ctx == null) return;
-      UpdateDialog.show(context: ctx, update: update);
-    },
-  );
   LocalStorage.init();
-  SoundService.instance.init();
   runApp(const StartupApp());
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    NotificationService.instance.init(
+      onNotificationTap: (payload) {
+        if (payload != 'app_update') return;
+        final update = UpdateService.lastKnownUpdate;
+        if (update == null) return;
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx == null) return;
+        UpdateDialog.show(context: ctx, update: update);
+      },
+    );
+  });
 }
 
 class StartupApp extends StatefulWidget {
@@ -194,7 +195,7 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
 
   Future<void> _checkUpdate() async {
     final service = UpdateService();
-    final update = await service.checkForUpdate(channel: UpdateChannel.stable);
+    final update = await service.checkForUpdate();
     if (!mounted || update == null || !update.isNewer) return;
     UpdateService.lastKnownUpdate = update;
     NotificationService.instance

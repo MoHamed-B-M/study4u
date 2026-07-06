@@ -132,19 +132,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                           },
                         ),
                       ),
-                      _buildSwitchRow(
-                        context,
-                        icon: SolarIconsBold.bug,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Include Beta Releases',
-                        subtitle: 'Check for pre-release updates too',
-                        value: settings.betaUpdates,
-                        onChanged: (v) {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setBetaUpdates(v);
-                        },
-                      ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                         child: ComicButton(
@@ -375,9 +362,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     final started = DateTime.now();
     try {
       final service = UpdateService();
-      final settings = ref.read(settingsProvider);
-      final channel = settings.betaUpdates ? UpdateChannel.beta : UpdateChannel.stable;
-      final update = await service.checkForUpdate(channel: channel);
+      final update = await service.checkForUpdate();
       final elapsed = DateTime.now().difference(started).inMilliseconds;
       if (elapsed < 1000) await Future.delayed(Duration(milliseconds: 1000 - elapsed));
       if (!context.mounted) return;

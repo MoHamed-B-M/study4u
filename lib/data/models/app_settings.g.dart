@@ -27,15 +27,14 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       hapticFeedback: fields[7] as bool,
       showNavLabels: fields[8] as bool,
       pressSound: fields[9] as bool? ?? true,
-      betaUpdates: fields[10] as bool? ?? false,
-      targetCgpa: fields[11] as double? ?? -1,
+      targetCgpa: fields[10] as double? ?? -1,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -57,8 +56,6 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(9)
       ..write(obj.pressSound)
       ..writeByte(10)
-      ..write(obj.betaUpdates)
-      ..writeByte(11)
       ..write(obj.targetCgpa);
   }
 

@@ -48,7 +48,6 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? hapticFeedback,
     bool? showNavLabels,
     bool? pressSound,
-    bool? betaUpdates,
     double? targetCgpa,
   }) {
     return AppSettings(
@@ -62,7 +61,6 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       hapticFeedback: hapticFeedback ?? state.hapticFeedback,
       showNavLabels: showNavLabels ?? state.showNavLabels,
       pressSound: pressSound ?? state.pressSound,
-      betaUpdates: betaUpdates ?? state.betaUpdates,
       targetCgpa: targetCgpa ?? state.targetCgpa,
     );
   }
@@ -94,8 +92,6 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       _saveAndUpdate(_copy(showNavLabels: value));
   void setPressSound(bool value) =>
       _saveAndUpdate(_copy(pressSound: value));
-  void setBetaUpdates(bool value) =>
-      _saveAndUpdate(_copy(betaUpdates: value));
   void setTargetCgpa(double value) =>
       _saveAndUpdate(_copy(targetCgpa: value));
 }

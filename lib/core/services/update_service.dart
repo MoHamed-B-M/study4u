@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-enum UpdateChannel { stable, beta }
-
 class UpdateInfo {
   final String latestVersion;
   final String downloadUrl;
@@ -25,7 +23,7 @@ class UpdateService {
   static UpdateInfo? lastKnownUpdate;
   static const _apiUrl = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases?per_page=10';
 
-  Future<UpdateInfo?> checkForUpdate({UpdateChannel channel = UpdateChannel.stable}) async {
+  Future<UpdateInfo?> checkForUpdate() async {
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version;
@@ -49,9 +47,6 @@ class UpdateService {
       DateTime? latestDate;
       for (final r in allReleases) {
         final release = r as Map<String, dynamic>;
-        if (channel == UpdateChannel.stable && release['prerelease'] == true) {
-          continue;
-        }
         final published = DateTime.tryParse(release['published_at'] as String? ?? '');
         if (published != null && (latestDate == null || published.isAfter(latestDate))) {
           latestRelease = release;
