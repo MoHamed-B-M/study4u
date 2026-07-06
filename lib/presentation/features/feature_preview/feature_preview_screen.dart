@@ -181,7 +181,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
               onTap: () async {
                 final isDisabled = await DisableBatteryOptimization
                     .isManufacturerBatteryOptimizationDisabled;
-                if (!isDisabled) {
+                if (isDisabled != true) {
                   await DisableBatteryOptimization
                       .showDisableManufacturerBatteryOptimizationSettings(
                     'Your device has additional battery optimization',
