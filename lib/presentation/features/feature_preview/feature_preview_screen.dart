@@ -1,10 +1,9 @@
+import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:parallax_onboarding/parallax_onboarding.dart';
-import '../../../data/platform/settings_bridge.dart';
 import '../../../theme/comic_theme.dart';
 import '../../theme/theme_provider.dart';
 import '../../../main.dart';
@@ -150,42 +149,23 @@ class FeaturePreviewScreen extends ConsumerWidget {
         ),
         OnboardingPage(
           background: ColoredBox(color: bgColor),
-          backgroundFactor: -0.3,
+          backgroundFactor: -0.4,
           content: _comicContent(
-            'Usage Access',
-            'Allow study4u to view your usage\nstatistics for insightful analytics',
+            'Battery Optimization',
+            'Disable battery optimization for\nreliable notifications & focus sessions',
             action: _PermissionButton(
-              label: 'Open Settings',
+              label: 'Auto Start',
               onTap: () async {
-                try {
-                  final info = await PackageInfo.fromPlatform();
-                  final opened = await SettingsBridge.openAppSettings(packageName: info.packageName);
-                  if (!opened && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Please open Settings manually'),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: ComicTheme.inkRed,
-                      ),
-                    );
-                  }
-                } catch (_) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Please open Settings manually'),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: ComicTheme.inkRed,
-                      ),
-                    );
-                  }
-                }
+                await DisableBatteryOptimization.showEnableAutoStartSettings(
+                  'Enable Auto Start',
+                  'Follow the steps and enable the auto start of this app',
+                );
               },
             ),
           ),
           foreground: Padding(
             padding: const EdgeInsets.all(32),
-            child: _foregroundIcon(Icons.analytics_outlined),
+            child: _foregroundIcon(Icons.power_settings_new),
           ),
           foregroundFactor: -0.1,
           foregroundAlignment: Alignment(0, -0.6),
@@ -194,33 +174,19 @@ class FeaturePreviewScreen extends ConsumerWidget {
           background: ColoredBox(color: bgColor),
           backgroundFactor: -0.4,
           content: _comicContent(
-            'Battery Optimization',
-            'Disable battery optimization for\nreliable notifications & focus sessions',
+            'Battery Saver',
+            'Disable manufacturer battery optimization\nfor smooth background operation',
             action: _PermissionButton(
-              label: 'Open Settings',
+              label: 'Disable Optimization',
               onTap: () async {
-                try {
-                  final info = await PackageInfo.fromPlatform();
-                  final opened = await SettingsBridge.openAppSettings(packageName: info.packageName);
-                  if (!opened && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Please open Settings manually'),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: ComicTheme.inkRed,
-                      ),
-                    );
-                  }
-                } catch (_) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Please open Settings manually'),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: ComicTheme.inkRed,
-                      ),
-                    );
-                  }
+                final isDisabled = await DisableBatteryOptimization
+                    .isManufacturerBatteryOptimizationDisabled;
+                if (!isDisabled) {
+                  await DisableBatteryOptimization
+                      .showDisableManufacturerBatteryOptimizationSettings(
+                    'Your device has additional battery optimization',
+                    'Follow the steps and disable the optimizations to allow smooth functioning of this app',
+                  );
                 }
               },
             ),

@@ -40,6 +40,9 @@ dependencies:
   # App Usage Stats
   app_usage: ^4.1.0
 
+  # Battery Optimization
+  disable_battery_optimization: ^1.1.2
+
   # Data & Persistence
   hive: ^2.2.3
   hive_flutter: ^1.1.0

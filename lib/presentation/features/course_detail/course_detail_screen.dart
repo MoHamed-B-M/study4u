@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/course.dart';
@@ -486,32 +487,57 @@ class _MaterialTile extends StatelessWidget {
     }
   }
 
-  void _open(BuildContext context) {
+  Future<void> _open(BuildContext context) async {
     switch (material.type) {
       case 'link':
         final uri = Uri.tryParse(material.content);
         if (uri != null && uri.isAbsolute) {
-          launchUrl(uri, mode: LaunchMode.externalApplication);
+          try {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } catch (_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Could not open link'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: ComicTheme.inkRed,
+                ),
+              );
+            }
+          }
         }
         break;
       case 'file':
         final file = File(material.content);
         if (file.existsSync()) {
-          launchUrl(Uri.file(material.content),
-              mode: LaunchMode.externalApplication);
+          try {
+            await OpenFilex.open(material.content);
+          } catch (_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Could not open file'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: ComicTheme.inkRed,
+                ),
+              );
+            }
+          }
         } else {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('File Not Found'),
-              content: const Text('File may have been moved.'),
-              actions: [
-                ComicButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('OK'))
-              ],
-            ),
-          );
+          if (context.mounted) {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('File Not Found'),
+                content: const Text('File may have been moved.'),
+                actions: [
+                  ComicButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('OK'))
+                ],
+              ),
+            );
+          }
         }
         break;
     }

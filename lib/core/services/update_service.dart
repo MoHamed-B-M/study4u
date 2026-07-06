@@ -21,7 +21,7 @@ class UpdateInfo {
 
 class UpdateService {
   static UpdateInfo? lastKnownUpdate;
-  static const _apiUrl = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases/latest';
+  static const _apiUrl = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases?per_page=5';
 
   Future<UpdateInfo?> checkForUpdate() async {
     try {
@@ -40,10 +40,23 @@ class UpdateService {
         return null;
       }
 
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final tagName = data['tag_name'] as String? ?? '';
-      final body = data['body'] as String?;
-      final assets = data['assets'] as List<dynamic>? ?? [];
+      final releases = jsonDecode(response.body) as List<dynamic>;
+      if (releases.isEmpty) return null;
+
+      Map<String, dynamic>? latestRelease;
+      DateTime? latestDate;
+      for (final r in releases) {
+        final published = DateTime.tryParse(r['published_at'] as String? ?? '');
+        if (published != null && (latestDate == null || published.isAfter(latestDate))) {
+          latestRelease = r as Map<String, dynamic>;
+          latestDate = published;
+        }
+      }
+      if (latestRelease == null) return null;
+
+      final tagName = latestRelease['tag_name'] as String? ?? '';
+      final body = latestRelease['body'] as String?;
+      final assets = latestRelease['assets'] as List<dynamic>? ?? [];
 
       String? downloadUrl;
       for (final asset in assets) {
@@ -101,6 +114,7 @@ class UpdateService {
     final client = HttpClient();
     try {
       final request = await client.getUrl(Uri.parse(url));
+      request.followRedirects = true;
       final response = await request.close();
       final totalBytes = response.contentLength;
       var receivedBytes = 0;
