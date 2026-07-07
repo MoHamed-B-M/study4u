@@ -12,23 +12,24 @@ All notable changes to stdy4u will be documented in this file.
 - **`ComicLoader` widget**: Animated SVG loading indicator — pulsates the thunder-struck icon with smooth scale + color shift (`inkRed` ↔ `surfaceWhite`), configurable size and colors — by **Hamma**
 - **`flutter_markdown`**: New dependency for live markdown rendering in update release notes — by **Hamma**
 - **`solar_icons`**: New dependency replacing `cupertino_icons` — 7000+ icons in Bold/Outline/Broken styles — by **Hamma**
-- **CGPA target persistence**: Target CGPA now stored in Hive via `AppSettings.targetCgpa` (field 11) — survives navigation and app restarts — by **Hamma**
+- **CGPA target persistence**: Target CGPA now stored in Hive via `AppSettings.targetCgpa` (field 10) — survives navigation and app restarts — by **Hamma**
+- **Download pause/resume/cancel**: Download dialog now shows Pause/Resume/Cancel buttons; progress saved to `dl_state.json` on pause, resumes via HTTP `Range` header, partial file deleted on cancel — by **Hamma**
 
 ### Changed
-- **Update check loading UI**: Full-screen dimmed overlay with centered `ComicLoader` replaces tiny spinner inside button — minimum 1s display to complete pulse cycle — by **Hamma**
+- **Update check loading UI**: Full-screen dimmed overlay with centered `ComicLoader` (size increased to 56) replaces tiny spinner inside button — minimum 1s display to complete pulse cycle — by **Hamma**
 - **Release notes rendering**: Replaced plain-text markdown stripping with live `flutter_markdown` `MarkdownBody` widget — renders headings, lists, code blocks, links, bold/italic; styled with comic theme colors — by **Hamma**
 - **Icons migrated to SolarIcons**: All 29 `CupertinoIcons.*` replaced with `SolarIconsBold.*` across 5 files (bottom nav, tracker, settings, dashboard, stats) — by **Hamma**
 - **Edge-to-edge rendering**: Transparent `statusBarColor` and `systemNavigationBarColor` set at startup and maintained on tab screens — by **Hamma**
-- **Compacted release notes line spacing**: Paragraph `height` reduced from 1.5/1.3 to `1.0` — tighter comic-style layout — by **Hamma**
+- **Compacted release notes line spacing**: Paragraph `height` reduced from 1.5 to 0.8 — ultra-tight comic-style layout — by **Hamma**
 - **SoundService simplification**: Replaced `just_audio` + `AudioPlayer` (6 MB native libs) with `SystemSound.play(SystemSoundType.click)` + `HapticFeedback.lightImpact()` — instant play, no preloading, no init delay — by **Hamma**
 - **Dependency cleanup**: Removed 14 unused packages — `m3e_design`, `m3e_buttons`, `icon_button_m3e`, `fab_m3e`, `toolbar_m3e`, `app_bar_m3e`, `expressive_loading_indicator`, `button_group_m3e`, `m3e_card_list`, `material_color_utilities`, `flutter_animate`, `percent_indicator`, `animations`, `dynamic_color` — reduces APK size — by **Hamma**
-- **NDK ABI filters**: Added `ndk { abiFilters "arm64-v8a", "armeabi-v7a" }` to `build.gradle.kts` — excludes x86/x86_64 native libs, smaller APK — by **Hamma**
+- **Removed link underlines**: Link (`a`) style in release notes markdown no longer has `TextDecoration.underline` — cleaner comic aesthetic — by **Hamma**
+- **ComicLoader**: Increased default size from 24 to 32, overlay size from 48 to 56 — by **Hamma**
 - **Deferred notification init**: `NotificationService.instance.init()` moved to `addPostFrameCallback` — timezone initialization no longer blocks first frame — by **Hamma**
 
 ### Fixed
-- **CGPA target not persisting**: Target CGPA was stored in local widget state only — reset on navigation/tab switch. Now persisted via Hive `AppSettings.targetCgpa` field 11 — by **Hamma**
+- **CGPA target not persisting**: Target CGPA was stored in local widget state only — reset on navigation/tab switch. Now persisted via Hive `AppSettings.targetCgpa` field 10 — by **Hamma**
 - **Notification ID overflow**: `remainder(1 << 31)` could produce negative Android notification IDs — replaced with `% 100000).abs()` for always-positive IDs — by **Hamma**
-- **Update Service not detecting pre-releases**: Changed GitHub API endpoint from `/releases/latest` (ignores pre-releases) to `/releases?per_page=10` with date-based sorting — now detects beta/prerelease tags — by **Hamma**
 - **APK download not following redirects**: Set `request.followRedirects = true` in `HttpClient` download — GitHub asset URLs redirect to CDN — by **Hamma**
 - **Materials open button not working**: Replaced `launchUrl(Uri.file(...))` with `OpenFilex.open()` for file materials (external apps can't access internal storage paths); added try-catch error handling for link launching — by **Hamma**
 - **Update dialog parenthesis bug**: Missing closing parens for `Container`/`Padding` and invalid `li:` parameter in `MarkdownStyleSheet` — fixed build errors — by **Hamma**
@@ -37,7 +38,7 @@ All notable changes to stdy4u will be documented in this file.
 ### Removed
 - `cupertino_icons` — replaced by `solar_icons`
 - `_stripMarkdown()` — replaced by `flutter_markdown` live render
-- `Just audio` SoundService dependency — click sound now uses `SystemSound` + `HapticFeedback` (saves ~6 MB native libs)
+- `just_audio` SoundService dependency — click sound now uses `SystemSound` + `HapticFeedback` (saves ~6 MB native libs)
 - `assets/audio/mechanical_click.wav` — no longer needed
 - Beta/Stable update channel toggle — single-channel release check
 - `UpdateChannel` enum — removed
