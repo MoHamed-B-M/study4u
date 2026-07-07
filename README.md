@@ -58,12 +58,14 @@
 - Calm music player — pick audio files to play during focus sessions
 - Weekly focus analytics dashboard
 
-### 🎨 Theming & Personalization
+### 🎨 Comic-Print Design System
 - Light, Dark, and System Default modes
-- 8 accent colors to personalize the UI
-- **Floating Navigation Bar** — glassmorphism frosted glass effect (optional)
-- Haptic feedback and press sound toggle
-- Comic-Print manga design system with high-contrast ink aesthetics
+- **Neo-Brutalist manga aesthetic** — flat surfaces, sharp 2.5px ink-black borders, hard offset shadows (`blurRadius: 0`), zero border radius
+- **Luckiest Guy** display font for headings, monospace for code snippets
+- Signature **Ink Red** (`#E63946`) accent color throughout
+- High-contrast ink-black text on aged paper / dark pulp backgrounds
+- Custom **MangaNavBar** — flat geometry, thick 3px top border, ALL-CAPS labels, red active state
+- Haptic feedback and mechanical press sound toggle
 
 ### 🔔 Notifications
 - Weekly recurring class reminders (15 min before each class)
