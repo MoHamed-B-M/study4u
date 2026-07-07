@@ -2,7 +2,7 @@
   <br>
   <h1>📚 stdy4u</h1>
   <h3><em>STUDY SMARTER</em></h3>
-  <p><strong>v1.2.0</strong> — Local-first student productivity companion</p>
+  <p><strong>v2.0.1</strong> — Local-first student productivity companion</p>
   <br>
 </div>
 
@@ -23,7 +23,7 @@
 
 ### 🎓 Course Management
 - Add courses with name, code, professor, room, schedule, and color coding
-- Track grades, target GPA, and credit hours per course
+- Track grades, target GPA, and credit hours per course — target CGPA persists across sessions
 - Edit or delete courses via long-press context menu
 - Visual progress indicators on the home dashboard
 
@@ -61,9 +61,9 @@
 ### 🎨 Theming & Personalization
 - Light, Dark, and System Default modes
 - 8 accent colors to personalize the UI
-- **Floating Navigation Bar** — glassmorphism frosted glass effect
-- Haptic feedback toggle
-- Material 3 expressive design
+- **Floating Navigation Bar** — glassmorphism frosted glass effect (optional)
+- Haptic feedback and press sound toggle
+- Comic-Print manga design system with high-contrast ink aesthetics
 
 ### 🔔 Notifications
 - Weekly recurring class reminders (15 min before each class)
@@ -72,8 +72,8 @@
 - Toggle notifications in Settings
 
 ### 🚀 Updates
-- On-launch GitHub OTA update check
-- Download progress dialog with auto-install
+- On-launch GitHub OTA update check with rich markdown release notes
+- Download with pause/resume/cancel — saved state survives interruptions
 - Manual check in Settings → About → Check for Updates
 
 ---
@@ -138,11 +138,11 @@ Tap any course card to open its detail screen with three tabs:
 - Open **Settings** to switch between Light, Dark, or System theme
 - Pick from **8 accent colors** to personalize the look
 - Toggle the **Floating Navigation Bar** for a glassmorphism effect
-- Enable or disable haptic feedback
+- Enable or disable haptic feedback and press sounds
 
 ### 9. App Updates
 
-When a new version is available, a **native system notification** pops up in your status bar. Tap the notification to open the update dialog, view release notes, and download the latest APK. You can also manually check for updates in **Settings → About → Check for Updates**.
+When a new version is available, a **native system notification** pops up in your status bar. Tap the notification to open the update dialog, view rich markdown release notes, and download the latest APK. The download supports **pause, resume, and cancel** — progress is saved locally so you can resume where you left off if interrupted. You can also manually check for updates in **Settings → About → Check for Updates**.
 
 ---
 
@@ -156,11 +156,14 @@ When a new version is available, a **native system notification** pops up in you
 | **Local Storage** | Hive (`hive_flutter`) |
 | **Charts** | fl_chart |
 | **Calendar** | table_calendar |
-| **Animations** | flutter_animate, animate_do |
+| **Icons** | solar_icons |
+| **SVG** | flutter_svg |
 | **Notifications** | flutter_local_notifications |
 | **Audio** | just_audio |
 | **File Picker** | file_picker |
-| **Code Generation** | build_runner + hive_generator + riverpod_generator |
+| **File Open** | open_filex |
+| **Markdown** | flutter_markdown |
+| **Code Generation** | build_runner + hive_generator |
 | **CI/CD** | GitHub Actions (build + release APK) |
 
 ---
@@ -192,11 +195,10 @@ lib/
 │   │   ├── settings/    # App settings & about
 │   │   ├── splash/      # Animated splash screen
 │   │   └── course_detail/ # Course detail & tasks/materials
-│   ├── theme/           # AppTheme, DesignTokens, ThemeProvider
-│   └── widgets/         # Reusable UI components
+│   ├── theme/           # ComicTheme, SettingsNotifier
+│   └── widgets/         # UpdateDialog, snackbars
+├── widgets/             # ComicLoader, MangaNavBar, shared atoms
 └── shared/
-    ├── models/          # Hive-annotated shared models
-    └── providers/       # Riverpod providers
 ```
 
 ---
@@ -240,7 +242,7 @@ flutter build apk --release --build-number=$YOUR_BUILD_NUMBER
 flutter build apk --release --build-number=$CI_PIPELINE_ID
 ```
 
-> The repository includes a GitHub Actions workflow (`.github/workflows/build_apk.yml`) that builds a release APK automatically on every push.
+> Build and push a tag (`v*.*.*`) to trigger the GitHub Actions release workflow.
 
 ---
 
