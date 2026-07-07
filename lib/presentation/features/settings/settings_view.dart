@@ -178,7 +178,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
         Container(
           color: Colors.black54,
           child: Center(
-            child: ComicLoader(size: 48),
+            child: ComicLoader(size: 56),
           ),
         ),
     ],

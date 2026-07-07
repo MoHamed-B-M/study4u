@@ -1,4 +1,5 @@
-import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -39,11 +40,40 @@ class _UpdateDialogContent extends StatefulWidget {
 
 class _UpdateDialogContentState extends State<_UpdateDialogContent> {
   final _service = UpdateService();
-  double? _downloadProgress;
+  bool _showProgress = false;
+  double _downloadProgress = 0.0;
   String? _error;
+  bool _isPaused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSavedState();
+  }
+
+  void _checkSavedState() {
+    try {
+      final f = File('${Directory.systemTemp.path}/dl_state.json');
+      if (f.existsSync()) {
+        final data = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+        if (data['url'] == widget.update.downloadUrl) {
+          final bytes = data['bytes'] as int;
+          if (bytes > 0) {
+            _showProgress = true;
+            _isPaused = true;
+          }
+        }
+      }
+    } catch (_) {}
+  }
 
   Future<void> _startDownload() async {
-    setState(() => _downloadProgress = 0.0);
+    setState(() {
+      _showProgress = true;
+      _isPaused = false;
+      _downloadProgress = 0.0;
+      _error = null;
+    });
     try {
       final path = await _service.downloadApk(
         url: widget.update.downloadUrl,
@@ -53,11 +83,30 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
       );
       await OpenFilex.open(path);
       if (mounted) Navigator.of(context).pop();
+    } on PauseException {
+      if (mounted) setState(() => _isPaused = true);
+    } on CancelException {
+      if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
         setState(() => _error = e.toString());
       }
     }
+  }
+
+  void _pause() {
+    _service.pauseDownload();
+    setState(() => _isPaused = true);
+  }
+
+  void _resume() {
+    setState(() => _isPaused = false);
+    _startDownload();
+  }
+
+  void _cancel() async {
+    _service.cancelDownload();
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -79,9 +128,11 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
             ),
           ],
         ),
-        child: _downloadProgress == null && _error == null
-            ? _buildInfo(isDark)
-            : _buildProgressOrError(isDark),
+        child: _error != null
+            ? _buildError(isDark)
+            : _showProgress
+                ? _buildProgress(isDark)
+                : _buildInfo(isDark),
       ),
     );
   }
@@ -150,25 +201,25 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                     p: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 13,
-                      height: 1,
+                      height: 0.8,
                     ),
                     h1: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
-                      height: 1,
+                      height: 0.8,
                     ),
                     h2: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      height: 1,
+                      height: 0.8,
                     ),
                     h3: TextStyle(
                       color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      height: 1,
+                      height: 0.8,
                     ),
                     code: TextStyle(
                       color: ComicTheme.inkRed,
@@ -201,7 +252,6 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                     ),
                     a: TextStyle(
                       color: ComicTheme.inkRed,
-                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
@@ -237,10 +287,9 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
     );
   }
 
-  Widget _buildProgressOrError(bool isDark) {
-    final progress = (_downloadProgress ?? 0.0).clamp(0.0, 1.0);
+  Widget _buildProgress(bool isDark) {
+    final progress = _downloadProgress.clamp(0.0, 1.0);
     final percent = (progress * 100).toInt();
-    final isError = _error != null;
 
     return Padding(
       padding: const EdgeInsets.all(32),
@@ -251,54 +300,36 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: isError
-                  ? ComicTheme.inkRed.withValues(alpha: 0.2)
-                  : (isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite),
+              color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
               border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
             ),
             child: Icon(
-              isError ? Icons.error_outline : Icons.download_rounded,
-              color: isError ? ComicTheme.inkRed : ComicTheme.inkRed,
+              _isPaused ? Icons.pause_rounded : Icons.download_rounded,
+              color: ComicTheme.inkRed,
               size: 28,
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            isError ? 'Download Failed' : 'Downloading...',
+            _isPaused ? 'Download Paused' : 'Downloading...',
             style: TextStyle(
               color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
           ),
-          if (isError) ...[
-            const SizedBox(height: 12),
-            Text(
-              _error!,
-              style: TextStyle(
-                color: ComicTheme.inkRed.withValues(alpha: 0.8),
-                fontSize: 13,
-              ),
-              textAlign: TextAlign.center,
+          const SizedBox(height: 24),
+          Text(
+            '$percent%',
+            style: TextStyle(
+              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
             ),
-            const SizedBox(height: 24),
-            _ComicDialogButton(
-              label: 'Close',
-              isCta: false,
-              onTap: () => Navigator.of(context).pop(),
-            ),
-          ] else ...[
-            const SizedBox(height: 24),
-            Text(
-              '$percent%',
-              style: TextStyle(
-                color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
+          ),
+          const SizedBox(height: 12),
+          ClipRect(
+            child: Container(
               height: 12,
               decoration: BoxDecoration(
                 color: isDark ? ComicTheme.darkSurface : ComicTheme.paperBg,
@@ -309,12 +340,102 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                 widthFactor: progress,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: ComicTheme.inkRed,
+                    color: _isPaused
+                        ? ComicTheme.inkBlack.withValues(alpha: 0.4)
+                        : ComicTheme.inkRed,
                   ),
                 ),
               ),
             ),
-          ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              if (_isPaused) ...[
+                Expanded(
+                  child: _ComicDialogButton(
+                    label: 'Cancel',
+                    isCta: false,
+                    onTap: _cancel,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ComicDialogButton(
+                    label: 'Resume',
+                    isCta: true,
+                    icon: Icons.play_arrow_rounded,
+                    onTap: _resume,
+                  ),
+                ),
+              ] else ...[
+                Expanded(
+                  child: _ComicDialogButton(
+                    label: 'Cancel',
+                    isCta: false,
+                    onTap: _cancel,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ComicDialogButton(
+                    label: 'Pause',
+                    isCta: true,
+                    icon: Icons.pause_rounded,
+                    onTap: _pause,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildError(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: ComicTheme.inkRed.withValues(alpha: 0.2),
+              border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+            ),
+            child: const Icon(
+              Icons.error_outline,
+              color: ComicTheme.inkRed,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Download Failed',
+            style: TextStyle(
+              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _error!,
+            style: TextStyle(
+              color: ComicTheme.inkRed.withValues(alpha: 0.8),
+              fontSize: 13,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          _ComicDialogButton(
+            label: 'Close',
+            isCta: false,
+            onTap: () => Navigator.of(context).pop(),
+          ),
         ],
       ),
     );

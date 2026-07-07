@@ -9,7 +9,7 @@ class ComicLoader extends StatefulWidget {
 
   const ComicLoader({
     super.key,
-    this.size = 24,
+    this.size = 32,
     this.colorA = ComicTheme.inkRed,
     this.colorB = ComicTheme.surfaceWhite,
   });
