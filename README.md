@@ -11,11 +11,9 @@
 ## 📱 Preview
 
 <p align="center">
-  <img src="screenshot/Skreenup_1779140422542.png" width="180" alt="Dashboard">
-  <img src="screenshot/Skreenup_1779140432966.png" width="180" alt="Attendance Tracker">
-  <img src="screenshot/Skreenup_1779140444045.png" width="180" alt="Statistics">
-  <img src="screenshot/Skreenup_1779140457709.png" width="180" alt="Settings">
-  <img src="screenshot/Skreenup_1779140469510.png" width="180" alt="Course Detail">
+  <img src="screenshot/IMG_20260702_193648.jpg" width="180" alt="Dashboard">
+  <img src="screenshot/IMG_20260702_193707.jpg" width="180" alt="Attendance Tracker">
+  <img src="screenshot/IMG_20260702_193724.jpg" width="180" alt="Statistics">
 </p>
 
 ### 🎬 App Preview
