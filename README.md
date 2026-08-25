@@ -1,265 +1,322 @@
 <div align="center">
-  <br>
-  <h1>📚 stdy4u</h1>
-  <h3><em>STUDY SMARTER</em></h3>
-  <p><strong>v2.0.1</strong> — Local-first student productivity companion</p>
-  <br>
+
+# stdy4u
+
+**Study smarter** — a local-first student productivity companion built with Flutter.
+
+[![Version](https://img.shields.io/badge/version-2.0.2-green.svg)](pubspec.yaml)
+[![Flutter](https://img.shields.io/badge/Flutter-3.27%2B-02569B.svg?logo=flutter)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-%3E%3D3.6.0-0175C2.svg?logo=dart)](https://dart.dev)
+[![CI](https://github.com/MoHamed-B-M/study4u/actions/workflows/build_apk.yml/badge.svg)](https://github.com/MoHamed-B-M/study4u/actions/workflows/build_apk.yml)
+[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](#getting-started)
+[![Downloads](https://img.shields.io/github/downloads/MoHamed-B-M/study4u/total.svg)](https://github.com/MoHamed-B-M/study4u/releases)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FMoHamed-B-M%2Fstudy4u&label=Visitors&countColor=%23263759&style=flat)](https://visitorbadge.io)
+
 </div>
 
 ---
 
-## 📱 Preview
+## Overview
 
-<p align="center">
-  <img src="screenshot/IMG_20260702_193648.jpg" width="180" alt="Dashboard">
-  <img src="screenshot/IMG_20260702_193707.jpg" width="180" alt="Attendance Tracker">
-  <img src="screenshot/IMG_20260702_193724.jpg" width="180" alt="Statistics">
-</p>
+stdy4u helps students manage courses, attendance, tasks, grades, and focus time in one offline-first app. All data is stored locally on the device — no account required. The interface uses a distinctive comic-print design system with high-contrast ink styling.
 
+## Features
 
----
-
-## ✨ Features
-
-### 🎓 Course Management
+### Course Management
 - Add courses with name, code, professor, room, schedule, and color coding
-- Track grades, target GPA, and credit hours per course — target CGPA persists across sessions
-- Edit or delete courses via long-press context menu
+- Track grades, target GPA, and credit hours per course; target CGPA persists across sessions
+- Edit or delete courses through a long-press context menu
 - Visual progress indicators on the home dashboard
 
-### ✅ Tasks & Notes
+### Tasks & Notes
 - Create tasks with due dates and urgency levels (Normal / Urgent)
 - Course-specific notes tab
-- Check-off completion with animated toggle
-- Filter by course on the detail screen
+- Animated completion toggle
+- Filter tasks by course on the detail screen
 
-### 📂 Course Materials
-- Add materials as **links**, **notes**, or **uploaded files** (PDF, images, docs)
-- Stored locally — files are copied to the app's documents directory
-- Tap to open files or URLs
-- Delete unwanted materials with the delete button
+### Course Materials
+- Attach materials as links, notes, or uploaded files (PDF, images, docs)
+- Files are copied to the app documents directory and stay available offline
+- Open files or URLs with a tap
 
-### 📅 Attendance Tracker
+### Attendance Tracker
 - Mark attendance per course: Present / Late / Absent / Excused
-- Calendar view with `table_calendar` — tap a day to see all courses
-- Automatic attendance rate calculation with configurable threshold warning
+- Monthly calendar view; tap any day to see all scheduled courses
+- Automatic attendance rate calculation with configurable threshold warnings
 - Quick-action chips in the daily schedule
 
-### 📊 Statistics & Analytics
-- CGPA calculation with letter grade conversion (A, B, C, D, F)
-- Grade distribution bar chart per course
-- Per-subject performance overview with progress rings
-- Pomodoro focus time analytics — weekly bar chart
-
-### ⏱️ Pomodoro Timer
-- Focus sessions with configurable durations (1–60 min)
-- Short break (1–30 min) and long break (1–60 min) with auto-rotation
+### Pomodoro Timer
+- Focus sessions with configurable durations (1-60 min)
+- Short break (1-30 min) and long break (1-60 min) with automatic rotation
 - Session counter and haptic feedback
-- Calm music player — pick audio files to play during focus sessions
+- Optional music playback during focus sessions
 - Weekly focus analytics dashboard
 
-### 🎨 Comic-Print Design System
-- Light, Dark, and System Default modes
-- **Neo-Brutalist manga aesthetic** — flat surfaces, sharp 2.5px ink-black borders, hard offset shadows (`blurRadius: 0`), zero border radius
-- **Luckiest Guy** display font for headings, monospace for code snippets
-- Signature **Ink Red** (`#E63946`) accent color throughout
-- High-contrast ink-black text on aged paper / dark pulp backgrounds
-- Custom **MangaNavBar** — flat geometry, thick 3px top border, ALL-CAPS labels, red active state
-- Haptic feedback and mechanical press sound toggle
+### Screen Time Insights
+- Reads device usage statistics through a native `UsageStatsManager` bridge (`app_usage`)
+- Per-app daily usage entries stored locally in Hive
+- Expandable screen time panel on the Stats screen
 
-### 🔔 Notifications
-- Weekly recurring class reminders (15 min before each class)
+### Statistics & Analytics
+- CGPA calculation with letter grade conversion (A-F)
+- Grade distribution chart per course
+- Per-subject performance overview with progress rings
+- Weekly Pomodoro focus time chart
+
+### Comic-Print Design System
+- Light, dark, and system default modes
+- Neo-brutalist manga aesthetic: flat surfaces, sharp 2.5 px ink-black borders, hard offset shadows, zero border radius
+- Signature Ink Red accent (`#E63946`) on aged paper and dark pulp backgrounds
+- Custom navigation bar with flat geometry, thick top border, all-caps labels
+- Haptic feedback and press-sound toggles
+
+### Notifications & Alarms
+- Weekly recurring class reminders (15 minutes before each class)
 - Task reminders and session alerts
-- Notification history bottom sheet
-- Toggle notifications in Settings
+- Exact alarms via `SCHEDULE_EXACT_ALARM` and a native alarm receiver
+- Notifications can be toggled in Settings
 
-### 🚀 Updates
-- On-launch GitHub OTA update check with rich markdown release notes
-- Download with pause/resume/cancel — saved state survives interruptions
-- Manual check in Settings → About → Check for Updates
+### In-App Updates
+- On-launch update check against GitHub releases with markdown release notes
+- Download with pause, resume, and cancel support; progress survives interruptions
+- Manual check available under Settings > About > Check for Updates
 
----
+## Preview
 
-## 📖 How to Use
+| Dashboard | Attendance Tracker | Statistics |
+|:---:|:---:|:---:|
+| ![Dashboard](screenshot/IMG_20260702_193648.jpg) | ![Attendance Tracker](screenshot/IMG_20260702_193707.jpg) | ![Statistics](screenshot/IMG_20260702_193724.jpg) |
 
-### 1. Getting Started
+## Commit Activity
 
-On first launch, you'll see an animated splash screen followed by a short **onboarding carousel**. Swipe through the intro pages, then tap **START** to begin.
+Development history of the main branch, generated from `git log`:
 
-The app works completely offline — all your data (courses, tasks, attendance, notes) is stored locally on your device. No sign-up, no account needed.
+```
+ 62 COMMITS | JUN 25 - JUL 07, 2026
+ ────────────────────────────────────────
+ Jun 25 │████░░░░░░░░░░░░░░░░░░░░│   3
+ Jun 26 │███░░░░░░░░░░░░░░░░░░░░░│   2
+ Jun 27 │███████████░░░░░░░░░░░░░│   8
+ Jun 28 │██████░░░░░░░░░░░░░░░░░░│   4
+ Jun 29 │███████░░░░░░░░░░░░░░░░░│   5
+ Jun 30 │███░░░░░░░░░░░░░░░░░░░░░│   2
+ Jul 01 │██████████████████░░░░░░│  13
+ Jul 02 │███░░░░░░░░░░░░░░░░░░░░░│   2
+ Jul 03 │░░░░░░░░░░░░░░░░░░░░░░░░│   0
+ Jul 04 │░░░░░░░░░░░░░░░░░░░░░░░░│   0
+ Jul 05 │░░░░░░░░░░░░░░░░░░░░░░░░│   0
+ Jul 06 │████████████████████████│  17
+ Jul 07 │████████░░░░░░░░░░░░░░░░│   6
+ ────────────────────────────────────────
+ DAILY COMMIT COUNT | 10 OF 13 DAYS ACTIVE
+```
 
-### 2. Adding Your First Course
+## Getting Started
 
-- Tap the **Home** tab and press the **+** button to open the Add Course form
-- Fill in the course name, code, professor, and schedule
-- Pick a **color** to identify the course on your dashboard
-- Set your **target grade** and credit hours (used for CGPA calculations)
-- Save — the course appears on your dashboard immediately
+### Prerequisites
 
-> **Tip:** Long-press any course card to edit or delete it.
+- Flutter SDK with Dart `>=3.6.0 <4.0.0`
+- Android Studio or VS Code with the Flutter plugin
+- For iOS builds: Xcode 15+ and CocoaPods
 
-### 3. Daily Dashboard
+### Installation
 
-Your **Home** screen shows at a glance:
-- A personalized greeting with your study streak
-- **Up Next** — your next class today with a countdown
-- **Quote Cards** — tap the "UP NEXT" card to expand a full-screen motivational quote with a smooth animated transition. Swipe or tap the close button to dismiss
-- Course progress rings showing attendance rate
-- Pending tasks and quick action buttons
+```bash
+git clone https://github.com/MoHamed-B-M/study4u.git
+cd study4u
+flutter pub get
+```
 
-### 4. Marking Attendance
+Verify your toolchain:
 
-- Go to the **Tracker** tab to see a monthly calendar
-- Tap any date to view all courses scheduled that day
-- Tap **Present / Late / Absent / Excused** to mark attendance
-- The tracker calculates your attendance percentage and warns if you're below the threshold
+```bash
+flutter doctor
+```
 
-### 5. Using the Pomodoro Timer
+Run in debug mode:
 
-- Navigate to the **Pomodoro** section from the Home screen
-- Tap the gear icon to adjust Focus, Short Break, and Long Break durations
-- Press **Play** to start a focus session
-- Optionally pick calming music to play during focus time
-- View your weekly focus stats on the **Stats** screen
+```bash
+flutter run
+```
 
-### 6. Tracking Grades & Statistics
+### Code Generation
 
-- The **Stats** screen shows your overall **CGPA** with a bar chart breakdown per course
-- Each course displays its grade, credits, and contribution to your GPA
-- The weekly focus time chart shows your Pomodoro productivity
+Models annotated for Hive use code-generated adapters. Regenerate after any model change:
 
-### 7. Managing Materials, Tasks & Notes
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
 
-Tap any course card to open its detail screen with three tabs:
-- **Materials** — Add links, written notes, or upload files (PDFs, images). Tap to open, swipe to delete
-- **Tasks** — Create tasks with due dates and urgency. Check them off when done
-- **Notes** — Course-specific notes that stay with the course
+### Build and Verify
 
-### 8. Customizing the App
+```bash
+# Static analysis - must report zero errors before committing
+flutter analyze --no-pub
 
-- Open **Settings** to switch between Light, Dark, or System theme
-- Pick from **8 accent colors** to personalize the look
-- Toggle the **Floating Navigation Bar** for a glassmorphism effect
-- Enable or disable haptic feedback and press sounds
+# Release build used by CI
+flutter build apk --release --split-per-abi
+```
 
-### 9. App Updates
+## User Guide
 
-When a new version is available, a **native system notification** pops up in your status bar. Tap the notification to open the update dialog, view rich markdown release notes, and download the latest APK. The download supports **pause, resume, and cancel** — progress is saved locally so you can resume where you left off if interrupted. You can also manually check for updates in **Settings → About → Check for Updates**.
+<details>
+<summary><strong>Expand the user guide</strong></summary>
 
----
+### First launch
+An animated splash screen leads into a short onboarding carousel. Tap START to begin. The app works fully offline; no sign-up is needed.
 
-## 🛠️ Tech Stack
+### Adding your first course
+On the Home tab, press the + button to open the Add Course sheet. Fill in name, code, professor, room, and schedule, pick a color, and set target grade plus credits. Long-press any course card to edit or delete it.
+
+### Daily dashboard
+The Home screen shows a personalized greeting, an Up Next card with your next class and countdown, expandable motivational quote cards, course progress rings for attendance rate, and pending tasks with quick actions.
+
+### Marking attendance
+Open the Tracker tab, tap any date, then mark each course as Present, Late, Absent, or Excused. The tracker computes your attendance percentage and warns you when it drops below the configured threshold.
+
+### Using the Pomodoro timer
+Open the Pomodoro modal from the Stats screen. Tap the gear icon to adjust focus and break durations, then press Play. Weekly focus statistics appear on the Stats screen.
+
+### Grades and screen time
+The Stats screen shows overall CGPA with a per-course breakdown, weekly Pomodoro focus charts, and an expandable device screen time panel.
+
+### Materials, tasks, and notes
+Tap any course card to open its detail screen with three tabs: Materials, Tasks, and Notes.
+
+### Settings
+Switch between light, dark, and system theme; toggle haptic feedback, notifications, and press sounds.
+
+</details>
+
+## Architecture
+
+The project follows Clean Architecture with three layers wired together by Riverpod:
+
+```
+presentation/   Screens, providers, theme
+domain/         Entities, abstract repositories,
+                use cases (CGPA, attendance analytics,
+                schedule optimizer)
+data/           Hive datasources, models,
+                repository implementations,
+                platform bridges (MethodChannels)
+```
+
+### State management pattern
+
+- `dataRefreshProvider` (`StateProvider<int>`) acts as a shared refresh counter.
+- List providers such as `courseListProvider`, `taskListProvider`, and `attendanceRecordsProvider` watch it.
+- Mutations increment the counter to trigger list re-evaluation.
+- Settings use `StateNotifierProvider<SettingsNotifier, AppSettings>` backed by Hive.
+
+### Navigation
+
+GoRouter with a `ShellRoute` hosts the three tab routes (`/`, `/tracker`, `/stats`) inside an `IndexedStack`. Standalone routes (`/settings`, `/course/:id`) use a custom slide transition.
+
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | Flutter 3.44 + Dart |
-| **State Management** | Riverpod (`flutter_riverpod`) |
-| **Navigation** | GoRouter with ShellRoute |
-| **Local Storage** | Hive (`hive_flutter`) |
-| **Charts** | fl_chart |
-| **Calendar** | table_calendar |
-| **Icons** | solar_icons |
-| **SVG** | flutter_svg |
-| **Notifications** | flutter_local_notifications |
-| **Audio** | just_audio |
-| **File Picker** | file_picker |
-| **File Open** | open_filex |
-| **Markdown** | flutter_markdown |
-| **Code Generation** | build_runner + hive_generator |
-| **CI/CD** | GitHub Actions (build + release APK) |
+| Framework | Flutter (Dart >= 3.6.0) |
+| State management | Riverpod (`flutter_riverpod`) |
+| Navigation | GoRouter with ShellRoute |
+| Local storage | Hive + hive_flutter (generated adapters) |
+| Calendar UI | table_calendar |
+| Icons / SVG | solar_icons, flutter_svg |
+| Notifications | flutter_local_notifications + timezone |
+| Audio | just_audio |
+| Files | file_picker, open_filex |
+| Usage stats | app_usage (native bridge) |
+| Markdown | flutter_markdown |
+| Code generation | build_runner, hive_generator, riverpod_generator |
+| CI/CD | GitHub Actions (build + release APK) |
 
----
+Charts are hand-painted with `CustomPaint`; no chart library dependency.
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 lib/
 ├── core/
+│   ├── animation/       # Page-scale transition helpers
 │   ├── constants/       # App-wide constants
-│   ├── errors/          # Custom exception classes
+│   ├── errors/          # Custom exceptions
 │   ├── extensions/      # BuildContext helpers
-│   ├── services/        # NotificationService, UpdateService
+│   ├── services/        # NotificationService, UpdateService, SoundService
 │   └── utils/           # Grade calculator, time utilities
 ├── data/
-│   ├── datasources/     # LocalStorage (Hive init + box access)
-│   ├── models/          # AppSettings, ScreenTimeLog (Hive-annotated)
+│   ├── datasources/     # LocalStorage (Hive init and box access)
+│   ├── models/          # Hive-annotated models (AppSettings, ScreenTimeLog)
+│   ├── platform/        # MethodChannel bridges (alarm, calendar, screen time, settings)
 │   └── repositories/    # Repository implementations
 ├── domain/
-│   ├── entities/        # Course, Task, CourseMaterial, AttendanceRecord
+│   ├── entities/        # Course, Task, CourseMaterial, AttendanceRecord, PomodoroSession
 │   ├── repositories/    # Abstract repository interfaces
-│   └── usecases/        # Business logic: CGPA, attendance, schedule
+│   └── usecases/        # CGPA calculator, attendance analytics, schedule optimizer
 ├── presentation/
-│   ├── features/        # Screen widgets grouped by feature
-│   │   ├── dashboard/   # Home dashboard with greeting + progress
-│   │   ├── home/        # Main screen shell with tabs
-│   │   ├── tracker/     # Attendance tracker with calendar
-│   │   ├── stats/       # Statistics & CGPA visualization
-│   │   ├── settings/    # App settings & about
-│   │   ├── splash/      # Animated splash screen
-│   │   └── course_detail/ # Course detail & tasks/materials
-│   ├── theme/           # ComicTheme, SettingsNotifier
+│   ├── features/        # Screens grouped by feature
+│   │   ├── home/            # Main shell and tabs
+│   │   ├── dashboard/       # Home dashboard (greeting, Up Next, progress rings)
+│   │   ├── tracker/         # Attendance tracker calendar
+│   │   ├── statistics/      # Stats screen wrapper
+│   │   ├── stats/           # Statistics, CGPA, Pomodoro, screen-time views
+│   │   ├── settings/        # App settings and about
+│   │   ├── splash/          # Animated splash screen
+│   │   ├── feature_preview/ # Onboarding carousel
+│   │   └── course_detail/   # Course detail: materials, tasks, notes
+│   ├── providers/       # Feature-level providers (pomodoro, alarms, calendar)
+│   ├── theme/           # Theme provider, SettingsNotifier
 │   └── widgets/         # UpdateDialog, snackbars
-├── widgets/             # ComicLoader, MangaNavBar, shared atoms
-└── shared/
+├── shared/              # Cross-feature models, providers, widgets, theme
+├── theme/               # ComicTheme design system
+└── widgets/             # MangaNavBar, ComicCard, shared atoms
+
+android/app/src/main/kotlin/com/example/study4u/
+├── MainActivity.kt
+├── AlarmReceiver.kt     # Exact-alarm broadcast receiver
+├── AlarmPlugin.kt       # MethodChannel: alarm scheduling
+├── CalendarPlugin.kt    # MethodChannel: calendar read/write
+├── ScreenTimePlugin.kt  # MethodChannel: UsageStatsManager queries
+└── SettingsPlugin.kt    # MethodChannel: battery-optimization prompts
 ```
 
----
+## Android Permissions
 
-## 🚀 Getting Started
+| Permission | Purpose |
+|------------|---------|
+| `PACKAGE_USAGE_STATS` | Read device screen-time statistics |
+| `READ_CALENDAR` / `WRITE_CALENDAR` | Sync courses with the device calendar |
+| `POST_NOTIFICATIONS` | Class and task reminders, update notices |
+| `SCHEDULE_EXACT_ALARM` | Exact class-reminder alarms |
+| `RECEIVE_BOOT_COMPLETED` | Re-register alarms after reboot |
+| `FOREGROUND_SERVICE` | Background alarm and service support |
 
-### Prerequisites
-- Flutter SDK `>=3.6.0 <4.0.0`
-- Android Studio / VS Code with Flutter plugins
+Battery-optimization exemption is requested at runtime so reminders fire reliably.
 
-### Setup
+## Building for Release
 
 ```bash
-# Clone the repository
-git clone https://github.com/MoHamed-B-M/study4u.git
-cd study4u
-
-# Install dependencies
-flutter pub get
-
-# Generate Hive adapters & Riverpod providers
-dart run build_runner build --delete-conflicting-outputs
-
-# Run in debug mode
-flutter run
-
-# Build release APK
-flutter build apk --release
+# Increment version in pubspec.yaml first
+flutter build apk --release --split-per-abi --build-number=$YOUR_BUILD_NUMBER
 ```
 
+Pushing a tag matching `v*.*.*` triggers the GitHub Actions release workflow, which builds signed APKs and attaches them to a GitHub Release.
 
----
+## Roadmap
 
-## 📦 Building for Release
+- Home-screen widgets (Android AppWidget + iOS WidgetKit) showing study statistics with deep links into the app
+- Quick actions / app shortcuts: start focus timer, open flashcards, create a study session
+- Flashcards feature
 
-```bash
-# Increment version in pubspec.yaml, then:
-flutter build apk --release --build-number=$YOUR_BUILD_NUMBER
+See [CHANGELOG.md](CHANGELOG.md) for shipped changes.
 
-# Or with signing env vars (CI):
-flutter build apk --release --build-number=$CI_PIPELINE_ID
-```
+## Acknowledgments
 
-> Build and push a tag (`v*.*.*`) to trigger the GitHub Actions release workflow.
+Developed as a school project for Madame Basma.
 
----
+## License
 
-## 📄 Changelog
+Released under the [GNU Affero General Public License v3.0](LICENSE).
 
-See [CHANGELOG.md](CHANGELOG.md) for a full history of changes.
-
----
-
-## 🏫 School Project
-
-This app was developed as a school project for **Madame Basma**.
-
----
-
-## 📝 License
-
-Private project.
+AGPL-3.0 is a strong copyleft license: modified versions made available over a network must offer their corresponding source code under the same license.

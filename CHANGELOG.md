@@ -4,6 +4,16 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
+## [2.0.2] - 2026-08-25
+
+### Added
+- **AGPL-3.0 license**: Added full GNU Affero General Public License v3.0 — the project is now officially open-source licensed — by **Hamma**
+
+### Changed
+- **README overhaul**: Complete documentation rewrite — streamlined Overview section, updated feature list, shields.io badge row (Flutter, Dart, CI, platform, downloads, license, visitors), simplified Tech Stack and Project Structure sections, and a rewritten Theming section documenting the Neo-Brutalist manga design system — by **Hamma**
+
+---
+
 ## [2.0.1] - 2026-07-06
 
 ### Added
