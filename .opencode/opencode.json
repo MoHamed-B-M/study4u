@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "lsp": {
+    "dart": {
+      "command": ["dart", "language-server", "--client-id=opencode"],
+      "extensions": [".dart"]
+    }
+  },
+  "formatter": {
+    "dart": {
+      "command": ["dart", "format", "$FILE"],
+      "extensions": [".dart"]
+    }
+  }
+}

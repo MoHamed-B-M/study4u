@@ -10,5 +10,6 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(CalendarPlugin())
         flutterEngine.plugins.add(AlarmPlugin())
         flutterEngine.plugins.add(SettingsPlugin())
+        flutterEngine.plugins.add(WidgetPlugin())
     }
 }

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
-import 'core/services/sound_service.dart';
+import 'core/services/home_widget_service.dart';
 import 'data/datasources/local_storage.dart';
 import 'theme/comic_theme.dart';
 import 'presentation/theme/theme_provider.dart';
@@ -16,9 +16,11 @@ import 'presentation/features/course_detail/course_detail_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
+import 'presentation/widgets/telegram_prompt_dialog.dart';
 import 'widgets/manga_nav_bar.dart';
 import 'core/animation/page_scale.dart';
 import 'data/models/app_settings.dart';
+import 'shared/providers/logic_providers.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -161,8 +163,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: CourseDetailScreen(courseId: state.pathParameters['id']!),
-          transitionsBuilder:
-              (context, animation, secondaryAnimation, child) {
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position: Tween<Offset>(
                 begin: const Offset(1, 0),
@@ -186,11 +187,54 @@ class Stdy4uApp extends ConsumerStatefulWidget {
   ConsumerState<Stdy4uApp> createState() => _Stdy4uAppState();
 }
 
-class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
+class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdate());
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      HomeWidgetService.pushUpdate();
+      _startupSequence();
+    });
+  }
+
+  /// Runs once per app start: update check first, then the one-time
+  /// Telegram join prompt (so the two dialogs never stack).
+  Future<void> _startupSequence() async {
+    await _checkUpdate();
+    if (!mounted) return;
+    _maybeShowTelegramPrompt();
+  }
+
+  void _maybeShowTelegramPrompt() {
+    bool alreadyShown = false;
+    try {
+      final s = LocalStorage.appSettingsBox.get('default');
+      alreadyShown = s?.telegramPromptShown ?? false;
+    } catch (_) {}
+    if (alreadyShown) return;
+
+    TelegramPromptDialog.show(context).then((_) {
+      // Mark as shown no matter how the dialog was closed.
+      try {
+        ref.read(settingsProvider.notifier).setTelegramPromptShown(true);
+      } catch (_) {}
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh the home-screen widget snapshot whenever the app comes back.
+    if (state == AppLifecycleState.resumed) {
+      HomeWidgetService.pushUpdate();
+    }
   }
 
   Future<void> _checkUpdate() async {
@@ -209,6 +253,11 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
+
+    // Keep the home-screen widget in sync when data changes.
+    ref.listen<int>(dataRefreshProvider, (_, __) {
+      HomeWidgetService.pushUpdate();
+    });
 
     return MaterialApp.router(
       title: 'stdy4u',

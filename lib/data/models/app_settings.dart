@@ -26,6 +26,8 @@ class AppSettings extends HiveObject {
   final bool pressSound;
   @HiveField(10)
   final double targetCgpa;
+  @HiveField(11)
+  final bool telegramPromptShown;
 
   AppSettings({
     this.id = 'default',
@@ -39,5 +41,6 @@ class AppSettings extends HiveObject {
     this.showNavLabels = true,
     this.pressSound = true,
     this.targetCgpa = -1,
+    this.telegramPromptShown = false,
   });
 }

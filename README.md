@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-2.0.2-green.svg)](pubspec.yaml)
 [![Flutter](https://img.shields.io/badge/Flutter-3.27%2B-02569B.svg?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.6.0-0175C2.svg?logo=dart)](https://dart.dev)
-[![CI](https://github.com/MoHamed-B-M/study4u/actions/workflows/build_apk.yml/badge.svg)](https://github.com/MoHamed-B-M/study4u/actions/workflows/build_apk.yml)
+[![CI](https://github.com/MoHamed-B-M/study4u/actions/workflows/build.yaml/badge.svg)](https://github.com/MoHamed-B-M/study4u/actions/workflows/build.yaml)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](#getting-started)
 [![Downloads](https://img.shields.io/github/downloads/MoHamed-B-M/study4u/total.svg)](https://github.com/MoHamed-B-M/study4u/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)

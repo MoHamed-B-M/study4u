@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_title">STDY4U</string>
+    <string name="widget_next_label">NEXT CLASS</string>
+    <string name="widget_description">Study dashboard — next class, tasks, focus time and CGPA at a glance.</string>
+</resources>

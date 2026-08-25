@@ -4,6 +4,25 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Telegram community**: New "Telegram Community" row in Settings → About — opens [t.me/study4ulink](https://t.me/study4ulink) with the Telegram app / external browser — by **Hamma**
+- **First-launch Telegram prompt**: One-time comic-print dialog on first launch (after the update check, so dialogs never stack) inviting users to join the Telegram channel — Close and Join buttons; dismissal is persisted in Hive (`AppSettings.telegramPromptShown`, field 11) so it never shows twice — by **Hamma**
+- **Android home-screen widget**: New comic-print study dashboard widget (2×2) — next class (computed live from today's schedule at render time), pending tasks count, focus minutes today, and CGPA with letter grade; paper/ink styling adapts to light & dark system themes; tap opens the app — by **Hamma**
+- **Widgets settings option**: New `WIDGETS` section in Settings with "Home Screen Widget" row opening a bottom sheet that pins the widget via the system add-widget dialog (Android 8+), with manual instructions fallback — by **Hamma**
+- **`com.stdy4u/widget` method channel**: `WidgetPlugin.kt` + `WidgetBridge` Dart bridge — saves data snapshots and re-renders all widget instances, requests pinning — by **Hamma**
+
+### Changed
+- **What's New dialog enlarged**: Update dialog now grows up to **80% of screen height** (width 92%) instead of a fixed 220px notes box — release notes get room to breathe on long changelogs — by **Hamma**
+- **Release notes readability**: Bumped markdown body text 13→15px with proper 1.45 line height (was ultra-cramped 0.8), larger headings (h1 21 / h2 19 / h3 17), block spacing and list indentation added — by **Hamma**
+- **Widget data sync**: Widget snapshot refreshes automatically on app start, on app resume, and whenever data changes (`dataRefreshProvider`) — by **Hamma**
+
+### Removed
+- **`build_apk.yml` workflow** ("Build APK (All Branches)") — redundant with the main Build & Release APK workflow — by **Hamma**
+
+---
+
 ## [2.0.2] - 2026-08-25
 
 ### Added

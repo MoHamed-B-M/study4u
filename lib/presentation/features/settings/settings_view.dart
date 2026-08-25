@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/update_service.dart';
 import '../../../data/models/app_settings.dart';
+import '../../../data/platform/widget_bridge.dart';
 import '../../../theme/comic_theme.dart';
 import '../../../widgets/comic_card.dart';
 import '../../../widgets/comic_button.dart';
@@ -35,155 +37,185 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
       body: Stack(
         children: [
           CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionHeader(context, 'APPEARANCE'),
-                  ComicCard(
-                    padding: EdgeInsets.zero,
-                    child: Column(children: [
-                      _buildSettingRow(
-                        context,
-                        icon: SolarIconsBold.moon,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Appearance',
-                        subtitle: _themeLabel(settings.themeMode),
-                        onTap: () => _showThemeSheet(context, ref, settings),
-                      ),
-                    ]),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, 'PREFERENCES'),
-                  ComicCard(
-                    padding: EdgeInsets.zero,
-                    child: Column(children: [
-                      _buildSwitchRow(
-                        context,
-                        icon: SolarIconsBold.smartphoneVibration,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Haptic Feedback',
-                        subtitle: 'Vibration on interactions',
-                        value: settings.hapticFeedback,
-                        onChanged: (v) {
-                          HapticFeedback.selectionClick();
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setHapticFeedback(v);
-                        },
-                      ),
-                      _buildSwitchRow(
-                        context,
-                        icon: SolarIconsBold.bell,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Notifications',
-                        subtitle: 'Get reminded about classes and tasks',
-                        value: settings.notificationEnabled,
-                        onChanged: (v) {
-                          HapticFeedback.selectionClick();
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setNotificationEnabled(v);
-                        },
-                      ),
-                      _buildSwitchRow(
-                        context,
-                        icon: SolarIconsBold.musicNote,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Press Sound',
-                        subtitle: 'Play click sound on button press',
-                        value: settings.pressSound,
-                        onChanged: (v) {
-                          HapticFeedback.selectionClick();
-                          SoundService.pressSoundEnabled = v;
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setPressSound(v);
-                        },
-                      ),
-                    ]),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, 'ABOUT'),
-                  ComicCard(
-                    padding: EdgeInsets.zero,
-                    child: Column(children: [
-                      _buildSettingRow(
-                        context,
-                        icon: SolarIconsBold.book,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'stdy4u',
-                        subtitle: 'Tap for version info',
-                        trailing: FutureBuilder<PackageInfo>(
-                          future: PackageInfo.fromPlatform(),
-                          builder: (ctx, snap) {
-                            final ver = snap.data?.version ?? '1.0.0';
-                            final build = snap.data?.buildNumber ?? '1';
-                            return Text(
-                              'v$ver+$build',
-                              style: TextStyle(
-                                fontSize: 11,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        child: ComicButton(
-                          isCta: true,
-                          onPressed: _checking ? null : () => _checkForUpdate(context),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.download_rounded, size: 18, color: ComicTheme.surfaceWhite),
-                              SizedBox(width: 8),
-                              Text('Check for Updates'),
-                            ],
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionHeader(context, 'APPEARANCE'),
+                      ComicCard(
+                        padding: EdgeInsets.zero,
+                        child: Column(children: [
+                          _buildSettingRow(
+                            context,
+                            icon: SolarIconsBold.moon,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'Appearance',
+                            subtitle: _themeLabel(settings.themeMode),
+                            onTap: () =>
+                                _showThemeSheet(context, ref, settings),
                           ),
-                        ),
+                        ]),
                       ),
-                      _buildSettingRow(
-                        context,
-                        icon: SolarIconsBold.book,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'GitHub Repository',
-                        subtitle: 'MoHamed-B-M/study4u',
-                        onTap: () => launchUrl(Uri.parse(
-                            'https://github.com/MoHamed-B-M/study4u')),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(context, 'PREFERENCES'),
+                      ComicCard(
+                        padding: EdgeInsets.zero,
+                        child: Column(children: [
+                          _buildSwitchRow(
+                            context,
+                            icon: SolarIconsBold.smartphoneVibration,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'Haptic Feedback',
+                            subtitle: 'Vibration on interactions',
+                            value: settings.hapticFeedback,
+                            onChanged: (v) {
+                              HapticFeedback.selectionClick();
+                              ref
+                                  .read(settingsProvider.notifier)
+                                  .setHapticFeedback(v);
+                            },
+                          ),
+                          _buildSwitchRow(
+                            context,
+                            icon: SolarIconsBold.bell,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'Notifications',
+                            subtitle: 'Get reminded about classes and tasks',
+                            value: settings.notificationEnabled,
+                            onChanged: (v) {
+                              HapticFeedback.selectionClick();
+                              ref
+                                  .read(settingsProvider.notifier)
+                                  .setNotificationEnabled(v);
+                            },
+                          ),
+                          _buildSwitchRow(
+                            context,
+                            icon: SolarIconsBold.musicNote,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'Press Sound',
+                            subtitle: 'Play click sound on button press',
+                            value: settings.pressSound,
+                            onChanged: (v) {
+                              HapticFeedback.selectionClick();
+                              SoundService.pressSoundEnabled = v;
+                              ref
+                                  .read(settingsProvider.notifier)
+                                  .setPressSound(v);
+                            },
+                          ),
+                        ]),
                       ),
-                      _buildSettingRow(
-                        context,
-                        icon: SolarIconsBold.like,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Submit Feedback',
-                        subtitle: 'Report issues or suggest features',
-                        onTap: () => launchUrl(Uri.parse(
-                            'https://github.com/MoHamed-B-M/study4u/issues/new')),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(context, 'WIDGETS'),
+                      ComicCard(
+                        padding: EdgeInsets.zero,
+                        child: Column(children: [
+                          _buildSettingRow(
+                            context,
+                            icon: Icons.widgets_rounded,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'Home Screen Widget',
+                            subtitle:
+                                'Next class, tasks & focus time at a glance',
+                            onTap: () => _showWidgetSheet(context),
+                          ),
+                        ]),
                       ),
-                    ]),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(context, 'ABOUT'),
+                      ComicCard(
+                        padding: EdgeInsets.zero,
+                        child: Column(children: [
+                          _buildSettingRow(
+                            context,
+                            icon: SolarIconsBold.book,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'stdy4u',
+                            subtitle: 'Tap for version info',
+                            trailing: FutureBuilder<PackageInfo>(
+                              future: PackageInfo.fromPlatform(),
+                              builder: (ctx, snap) {
+                                final ver = snap.data?.version ?? '1.0.0';
+                                final build = snap.data?.buildNumber ?? '1';
+                                return Text(
+                                  'v$ver+$build',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                            child: ComicButton(
+                              isCta: true,
+                              onPressed: _checking
+                                  ? null
+                                  : () => _checkForUpdate(context),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.download_rounded,
+                                      size: 18, color: ComicTheme.surfaceWhite),
+                                  SizedBox(width: 8),
+                                  Text('Check for Updates'),
+                                ],
+                              ),
+                            ),
+                          ),
+                          _buildSettingRow(
+                            context,
+                            icon: SolarIconsBold.book,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'GitHub Repository',
+                            subtitle: 'MoHamed-B-M/study4u',
+                            onTap: () => launchUrl(Uri.parse(
+                                'https://github.com/MoHamed-B-M/study4u')),
+                          ),
+                          _buildSettingRow(
+                            context,
+                            icon: SolarIconsBold.like,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'Submit Feedback',
+                            subtitle: 'Report issues or suggest features',
+                            onTap: () => launchUrl(Uri.parse(
+                                'https://github.com/MoHamed-B-M/study4u/issues/new')),
+                          ),
+                          _buildSettingRow(
+                            context,
+                            icon: Icons.send_rounded,
+                            iconColor: const Color(0xFF229ED9),
+                            title: 'Telegram Community',
+                            subtitle: 't.me/study4ulink',
+                            onTap: () => launchUrl(
+                                Uri.parse(AppConstants.telegramUrl),
+                                mode: LaunchMode.externalApplication),
+                          ),
+                        ]),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
                   ),
-                  const SizedBox(height: 40),
-                ],
+                ),
+              ),
+            ],
+          ),
+          if (_checking)
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: ComicLoader(size: 56),
               ),
             ),
-          ),
         ],
       ),
-      if (_checking)
-        Container(
-          color: Colors.black54,
-          child: Center(
-            child: ComicLoader(size: 56),
-          ),
-        ),
-    ],
-  ),
-);
+    );
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
@@ -197,7 +229,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
+              color: isDark
+                  ? ComicTheme.darkText.withValues(alpha: 0.6)
+                  : ComicTheme.inkBlack.withValues(alpha: 0.6),
               letterSpacing: 0.5,
             ),
           ),
@@ -364,7 +398,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
       final service = UpdateService();
       final update = await service.checkForUpdate();
       final elapsed = DateTime.now().difference(started).inMilliseconds;
-      if (elapsed < 1000) await Future.delayed(Duration(milliseconds: 1000 - elapsed));
+      if (elapsed < 1000)
+        await Future.delayed(Duration(milliseconds: 1000 - elapsed));
       if (!context.mounted) return;
 
       if (update == null || !update.isNewer) {
@@ -422,17 +457,21 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDark ? ComicTheme.darkText.withValues(alpha: 0.7) : ComicTheme.inkBlack.withValues(alpha: 0.7),
+                    color: isDark
+                        ? ComicTheme.darkText.withValues(alpha: 0.7)
+                        : ComicTheme.inkBlack.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 24),
                 GestureDetector(
                   onTap: () => Navigator.pop(ctx),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 10),
                     decoration: BoxDecoration(
                       color: ComicTheme.inkRed,
-                      border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+                      border:
+                          Border.all(color: ComicTheme.inkBlack, width: 2.5),
                       boxShadow: const [
                         BoxShadow(
                           color: ComicTheme.inkBlack,
@@ -490,8 +529,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                           .setThemeMode('system');
                       Navigator.of(modalCtx).pop();
                     },
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: const Column(children: [
                       Icon(Icons.brightness_auto, size: 18),
                       Text('System'),
@@ -502,13 +541,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     isCta: settings.themeMode == 'light',
                     onPressed: () {
                       HapticFeedback.selectionClick();
-                      ref
-                          .read(settingsProvider.notifier)
-                          .setThemeMode('light');
+                      ref.read(settingsProvider.notifier).setThemeMode('light');
                       Navigator.of(modalCtx).pop();
                     },
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: const Column(children: [
                       Icon(Icons.wb_sunny, size: 18),
                       Text('Light'),
@@ -519,13 +556,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     isCta: settings.themeMode == 'dark',
                     onPressed: () {
                       HapticFeedback.selectionClick();
-                      ref
-                          .read(settingsProvider.notifier)
-                          .setThemeMode('dark');
+                      ref.read(settingsProvider.notifier).setThemeMode('dark');
                       Navigator.of(modalCtx).pop();
                     },
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: const Column(children: [
                       Icon(Icons.nightlight_round, size: 18),
                       Text('Dark'),
@@ -545,4 +580,76 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     );
   }
 
+  void _showWidgetSheet(BuildContext context) {
+    HapticFeedback.selectionClick();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext modalCtx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Home Screen Widget',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Add the stdy4u study dashboard to your home screen — '
+                'see your next class, pending tasks, focus time and CGPA '
+                'without opening the app.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.45,
+                  color: isDark
+                      ? ComicTheme.darkText.withValues(alpha: 0.7)
+                      : ComicTheme.inkBlack.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ComicButton(
+                isCta: true,
+                onPressed: () async {
+                  HapticFeedback.lightImpact();
+                  final ok = await WidgetBridge.requestPin();
+                  if (modalCtx.mounted) Navigator.of(modalCtx).pop();
+                  if (!ok && context.mounted) {
+                    _showComicAlert(
+                      context,
+                      'Add Manually',
+                      'Automatic pinning is not supported here. '
+                          'Long-press your home screen, open Widgets and pick stdy4u.',
+                    );
+                  }
+                },
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add_rounded,
+                        size: 18, color: ComicTheme.surfaceWhite),
+                    SizedBox(width: 8),
+                    Text('Add Widget'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              ComicButton(
+                onPressed: () => Navigator.of(modalCtx).pop(),
+                child: const Text('Later'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

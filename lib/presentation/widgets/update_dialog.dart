@@ -113,9 +113,13 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: screenWidth * 0.88),
+      constraints: BoxConstraints(
+        maxWidth: screenWidth * 0.92,
+        maxHeight: screenHeight * 0.80,
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
@@ -144,114 +148,142 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 32),
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
-            border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
-          ),
-          child: Icon(
-            Icons.download_rounded,
-            color: ComicTheme.inkRed,
-            size: 28,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'UPDATE\nAVAILABLE',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-            height: 1.1,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'v${widget.update.latestVersion}',
-          style: TextStyle(
-            color: ComicTheme.inkRed,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
+        const SizedBox(height: 28),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color:
+                    isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+              ),
+              child: const Icon(
+                Icons.download_rounded,
+                color: ComicTheme.inkRed,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'WHAT\'S NEW',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                    height: 1.1,
+                  ),
+                ),
+                Text(
+                  'Version ${widget.update.latestVersion}',
+                  style: const TextStyle(
+                    color: ComicTheme.inkRed,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         if (hasNotes) ...[
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              constraints: const BoxConstraints(maxHeight: 220),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? ComicTheme.darkSurface
-                    : ComicTheme.surfaceWhite,
-                border: Border.all(color: ComicTheme.inkBlack, width: 2),
-              ),
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: MarkdownBody(
-                  data: widget.update.releaseNotes!,
-                  selectable: true,
-                  shrinkWrap: true,
-                  styleSheet: MarkdownStyleSheet(
-                    p: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontSize: 13,
-                      height: 0.8,
-                    ),
-                    h1: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      height: 0.8,
-                    ),
-                    h2: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      height: 0.8,
-                    ),
-                    h3: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      height: 0.8,
-                    ),
-                    code: TextStyle(
-                      color: ComicTheme.inkRed,
-                      fontSize: 12,
-                      backgroundColor: Colors.transparent,
-                    ),
-                    codeblockDecoration: BoxDecoration(
-                      color: isDark
-                          ? ComicTheme.darkPulp
-                          : ComicTheme.paperBg,
-                      border: Border.all(color: ComicTheme.inkBlack, width: 1),
-                    ),
-                    codeblockPadding: const EdgeInsets.all(12),
-                    horizontalRuleDecoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: ComicTheme.inkBlack, width: 1),
+          const SizedBox(height: 20),
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color:
+                      isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                  border: Border.all(color: ComicTheme.inkBlack, width: 2),
+                ),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(18),
+                  child: MarkdownBody(
+                    data: widget.update.releaseNotes!,
+                    selectable: true,
+                    shrinkWrap: true,
+                    styleSheet: MarkdownStyleSheet(
+                      p: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontSize: 15,
+                        height: 1.45,
                       ),
-                    ),
-                    listBullet: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontSize: 13,
-                    ),
-                    strong: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    em: TextStyle(
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    a: TextStyle(
-                      color: ComicTheme.inkRed,
+                      h1: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w800,
+                        height: 1.25,
+                      ),
+                      h2: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
+                      ),
+                      h3: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        height: 1.35,
+                      ),
+                      h4: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        height: 1.4,
+                      ),
+                      code: TextStyle(
+                        color: ComicTheme.inkRed,
+                        fontSize: 13,
+                        backgroundColor: Colors.transparent,
+                      ),
+                      codeblockDecoration: BoxDecoration(
+                        color:
+                            isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
+                        border:
+                            Border.all(color: ComicTheme.inkBlack, width: 1),
+                      ),
+                      codeblockPadding: const EdgeInsets.all(12),
+                      horizontalRuleDecoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: ComicTheme.inkBlack, width: 1),
+                        ),
+                      ),
+                      listBullet: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontSize: 15,
+                        height: 1.45,
+                      ),
+                      listIndent: 22,
+                      blockSpacing: 10,
+                      strong: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      em: TextStyle(
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      a: TextStyle(
+                        color: ComicTheme.inkRed,
+                      ),
                     ),
                   ),
                 ),
@@ -260,7 +292,7 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
           ),
         ],
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
           child: Row(
             children: [
               Expanded(
@@ -471,7 +503,9 @@ class _ComicDialogButtonState extends State<_ComicDialogButton> {
         : (isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite);
     final pressedBg = widget.isCta
         ? ComicTheme.inkRed.withValues(alpha: 0.7)
-        : (isDark ? ComicTheme.darkText.withValues(alpha: 0.2) : ComicTheme.inkBlack.withValues(alpha: 0.1));
+        : (isDark
+            ? ComicTheme.darkText.withValues(alpha: 0.2)
+            : ComicTheme.inkBlack.withValues(alpha: 0.1));
     final textColor = widget.isCta
         ? ComicTheme.surfaceWhite
         : (isDark ? ComicTheme.darkText : ComicTheme.inkBlack);

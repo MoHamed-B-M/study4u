@@ -49,6 +49,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? showNavLabels,
     bool? pressSound,
     double? targetCgpa,
+    bool? telegramPromptShown,
   }) {
     return AppSettings(
       id: state.id,
@@ -62,6 +63,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       showNavLabels: showNavLabels ?? state.showNavLabels,
       pressSound: pressSound ?? state.pressSound,
       targetCgpa: targetCgpa ?? state.targetCgpa,
+      telegramPromptShown: telegramPromptShown ?? state.telegramPromptShown,
     );
   }
 
@@ -90,10 +92,11 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       _saveAndUpdate(_copy(hapticFeedback: value));
   void setShowNavLabels(bool value) =>
       _saveAndUpdate(_copy(showNavLabels: value));
-  void setPressSound(bool value) =>
-      _saveAndUpdate(_copy(pressSound: value));
-  void setTargetCgpa(double value) =>
-      _saveAndUpdate(_copy(targetCgpa: value));
+  void setPressSound(bool value) => _saveAndUpdate(_copy(pressSound: value));
+  void setTargetCgpa(double value) => _saveAndUpdate(_copy(targetCgpa: value));
+
+  void setTelegramPromptShown(bool value) =>
+      _saveAndUpdate(_copy(telegramPromptShown: value));
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {

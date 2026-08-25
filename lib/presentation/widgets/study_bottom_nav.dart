@@ -76,7 +76,7 @@ class StudyBottomNav extends StatelessWidget {
                     ],
                   ),
                   child: const Icon(
-                    SolarIconsBold.addCircle
+                    SolarIconsBold.addCircle,
                     color: DesignTokens.textWhite,
                     size: 24,
                   ),

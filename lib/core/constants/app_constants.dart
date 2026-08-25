@@ -20,9 +20,12 @@ class AppConstants {
   static const String channelCalendar = 'com.stdy4u/calendar';
   static const String channelAlarm = 'com.stdy4u/alarm';
   static const String channelSettings = 'com.stdy4u/settings';
+  static const String channelWidget = 'com.stdy4u/widget';
 
   static const String androidAlarmChannelId = 'stdy4u_alarm_channel';
   static const String androidPomodoroChannelId = 'stdy4u_pomodoro_channel';
   static const String androidPomodoroChannelName = 'Pomodoro Timer';
   static const String androidAlarmChannelName = 'Class & Task Reminders';
+
+  static const String telegramUrl = 'https://t.me/study4ulink';
 }
