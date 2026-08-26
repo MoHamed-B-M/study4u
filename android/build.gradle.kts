@@ -5,6 +5,30 @@ allprojects {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Consistent JVM targets: some older plugins (e.g. flutter_vibrate) pin Java
+// to 1.8 while newer Kotlin GradlePlugin defaults compile tasks to 17, which
+// fails the build with "Inconsistent JVM Target Compatibility". Force every
+// Android subproject onto the same target as :app (17).
+// ---------------------------------------------------------------------------
+subprojects {
+    afterEvaluate {
+        (extensions.findByName("android")
+            as? com.android.build.gradle.BaseExtension)?.apply {
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
+        }
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java)
+            .configureEach {
+                compilerOptions {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+                }
+            }
+    }
+}
+
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")

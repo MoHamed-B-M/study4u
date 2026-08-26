@@ -4,6 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
 import '../../theme/comic_theme.dart';
 
+/// Telegram brand blue, reused for the badge, chips and the Join CTA.
+const Color _tgBlue = Color(0xFF229ED9);
+
 /// One-time "Join us on Telegram" prompt shown on first app launch.
 /// Comic-print styled with Join / Close actions.
 class TelegramPromptDialog {
@@ -16,12 +19,20 @@ class TelegramPromptDialog {
       barrierDismissible: true,
       barrierLabel: MaterialLocalizations.of(context).dialogLabel,
       barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 200),
+      transitionDuration: const Duration(milliseconds: 220),
       pageBuilder: (context, animation, secondaryAnimation) {
+        final curved =
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
         return FadeTransition(
-          opacity: animation,
-          child: const Center(
-            child: _TelegramPromptContent(),
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.92, end: 1).animate(curved),
+            child: const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: _TelegramPromptContent(),
+              ),
+            ),
           ),
         );
       },
@@ -47,20 +58,20 @@ class _TelegramPromptContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final screenWidth = MediaQuery.of(context).size.width;
     final primaryText = isDark ? ComicTheme.darkText : ComicTheme.inkBlack;
 
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: screenWidth * 0.85),
+      // Fixed cap keeps every line comfortable on narrow screens; the outer
+      // horizontal padding guarantees the dialog fits any device.
+      constraints: const BoxConstraints(maxWidth: 360),
       child: Container(
-        padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           color: isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
-          border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+          border: Border.all(color: ComicTheme.inkBlack, width: 3),
           boxShadow: const [
             BoxShadow(
               color: ComicTheme.inkBlack,
-              offset: Offset(4, 4),
+              offset: Offset(5, 5),
               blurRadius: 0,
             ),
           ],
@@ -68,65 +79,189 @@ class _TelegramPromptContent extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: const Color(0xFF229ED9).withValues(alpha: 0.12),
-                border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
-              ),
-              child: const Icon(
-                Icons.send_rounded,
-                color: Color(0xFF229ED9),
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              'JOIN US ON\nTELEGRAM',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-                height: 1.15,
-                color: primaryText,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Get study tips, update news and community help — '
-              'right in your pocket.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13.5,
-                height: 1.45,
-                color: primaryText.withValues(alpha: 0.75),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
+            // ---- Hero: telegram-blue band with an overlapping badge ----
+            Stack(
+              alignment: Alignment.bottomCenter,
+              clipBehavior: Clip.none,
               children: [
-                Expanded(
-                  child: _ComicButton(
-                    label: 'Close',
-                    isCta: false,
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
+                Container(
+                  height: 64,
+                  width: double.infinity,
+                  color: _tgBlue,
+                  child: const _DiagonalStripes(),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ComicButton(
-                    label: 'Join',
-                    isCta: true,
-                    icon: Icons.send_rounded,
-                    onTap: () => _join(context),
+                Positioned(
+                  bottom: -28,
+                  child: Container(
+                    width: 62,
+                    height: 62,
+                    decoration: BoxDecoration(
+                      color: _tgBlue,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: ComicTheme.inkBlack, width: 3),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: ComicTheme.inkBlack,
+                          offset: Offset(3, 3),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   ),
                 ),
               ],
             ),
+
+            // ---- Body ----
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 40, 20, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'JOIN US ON TELEGRAM',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                      color: primaryText,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Study tips, update news and community help — '
+                    'right in your pocket.',
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      height: 1.45,
+                      color: primaryText.withValues(alpha: 0.75),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Wrap (not Row) so chips re-flow instead of overflowing.
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: const [
+                      _PerkChip(icon: Icons.trending_up_rounded, label: 'TIPS'),
+                      _PerkChip(
+                          icon: Icons.rocket_launch_rounded, label: 'UPDATES'),
+                      _PerkChip(icon: Icons.forum_rounded, label: 'COMMUNITY'),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ComicButton(
+                          label: 'Close',
+                          isCta: false,
+                          onTap: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _ComicButton(
+                          label: 'Join',
+                          isCta: true,
+                          icon: Icons.send_rounded,
+                          onTap: () => _join(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No spam — helpful stuff only.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontStyle: FontStyle.italic,
+                      color: primaryText.withValues(alpha: 0.55),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Comic-print diagonal stripes used as texture inside the hero band.
+class _DiagonalStripes extends StatelessWidget {
+  const _DiagonalStripes();
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: 0.14,
+      child: CustomPaint(
+        painter: _StripePainter(),
+        size: Size.infinite,
+      ),
+    );
+  }
+}
+
+class _StripePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 7;
+    for (double x = -size.height; x < size.width + size.height; x += 16) {
+      canvas.drawLine(
+          Offset(x, size.height), Offset(x + size.height, 0), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Tiny bordered chip highlighting a benefit of the channel.
+class _PerkChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _PerkChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+        border: Border.all(color: ComicTheme.inkBlack, width: 2),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: _tgBlue),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.3,
+              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -157,15 +292,15 @@ class _ComicButtonState extends State<_ComicButton> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final bgColor = widget.isCta
-        ? ComicTheme.inkRed
+        ? _tgBlue
         : (isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite);
     final pressedBg = widget.isCta
-        ? ComicTheme.inkRed.withValues(alpha: 0.7)
+        ? _tgBlue.withValues(alpha: 0.7)
         : (isDark
             ? ComicTheme.darkText.withValues(alpha: 0.2)
             : ComicTheme.inkBlack.withValues(alpha: 0.1));
     final textColor = widget.isCta
-        ? ComicTheme.surfaceWhite
+        ? Colors.white
         : (isDark ? ComicTheme.darkText : ComicTheme.inkBlack);
 
     return GestureDetector(

@@ -22,12 +22,15 @@ All notable changes to stdy4u will be documented in this file.
 - **Release notes readability**: Bumped markdown body text 13→15px with proper 1.45 line height (was ultra-cramped 0.8), larger headings (h1 21 / h2 19 / h3 17), block spacing and list indentation added — by **Hamma**
 - **Widget data sync**: Widget snapshot refreshes automatically on app start, on app resume, and whenever data changes (`dataRefreshProvider`) — by **Hamma**
 - **Haptics migrated to `flutter_vibrate`**: Every `HapticFeedback.*` call across 17 files replaced with typed platform haptics — `lightImpact`→`FeedbackType.light`, `mediumImpact`→`.medium`, `heavyImpact`→`.heavy`, `selectionClick`→`.selection`; unused `flutter/services.dart` imports dropped (kept in `SoundService` for `SystemSound`) — by **Hamma**
+- **Telegram prompt redesign**: First-launch dialog rebuilt — telegram-blue hero band with comic diagonal stripes and an overlapping send-badge, perk chips (Tips / Updates / Community) in a re-flowing Wrap layout, brand-blue Join CTA, "no spam" footnote, and a fade+scale entrance; fixed 360px cap makes it overflow-proof on narrow screens — by **Hamma**
 
 ### Removed
 - **`build_apk.yml` workflow** ("Build APK (All Branches)") — redundant with the main Build & Release APK workflow — by **Hamma**
 
 ### Fixed
 - **"Problem loading widget" error**: `StudyWidgetProvider` view building is now guarded — if rendering ever throws, a minimal fallback RemoteViews layout (`widget_fallback.xml`) is shown instead of the launcher's broken-widget error state — by **Hamma**
+- **Stray yellow stripes on first launch**: The Telegram prompt could trigger Flutter's overflow indicators on narrower screens — new layout wraps all content (chips via `Wrap`, fixed dialog cap) so nothing can overflow anymore — by **Hamma**
+- **`flutter_vibrate` build failure** ("Inconsistent JVM Target Compatibility"): Root `build.gradle.kts` now forces Java 17 + Kotlin `jvmTarget` 17 on every Android subproject after evaluation, aligning older plugins (which pinned Java 1.8) with modern Kotlin tasks — by **Hamma**
 
 ---
 
