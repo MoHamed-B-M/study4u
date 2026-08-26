@@ -31,6 +31,7 @@ All notable changes to stdy4u will be documented in this file.
 - **"Problem loading widget" error**: `StudyWidgetProvider` view building is now guarded — if rendering ever throws, a minimal fallback RemoteViews layout (`widget_fallback.xml`) is shown instead of the launcher's broken-widget error state — by **Hamma**
 - **Stray yellow stripes on first launch**: The Telegram prompt could trigger Flutter's overflow indicators on narrower screens — new layout wraps all content (chips via `Wrap`, fixed dialog cap) so nothing can overflow anymore — by **Hamma**
 - **`flutter_vibrate` build failure** ("Inconsistent JVM Target Compatibility"): Root `build.gradle.kts` now forces Java 17 + Kotlin `jvmTarget` 17 on every Android subproject after evaluation, aligning older plugins (which pinned Java 1.8) with modern Kotlin tasks — by **Hamma**
+- **`flutter_vibrate` resource linking failure** (`AAPT: resource android:attr/lStar not found`): The same root block also pins every subproject's `compileSdk` to 36 (matching `:app`) so old plugins merge/link resources against a modern SDK — by **Hamma**
 
 ---
 

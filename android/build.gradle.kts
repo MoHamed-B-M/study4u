@@ -15,6 +15,10 @@ subprojects {
     afterEvaluate {
         (extensions.findByName("android")
             as? com.android.build.gradle.BaseExtension)?.apply {
+            // Older Flutter plugins pin low compileSdk versions; their merged
+            // resources then fail to link modern framework attrs such as
+            // android:attr/lStar. Align every subproject with :app.
+            compileSdkVersion(36)
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
                 targetCompatibility = JavaVersion.VERSION_17
