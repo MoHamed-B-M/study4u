@@ -29,6 +29,8 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       pressSound: fields[9] as bool,
       targetCgpa: fields[10] as double,
       telegramPromptShown: fields[11] as bool,
+      // `?? false` keeps records written before field 12 readable.
+      useAltAppIcon: fields[12] as bool? ?? false,
     );
   }
 
@@ -59,7 +61,9 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(10)
       ..write(obj.targetCgpa)
       ..writeByte(11)
-      ..write(obj.telegramPromptShown);
+      ..write(obj.telegramPromptShown)
+      ..writeByte(12)
+      ..write(obj.useAltAppIcon);
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/course.dart';
 import '../../shared/providers/logic_providers.dart';
@@ -100,7 +100,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
   }
 
   void _save() {
-    HapticFeedback.mediumImpact();
+    Vibrate.feedback(FeedbackType.medium);
     final id = widget.course?.id ?? const Uuid().v4();
     final weekDays = _weekDays.map((d) => _days[d]).toList();
     final course = CourseEntity(

@@ -3,4 +3,5 @@
     <string name="widget_title">STDY4U</string>
     <string name="widget_next_label">NEXT CLASS</string>
     <string name="widget_description">Study dashboard — next class, tasks, focus time and CGPA at a glance.</string>
+    <string name="widget_fallback_text">STDY4U — open the app to refresh</string>
 </resources>

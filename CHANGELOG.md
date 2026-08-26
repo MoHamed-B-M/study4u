@@ -12,14 +12,22 @@ All notable changes to stdy4u will be documented in this file.
 - **Android home-screen widget**: New comic-print study dashboard widget (2×2) — next class (computed live from today's schedule at render time), pending tasks count, focus minutes today, and CGPA with letter grade; paper/ink styling adapts to light & dark system themes; tap opens the app — by **Hamma**
 - **Widgets settings option**: New `WIDGETS` section in Settings with "Home Screen Widget" row opening a bottom sheet that pins the widget via the system add-widget dialog (Android 8+), with manual instructions fallback — by **Hamma**
 - **`com.stdy4u/widget` method channel**: `WidgetPlugin.kt` + `WidgetBridge` Dart bridge — saves data snapshots and re-renders all widget instances, requests pinning — by **Hamma**
+- **Selectable app icon**: New "App Icon" row in Settings → Appearance — pick between the Default icon and a **Comic edition** launcher icon (new `ic_launcher/` asset pack: adaptive background/foreground + legacy PNGs at all densities); built on two Android `activity-alias` entries (`MainLauncherDefault` / `MainLauncherAlt`) so exactly one is enabled at a time — by **Hamma**
+- **`com.stdy4u/app_icon` method channel**: `AppIconPlugin.kt` + `AppIconBridge` Dart bridge — swaps the launcher aliases at runtime, reports the active icon, and re-applies the persisted choice (`AppSettings.useAltAppIcon`, field 12) on every app start — by **Hamma**
+- **`flutter_vibrate: ^1.4.0`**: New dependency unifying device vibration & haptic feedback APIs across Android/iOS — by **Hamma**
+- **`VIBRATE` permission**: Added to `AndroidManifest.xml` for full `flutter_vibrate` functionality — by **Hamma**
 
 ### Changed
 - **What's New dialog enlarged**: Update dialog now grows up to **80% of screen height** (width 92%) instead of a fixed 220px notes box — release notes get room to breathe on long changelogs — by **Hamma**
 - **Release notes readability**: Bumped markdown body text 13→15px with proper 1.45 line height (was ultra-cramped 0.8), larger headings (h1 21 / h2 19 / h3 17), block spacing and list indentation added — by **Hamma**
 - **Widget data sync**: Widget snapshot refreshes automatically on app start, on app resume, and whenever data changes (`dataRefreshProvider`) — by **Hamma**
+- **Haptics migrated to `flutter_vibrate`**: Every `HapticFeedback.*` call across 17 files replaced with typed platform haptics — `lightImpact`→`FeedbackType.light`, `mediumImpact`→`.medium`, `heavyImpact`→`.heavy`, `selectionClick`→`.selection`; unused `flutter/services.dart` imports dropped (kept in `SoundService` for `SystemSound`) — by **Hamma**
 
 ### Removed
 - **`build_apk.yml` workflow** ("Build APK (All Branches)") — redundant with the main Build & Release APK workflow — by **Hamma**
+
+### Fixed
+- **"Problem loading widget" error**: `StudyWidgetProvider` view building is now guarded — if rendering ever throws, a minimal fallback RemoteViews layout (`widget_fallback.xml`) is shown instead of the launcher's broken-widget error state — by **Hamma**
 
 ---
 

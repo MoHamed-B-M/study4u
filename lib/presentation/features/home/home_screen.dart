@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,7 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           GestureDetector(
             onTap: () {
-              HapticFeedback.lightImpact();
+              Vibrate.feedback(FeedbackType.light);
               GoRouter.of(context).push('/settings');
             },
             child: Container(
@@ -229,7 +229,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            HapticFeedback.selectionClick();
+                            Vibrate.feedback(FeedbackType.selection);
                             ref
                                 .read(taskRepositoryProvider)
                                 .toggleTask(task.id);
@@ -518,7 +518,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             )),
         if (action != null)
           ComicButton(
-            onPressed: () => HapticFeedback.lightImpact(),
+            onPressed: () => Vibrate.feedback(FeedbackType.light),
             padding: EdgeInsets.zero,
             child: Text(action,
                 style: const TextStyle(
@@ -534,7 +534,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       key: upNextKey,
       child: GestureDetector(
         onTap: () {
-          HapticFeedback.lightImpact();
+          Vibrate.feedback(FeedbackType.light);
           final renderBox =
               upNextKey.currentContext?.findRenderObject() as RenderBox?;
           if (renderBox != null && renderBox.hasSize) {
@@ -652,7 +652,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           final isDark = Theme.of(context).brightness == Brightness.dark;
           return GestureDetector(
             onTap: () {
-              HapticFeedback.lightImpact();
+              Vibrate.feedback(FeedbackType.light);
               GoRouter.of(context).push('/course/${course.id}');
             },
             child: Container(
@@ -738,7 +738,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final sheetBg = isDark ? ComicTheme.darkPulp : ComicTheme.surfaceWhite;
     return FloatingActionButton(
       onPressed: () {
-        HapticFeedback.lightImpact();
+        Vibrate.feedback(FeedbackType.light);
         showModalBottomSheet(
           context: context,
           backgroundColor: sheetBg,
@@ -753,7 +753,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     isCta: true,
                     onPressed: () {
                       Navigator.pop(context);
-                      HapticFeedback.lightImpact();
+                      Vibrate.feedback(FeedbackType.light);
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -769,7 +769,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     isCta: true,
                     onPressed: () {
                       Navigator.pop(context);
-                      HapticFeedback.lightImpact();
+                      Vibrate.feedback(FeedbackType.light);
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,

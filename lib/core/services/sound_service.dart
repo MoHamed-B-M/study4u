@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 
 class SoundService {
   SoundService._();
@@ -8,7 +9,7 @@ class SoundService {
   void playClick() {
     if (!pressSoundEnabled) return;
     try {
-      HapticFeedback.lightImpact();
+      Vibrate.feedback(FeedbackType.light);
       SystemSound.play(SystemSoundType.click);
     } catch (_) {}
   }

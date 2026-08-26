@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import '../theme/comic_theme.dart';
 import '../core/services/sound_service.dart';
 
@@ -73,7 +73,7 @@ class _ComicButtonState extends State<ComicButton> {
       onTapUp: widget.onPressed != null
           ? (_) {
               if (widget.enableHaptic) {
-                HapticFeedback.lightImpact();
+                Vibrate.feedback(FeedbackType.light);
               }
               if (widget.enableSound) {
                 SoundService.instance.playClick();

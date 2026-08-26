@@ -26,6 +26,12 @@
       "sourceType": "autoskills-registry",
       "computedHash": "71285453d40e4949865bf47cf63b7f41dd4461f44cd1a3970eb3eb0e76b9025b"
     },
+    "flutter-tester": {
+      "source": "Harishwarrior/flutter-claude-skills",
+      "sourceType": "github",
+      "skillPath": "flutter-tester/SKILL.md",
+      "computedHash": "fec8034c56773d641ba00d50e3acbeb1048d093be1070920382a1f73b767b113"
+    },
     "flutter-testing": {
       "source": "madteacher/mad-agents-skills",
       "sourceType": "autoskills-registry",
@@ -35,6 +41,12 @@
       "source": "anthropics/skills",
       "sourceType": "autoskills-registry",
       "computedHash": "82fb11a63fb1e35ee2469516ed02d54695f783115b1540c0e783197af4240a3a"
+    },
+    "owasp-mobile-security-checker": {
+      "source": "Harishwarrior/flutter-claude-skills",
+      "sourceType": "github",
+      "skillPath": "owasp-mobile-security-checker/SKILL.md",
+      "computedHash": "052bc967d2e1ee1a4857b7e367e5e981a45550d2aa9130f8f72c7182717c7f84"
     },
     "seo": {
       "source": "addyosmani/web-quality-skills",

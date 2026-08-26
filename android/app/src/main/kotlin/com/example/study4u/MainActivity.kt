@@ -11,5 +11,6 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(AlarmPlugin())
         flutterEngine.plugins.add(SettingsPlugin())
         flutterEngine.plugins.add(WidgetPlugin())
+        flutterEngine.plugins.add(AppIconPlugin())
     }
 }

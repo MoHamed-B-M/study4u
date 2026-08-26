@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:solar_icons/solar_icons.dart';
 import '../../../shared/providers/logic_providers.dart';
@@ -36,7 +36,7 @@ class DashboardView extends ConsumerWidget {
           IconButton(
             icon: const Icon(SolarIconsBold.bell),
             onPressed: () {
-              HapticFeedback.lightImpact();
+              Vibrate.feedback(FeedbackType.light);
               context.push('/settings');
             },
           ),
@@ -130,7 +130,7 @@ class DashboardView extends ConsumerWidget {
                       if (courses.length > 3)
                         GestureDetector(
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            Vibrate.feedback(FeedbackType.light);
                           },
                           child: Text(
                             'See All',
@@ -350,7 +350,7 @@ class DashboardView extends ConsumerWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    Vibrate.feedback(FeedbackType.selection);
                     ref.read(taskRepositoryProvider).toggleTask(task.id);
                     ref.read(dataRefreshProvider.notifier).state++;
                   },
@@ -466,7 +466,7 @@ class _NextClassCardWrapperState extends ConsumerState<_NextClassCardWrapper> {
       key: _key,
       child: GestureDetector(
         onTap: () {
-          HapticFeedback.lightImpact();
+          Vibrate.feedback(FeedbackType.light);
           final renderBox =
               _key.currentContext?.findRenderObject() as RenderBox?;
           if (renderBox != null && renderBox.hasSize) {

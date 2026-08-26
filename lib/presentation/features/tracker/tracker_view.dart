@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../shared/providers/logic_providers.dart';
@@ -23,7 +23,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
   DateTime? _selectedDay;
 
   void _markAttendance(String courseId, AttendanceStatus status) {
-    HapticFeedback.mediumImpact();
+    Vibrate.feedback(FeedbackType.medium);
     final day = _selectedDay ?? DateTime.now();
     final id =
         '${courseId}_${day.year}${day.month.toString().padLeft(2, '0')}${day.day.toString().padLeft(2, '0')}';
@@ -226,7 +226,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
           });
-          HapticFeedback.selectionClick();
+          Vibrate.feedback(FeedbackType.selection);
         },
         calendarStyle: CalendarStyle(
           todayDecoration: BoxDecoration(

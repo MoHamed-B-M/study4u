@@ -1,7 +1,7 @@
 // BATTERY_OPT: import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:parallax_onboarding/parallax_onboarding.dart';
 import '../../../theme/comic_theme.dart';
@@ -71,7 +71,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
 
     void finish() {
       ref.read(settingsProvider.notifier).setOnboardingComplete(true);
-      HapticFeedback.mediumImpact();
+      Vibrate.feedback(FeedbackType.medium);
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(

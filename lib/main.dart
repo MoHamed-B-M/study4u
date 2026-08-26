@@ -6,6 +6,7 @@ import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
 import 'core/services/home_widget_service.dart';
 import 'data/datasources/local_storage.dart';
+import 'data/platform/app_icon_bridge.dart';
 import 'theme/comic_theme.dart';
 import 'presentation/theme/theme_provider.dart';
 import 'presentation/features/home/home_screen.dart';
@@ -195,6 +196,9 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       HomeWidgetService.pushUpdate();
+      // Re-apply the persisted launcher-icon choice in case the native
+      // component state was reset (e.g. by a reinstall) while Hive kept it.
+      AppIconBridge.syncWithSettings(ref.read(settingsProvider).useAltAppIcon);
       _startupSequence();
     });
   }

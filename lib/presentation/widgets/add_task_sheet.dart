@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/task.dart';
@@ -162,7 +162,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
       dueDate: _dueDate,
     ));
     ref.read(dataRefreshProvider.notifier).state++;
-    HapticFeedback.lightImpact();
+    Vibrate.feedback(FeedbackType.light);
     Navigator.of(context).pop();
   }
 }

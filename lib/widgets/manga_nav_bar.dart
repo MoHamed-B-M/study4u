@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import '../theme/comic_theme.dart';
 
 class MangaNavBar extends StatelessWidget {
@@ -85,7 +85,7 @@ class _NavTab extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          if (enableHaptic) HapticFeedback.lightImpact();
+          if (enableHaptic) Vibrate.feedback(FeedbackType.light);
           onTap();
         },
         child: AnimatedContainer(

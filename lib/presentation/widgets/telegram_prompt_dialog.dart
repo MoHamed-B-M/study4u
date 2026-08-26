@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
 import '../../theme/comic_theme.dart';
@@ -33,7 +33,7 @@ class _TelegramPromptContent extends StatelessWidget {
   const _TelegramPromptContent();
 
   Future<void> _join(BuildContext context) async {
-    HapticFeedback.lightImpact();
+    Vibrate.feedback(FeedbackType.light);
     final uri = Uri.parse(AppConstants.telegramUrl);
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
@@ -172,7 +172,7 @@ class _ComicButtonState extends State<_ComicButton> {
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) {
         setState(() => _pressed = false);
-        HapticFeedback.lightImpact();
+        Vibrate.feedback(FeedbackType.light);
         widget.onTap();
       },
       onTapCancel: () => setState(() => _pressed = false),

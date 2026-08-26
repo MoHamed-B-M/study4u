@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1060,7 +1060,7 @@ class _TaskTile extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () {
-                HapticFeedback.selectionClick();
+                Vibrate.feedback(FeedbackType.selection);
                 ref.read(taskRepositoryProvider).toggleTask(task.id);
                 ref.read(dataRefreshProvider.notifier).state++;
               },

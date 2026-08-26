@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import '../../../core/animation/m3e_spring.dart';
 import '../../../core/utils/grade_calculator.dart';
 import '../../../domain/usecases/cgpa_calculator.dart';
@@ -310,7 +310,7 @@ class _StatsViewState extends ConsumerState<StatsView>
             width: double.infinity,
             child: ComicButton(
               onPressed: () {
-                HapticFeedback.mediumImpact();
+                Vibrate.feedback(FeedbackType.medium);
                 if (pomodoro.isActive) {
                   ref.read(pomodoroProvider.notifier).pauseTimer();
                 } else {
@@ -334,7 +334,7 @@ class _StatsViewState extends ConsumerState<StatsView>
 
 
   void _showSetTargetDialog() {
-    HapticFeedback.lightImpact();
+    Vibrate.feedback(FeedbackType.light);
     final ctrl = TextEditingController(
       text: _targetCgpa?.toStringAsFixed(2) ?? '',
     );
@@ -397,7 +397,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    Vibrate.feedback(FeedbackType.light);
                     final text = ctrl.text.trim();
                     final val = double.tryParse(text);
                     if (val != null && val >= 0 && val <= 4) {
@@ -440,7 +440,7 @@ class _StatsViewState extends ConsumerState<StatsView>
   }
 
   void _showPomodoroModal() {
-    HapticFeedback.lightImpact();
+    Vibrate.feedback(FeedbackType.light);
     final pomodoro = ref.read(pomodoroProvider);
     final sessions = ref.read(pomodoroSessionsProvider);
     showDialog(
@@ -537,7 +537,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                       ComicButton(
                         isCta: true,
                         onPressed: () {
-                          HapticFeedback.mediumImpact();
+                          Vibrate.feedback(FeedbackType.medium);
                           if (pomodoro.isActive) {
                             ref.read(pomodoroProvider.notifier).pauseTimer();
                           } else {
@@ -554,7 +554,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                       ComicButton(
                         isCta: true,
                         onPressed: () {
-                          HapticFeedback.mediumImpact();
+                          Vibrate.feedback(FeedbackType.medium);
                           ref.read(pomodoroProvider.notifier).resetTimer();
                           Navigator.pop(ctx);
                         },
@@ -564,7 +564,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                       ComicButton(
                         isCta: true,
                         onPressed: () {
-                          HapticFeedback.mediumImpact();
+                          Vibrate.feedback(FeedbackType.medium);
                           ref.read(pomodoroProvider.notifier).skipSession();
                           Navigator.pop(ctx);
                         },
@@ -990,7 +990,7 @@ class _StatsViewState extends ConsumerState<StatsView>
   }
 
   void _toggleScreenTime() {
-    HapticFeedback.lightImpact();
+    Vibrate.feedback(FeedbackType.light);
     setState(() => _screenTimeExpanded = !_screenTimeExpanded);
     final reduced = M3ESpring.isReducedMotion(context);
     if (reduced) {

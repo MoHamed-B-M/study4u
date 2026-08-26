@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
 import '../../domain/entities/pomodoro_session.dart';
@@ -81,7 +81,7 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
 
   void startTimer({String? courseId}) {
     if (state.isActive) return;
-    HapticFeedback.mediumImpact();
+    Vibrate.feedback(FeedbackType.medium);
     if (state.musicFilePath != null) {
       _audioPlayer.play();
     }
@@ -103,7 +103,7 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
   void pauseTimer() {
     _timer?.cancel();
     _audioPlayer.pause();
-    HapticFeedback.mediumImpact();
+    Vibrate.feedback(FeedbackType.medium);
     state = state.copyWith(isActive: false, isMusicPlaying: false);
   }
 
@@ -166,9 +166,9 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
 
   void _handleSessionComplete() {
     pauseTimer();
-    HapticFeedback.heavyImpact();
+    Vibrate.feedback(FeedbackType.heavy);
     Future.delayed(const Duration(milliseconds: 200), () {
-      HapticFeedback.heavyImpact();
+      Vibrate.feedback(FeedbackType.heavy);
     });
 
     if (state.status == PomodoroStatus.focus) {

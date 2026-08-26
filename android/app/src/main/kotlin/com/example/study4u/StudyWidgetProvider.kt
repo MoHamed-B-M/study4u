@@ -72,7 +72,18 @@ class StudyWidgetProvider : AppWidgetProvider() {
             return ids.isNotEmpty()
         }
 
-        fun buildRemoteViews(context: Context): RemoteViews {
+        /**
+         * Builds the comic dashboard views. Falls back to a minimal layout if
+         * rendering fails, so the launcher never shows its "problem loading
+         * widget" state.
+         */
+        fun buildRemoteViews(context: Context): RemoteViews = try {
+            buildComicViews(context)
+        } catch (_: Exception) {
+            RemoteViews(context.packageName, R.layout.widget_fallback)
+        }
+
+        private fun buildComicViews(context: Context): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_study)
 
             // Tap anywhere on the widget to open the app.

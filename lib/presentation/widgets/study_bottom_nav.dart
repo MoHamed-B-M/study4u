@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:solar_icons/solar_icons.dart';
 import '../theme/design_tokens.dart';
 
@@ -52,7 +52,7 @@ class StudyBottomNav extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  Vibrate.feedback(FeedbackType.light);
                   onAddPressed?.call();
                 },
                 child: Container(
@@ -125,7 +125,7 @@ class _NavItem extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          HapticFeedback.selectionClick();
+          Vibrate.feedback(FeedbackType.selection);
           onTap();
         },
         child: Column(

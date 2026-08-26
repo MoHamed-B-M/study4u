@@ -50,6 +50,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? pressSound,
     double? targetCgpa,
     bool? telegramPromptShown,
+    bool? useAltAppIcon,
   }) {
     return AppSettings(
       id: state.id,
@@ -64,6 +65,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       pressSound: pressSound ?? state.pressSound,
       targetCgpa: targetCgpa ?? state.targetCgpa,
       telegramPromptShown: telegramPromptShown ?? state.telegramPromptShown,
+      useAltAppIcon: useAltAppIcon ?? state.useAltAppIcon,
     );
   }
 
@@ -97,6 +99,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   void setTelegramPromptShown(bool value) =>
       _saveAndUpdate(_copy(telegramPromptShown: value));
+
+  void setUseAltAppIcon(bool value) =>
+      _saveAndUpdate(_copy(useAltAppIcon: value));
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {

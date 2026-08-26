@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:open_filex/open_filex.dart';
 import '../../core/services/update_service.dart';
 import '../../theme/comic_theme.dart';
@@ -514,7 +514,7 @@ class _ComicDialogButtonState extends State<_ComicDialogButton> {
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) {
         setState(() => _pressed = false);
-        HapticFeedback.lightImpact();
+        Vibrate.feedback(FeedbackType.light);
         widget.onTap();
       },
       onTapCancel: () => setState(() => _pressed = false),

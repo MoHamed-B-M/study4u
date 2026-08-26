@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,6 +10,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/update_service.dart';
 import '../../../data/models/app_settings.dart';
+import '../../../data/platform/app_icon_bridge.dart';
 import '../../../data/platform/widget_bridge.dart';
 import '../../../theme/comic_theme.dart';
 import '../../../widgets/comic_card.dart';
@@ -58,6 +59,17 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             onTap: () =>
                                 _showThemeSheet(context, ref, settings),
                           ),
+                          _buildSettingRow(
+                            context,
+                            icon: Icons.apps_rounded,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'App Icon',
+                            subtitle: settings.useAltAppIcon
+                                ? 'Comic edition'
+                                : 'Default',
+                            onTap: () =>
+                                _showAppIconSheet(context, ref, settings),
+                          ),
                         ]),
                       ),
                       const SizedBox(height: 24),
@@ -73,7 +85,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             subtitle: 'Vibration on interactions',
                             value: settings.hapticFeedback,
                             onChanged: (v) {
-                              HapticFeedback.selectionClick();
+                              Vibrate.feedback(FeedbackType.selection);
                               ref
                                   .read(settingsProvider.notifier)
                                   .setHapticFeedback(v);
@@ -87,7 +99,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             subtitle: 'Get reminded about classes and tasks',
                             value: settings.notificationEnabled,
                             onChanged: (v) {
-                              HapticFeedback.selectionClick();
+                              Vibrate.feedback(FeedbackType.selection);
                               ref
                                   .read(settingsProvider.notifier)
                                   .setNotificationEnabled(v);
@@ -101,7 +113,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             subtitle: 'Play click sound on button press',
                             value: settings.pressSound,
                             onChanged: (v) {
-                              HapticFeedback.selectionClick();
+                              Vibrate.feedback(FeedbackType.selection);
                               SoundService.pressSoundEnabled = v;
                               ref
                                   .read(settingsProvider.notifier)
@@ -523,7 +535,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   ComicButton(
                     isCta: settings.themeMode == 'system',
                     onPressed: () {
-                      HapticFeedback.selectionClick();
+                      Vibrate.feedback(FeedbackType.selection);
                       ref
                           .read(settingsProvider.notifier)
                           .setThemeMode('system');
@@ -540,7 +552,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   ComicButton(
                     isCta: settings.themeMode == 'light',
                     onPressed: () {
-                      HapticFeedback.selectionClick();
+                      Vibrate.feedback(FeedbackType.selection);
                       ref.read(settingsProvider.notifier).setThemeMode('light');
                       Navigator.of(modalCtx).pop();
                     },
@@ -555,7 +567,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   ComicButton(
                     isCta: settings.themeMode == 'dark',
                     onPressed: () {
-                      HapticFeedback.selectionClick();
+                      Vibrate.feedback(FeedbackType.selection);
                       ref.read(settingsProvider.notifier).setThemeMode('dark');
                       Navigator.of(modalCtx).pop();
                     },
@@ -580,8 +592,90 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     );
   }
 
+  /// Lets the user switch between the default and the alternate
+  /// comic-print launcher icon (Android activity-alias swap).
+  void _showAppIconSheet(
+      BuildContext context, WidgetRef ref, AppSettings settings) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext modalCtx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Choose App Icon',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: ComicTheme.inkBlack,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ComicButton(
+                    isCta: !settings.useAltAppIcon,
+                    onPressed: () {
+                      Vibrate.feedback(FeedbackType.selection);
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setUseAltAppIcon(false);
+                      AppIconBridge.setAlternate(false);
+                      Navigator.of(modalCtx).pop();
+                    },
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: const Column(children: [
+                      Icon(Icons.apps_rounded, size: 18),
+                      Text('Default'),
+                    ]),
+                  ),
+                  const SizedBox(width: 8),
+                  ComicButton(
+                    isCta: settings.useAltAppIcon,
+                    onPressed: () {
+                      Vibrate.feedback(FeedbackType.selection);
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setUseAltAppIcon(true);
+                      AppIconBridge.setAlternate(true);
+                      Navigator.of(modalCtx).pop();
+                    },
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: const Column(children: [
+                      Icon(Icons.brush_rounded, size: 18),
+                      Text('Comic'),
+                    ]),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'The launcher may take a moment to refresh the icon.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: ComicTheme.inkBlack.withValues(alpha: 0.6),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ComicButton(
+                onPressed: () => Navigator.of(modalCtx).pop(),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showWidgetSheet(BuildContext context) {
-    HapticFeedback.selectionClick();
+    Vibrate.feedback(FeedbackType.selection);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
@@ -619,7 +713,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               ComicButton(
                 isCta: true,
                 onPressed: () async {
-                  HapticFeedback.lightImpact();
+                  Vibrate.feedback(FeedbackType.light);
                   final ok = await WidgetBridge.requestPin();
                   if (modalCtx.mounted) Navigator.of(modalCtx).pop();
                   if (!ok && context.mounted) {
