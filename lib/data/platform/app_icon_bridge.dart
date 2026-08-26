@@ -29,13 +29,9 @@ class AppIconBridge {
     }
   }
 
-  /// Applies [useAlt] only when it differs from the currently enabled alias
-  /// (e.g. after a reinstall cleared the native component state).
-  static Future<void> syncWithSettings(bool useAlt) async {
-    try {
-      if (await isAlternate() != useAlt) await setAlternate(useAlt);
-    } catch (_) {
-      // Icon switching must never crash the app.
-    }
-  }
+  /// Unconditionally applies [useAlt] to the native launcher aliases.
+  /// Idempotent on the platform side (re-setting the same state is a no-op),
+  /// so calling this on every launch/resume is safe and keeps Hive as the
+  /// single source of truth — nothing may "helpfully" revert the choice.
+  static Future<void> apply(bool useAlt) => setAlternate(useAlt);
 }

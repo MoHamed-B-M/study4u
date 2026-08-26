@@ -42,6 +42,11 @@ dependencies:
   # Calendar
   table_calendar: ^3.1.2
 
+  # Real-time collaboration (CRDT local-first stack)
+  crdt_lf: ^4.0.0
+  crdt_lf_flutter: ^0.4.0
+  crdt_socket_sync: ^0.7.0
+
   # System & Logic
   flutter_local_notifications: ^17.1.2
   flutter_vibrate: ^1.4.0

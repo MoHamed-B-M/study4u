@@ -14,6 +14,7 @@ import 'presentation/features/tracker/tracker_screen.dart';
 import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
+import 'presentation/features/collab/collab_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
@@ -160,6 +161,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/settings',
           builder: (context, state) => const SettingsScreen()),
       GoRoute(
+          path: '/collab', builder: (context, state) => const CollabScreen()),
+      GoRoute(
         path: '/course/:id',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
@@ -196,9 +199,9 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       HomeWidgetService.pushUpdate();
-      // Re-apply the persisted launcher-icon choice in case the native
-      // component state was reset (e.g. by a reinstall) while Hive kept it.
-      AppIconBridge.syncWithSettings(ref.read(settingsProvider).useAltAppIcon);
+      // Hive is the single source of truth for the launcher icon: apply it
+      // unconditionally (idempotent natively) so nothing can revert it.
+      AppIconBridge.apply(ref.read(settingsProvider).useAltAppIcon);
       _startupSequence();
     });
   }
@@ -238,6 +241,9 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
     // Refresh the home-screen widget snapshot whenever the app comes back.
     if (state == AppLifecycleState.resumed) {
       HomeWidgetService.pushUpdate();
+      // Re-assert the icon choice (idempotent) — some launchers/OEMs drop
+      // component overrides on aggressive battery optimizations.
+      AppIconBridge.apply(ref.read(settingsProvider).useAltAppIcon);
     }
   }
 

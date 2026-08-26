@@ -48,14 +48,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           GestureDetector(
             onTap: () {
               Vibrate.feedback(FeedbackType.light);
-              GoRouter.of(context).push('/settings');
+              GoRouter.of(context).push('/collab');
             },
             child: Container(
               width: 36,
               height: 36,
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                color:
+                    isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
                 border: Border.all(color: ComicTheme.inkBlack, width: 2),
                 boxShadow: const [
                   BoxShadow(
@@ -65,7 +66,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.settings, size: 18, color: ComicTheme.inkBlack),
+              child: const Icon(Icons.groups_rounded,
+                  size: 18, color: ComicTheme.inkBlack),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Vibrate.feedback(FeedbackType.light);
+              GoRouter.of(context).push('/settings');
+            },
+            child: Container(
+              width: 36,
+              height: 36,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color:
+                    isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                border: Border.all(color: ComicTheme.inkBlack, width: 2),
+                boxShadow: const [
+                  BoxShadow(
+                    color: ComicTheme.inkBlack,
+                    offset: Offset(2, 2),
+                    blurRadius: 0,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.settings,
+                  size: 18, color: ComicTheme.inkBlack),
             ),
           ),
         ],
@@ -521,8 +548,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () => Vibrate.feedback(FeedbackType.light),
             padding: EdgeInsets.zero,
             child: Text(action,
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 13)),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
           ),
       ],
     );
@@ -570,8 +597,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       color: ComicTheme.inkBlack.withValues(alpha: 0.15),
                     ),
@@ -659,14 +686,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               width: 150,
               margin: const EdgeInsets.only(right: 14),
               child: ComicCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 child: Column(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color:
-                            Color(course.colorValue).withValues(alpha: 0.15),
+                        color: Color(course.colorValue).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -681,9 +708,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
-                        color: isDark
-                            ? ComicTheme.darkText
-                            : ComicTheme.inkBlack,
+                        color:
+                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

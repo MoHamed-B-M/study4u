@@ -69,10 +69,14 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     );
   }
 
-  void _saveAndUpdate(AppSettings updated) {
+  Future<void> _saveAndUpdate(AppSettings updated) async {
     try {
-      LocalStorage.appSettingsBox.put('default', updated);
-    } catch (_) {}
+      // Awaited so a quick app close right after a change cannot lose the
+      // write (Hive batches are flushed when the future completes).
+      await LocalStorage.appSettingsBox.put('default', updated);
+    } catch (e) {
+      debugPrint('settings persist failed: $e');
+    }
     state = updated;
   }
 

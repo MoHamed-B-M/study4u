@@ -185,6 +185,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  crdt_lf:
+    dependency: "direct main"
+    description:
+      name: crdt_lf
+      sha256: a1344b38336cade28eb18daed6d430beeba79961d9e02c9e849c315998f6a338
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
+  crdt_lf_flutter:
+    dependency: "direct main"
+    description:
+      name: crdt_lf_flutter
+      sha256: "2e715f99dc4453f7bc1c3821389de9d0c5bf96da8dd96f25c47ac46bd67b180e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
+  crdt_socket_sync:
+    dependency: "direct main"
+    description:
+      name: crdt_socket_sync
+      sha256: "6dca2c35b8d9621e59a0e399850ed968d070da8bfa91e38f3d2a37f76bda10df"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.0"
   cross_file:
     dependency: transitive
     description:
@@ -432,6 +456,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  hlc_dart:
+    dependency: transitive
+    description:
+      name: hlc_dart
+      sha256: dc4b78f42e1cbc78e98fce25e56027d8f4d912ca6fd32f971cb1c566faded48c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0+2"
   hooks:
     dependency: transitive
     description:
@@ -624,6 +656,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.6"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   objective_c:
     dependency: transitive
     description:
@@ -768,6 +808,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.2"
+  provider:
+    dependency: transitive
+    description:
+      name: provider
+      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.5+1"
   pub_semver:
     dependency: transitive
     description:

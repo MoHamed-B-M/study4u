@@ -16,6 +16,8 @@ All notable changes to stdy4u will be documented in this file.
 - **`com.stdy4u/app_icon` method channel**: `AppIconPlugin.kt` + `AppIconBridge` Dart bridge — swaps the launcher aliases at runtime, reports the active icon, and re-applies the persisted choice (`AppSettings.useAltAppIcon`, field 12) on every app start — by **Hamma**
 - **`flutter_vibrate: ^1.4.0`**: New dependency unifying device vibration & haptic feedback APIs across Android/iOS — by **Hamma**
 - **`VIBRATE` permission**: Added to `AndroidManifest.xml` for full `flutter_vibrate` functionality — by **Hamma**
+- **Collaborative Study Room**: New real-time collaborative notes page at `/collab` (entry point: groups button in the Home app bar) built on the local-first CRDT stack `crdt_lf ^4.0.0` / `crdt_lf_flutter ^0.4.0` — Fugue text algorithm merges concurrent keystrokes conflict-free; edits persist locally via Hive snapshots so the page works fully offline; LAN sync via the official `crdt_socket_sync ^0.7.0` relay mode (dumb rebroadcaster, auto-reconnect with backoff, ping/pong liveness, change dedup); peer presence bar driven by the awareness plugin; comic-styled editor with LIVE/OFFLINE status pill — by **Hamma**
+- **Collab relay server script**: `tools/collab_relay_server.dart` — run `dart run tools/collab_relay_server.dart 8787` on any machine in the LAN to host rooms; CRDT-agnostic relay keeps the backend free of merge logic — by **Hamma**
 
 ### Changed
 - **What's New dialog enlarged**: Update dialog now grows up to **80% of screen height** (width 92%) instead of a fixed 220px notes box — release notes get room to breathe on long changelogs — by **Hamma**
@@ -32,6 +34,7 @@ All notable changes to stdy4u will be documented in this file.
 - **Stray yellow stripes on first launch**: The Telegram prompt could trigger Flutter's overflow indicators on narrower screens — new layout wraps all content (chips via `Wrap`, fixed dialog cap) so nothing can overflow anymore — by **Hamma**
 - **`flutter_vibrate` build failure** ("Inconsistent JVM Target Compatibility"): Root `build.gradle.kts` now forces Java 17 + Kotlin `jvmTarget` 17 on every Android subproject after evaluation, aligning older plugins (which pinned Java 1.8) with modern Kotlin tasks — by **Hamma**
 - **`flutter_vibrate` resource linking failure** (`AAPT: resource android:attr/lStar not found`): The same root block also pins every subproject's `compileSdk` to 36 (matching `:app`) so old plugins merge/link resources against a modern SDK — by **Hamma**
+- **Launcher icon reverting to default**: Settings writes are now awaited before state updates (a quick app close could lose the Hive batch), and the persisted choice is applied unconditionally on every launch/resume instead of a compare-first sync that could "helpfully" restore the default when the preference read came back stale — by **Hamma**
 
 ---
 

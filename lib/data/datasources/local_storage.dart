@@ -42,6 +42,7 @@ class LocalStorage {
         Hive.openBox<AppSettings>('appSettings'),
         Hive.openBox<String>('pomodoroSessions'),
         Hive.openBox<CourseMaterial>('materials'),
+        Hive.openBox<String>('collabDocs'),
       ]);
 
       final settingsBox = Hive.box<AppSettings>('appSettings');
@@ -70,10 +71,17 @@ class LocalStorage {
 
   static Box<Course> get coursesBox => Hive.box<Course>('courses');
   static Box<StudyTask> get tasksBox => Hive.box<StudyTask>('tasks');
-  static Box<AttendanceRecord> get attendanceBox => Hive.box<AttendanceRecord>('attendance');
-  static Box<PomodoroSettings> get pomodoroBox => Hive.box<PomodoroSettings>('settings');
-  static Box<ScreenTimeLog> get screenTimeBox => Hive.box<ScreenTimeLog>('screenTime');
-  static Box<AppSettings> get appSettingsBox => Hive.box<AppSettings>('appSettings');
-  static Box<CourseMaterial> get materialsBox => Hive.box<CourseMaterial>('materials');
-  static Box<String> get pomodoroSessionsBox => Hive.box<String>('pomodoroSessions');
+  static Box<AttendanceRecord> get attendanceBox =>
+      Hive.box<AttendanceRecord>('attendance');
+  static Box<PomodoroSettings> get pomodoroBox =>
+      Hive.box<PomodoroSettings>('settings');
+  static Box<ScreenTimeLog> get screenTimeBox =>
+      Hive.box<ScreenTimeLog>('screenTime');
+  static Box<AppSettings> get appSettingsBox =>
+      Hive.box<AppSettings>('appSettings');
+  static Box<CourseMaterial> get materialsBox =>
+      Hive.box<CourseMaterial>('materials');
+  static Box<String> get pomodoroSessionsBox =>
+      Hive.box<String>('pomodoroSessions');
+  static Box<String> get collabDocsBox => Hive.box<String>('collabDocs');
 }
