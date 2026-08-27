@@ -38,9 +38,20 @@ class AlarmPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent
-                    )
+                    // On Android 12+ check exact alarm permission, fallback to inexact if not granted
+                    val canExact = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                        try { alarmManager.canScheduleExactAlarms() } catch (_: Exception) { false }
+                    } else true
+                    if (canExact) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent
+                        )
+                    } else {
+                        // Fallback – will still fire, just inexact
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent
+                        )
+                    }
                     result.success(true)
                 } catch (e: Exception) {
                     result.success(false)

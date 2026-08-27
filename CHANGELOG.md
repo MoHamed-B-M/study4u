@@ -6,37 +6,35 @@ All notable changes to stdy4u will be documented in this file.
 
 ## [Unreleased]
 
+---
+
+## [2.1.0] - 2026-08-27
+
 ### Added
-- **Telegram community**: New "Telegram Community" row in Settings → About — opens [t.me/study4ulink](https://t.me/study4ulink) with the Telegram app / external browser — by **Hamma**
-- **First-launch Telegram prompt**: One-time comic-print dialog on first launch (after the update check, so dialogs never stack) inviting users to join the Telegram channel — Close and Join buttons; dismissal is persisted in Hive (`AppSettings.telegramPromptShown`, field 11) so it never shows twice — by **Hamma**
-- **Android home-screen widget**: New comic-print study dashboard widget (2×2) — next class (computed live from today's schedule at render time), pending tasks count, focus minutes today, and CGPA with letter grade; paper/ink styling adapts to light & dark system themes; tap opens the app — by **Hamma**
-- **Widgets settings option**: New `WIDGETS` section in Settings with "Home Screen Widget" row opening a bottom sheet that pins the widget via the system add-widget dialog (Android 8+), with manual instructions fallback — by **Hamma**
-- **`com.stdy4u/widget` method channel**: `WidgetPlugin.kt` + `WidgetBridge` Dart bridge — saves data snapshots and re-renders all widget instances, requests pinning — by **Hamma**
-- **Selectable app icon**: New "App Icon" row in Settings → Appearance — pick between the Default icon and a **Comic edition** launcher icon (new `ic_launcher/` asset pack: adaptive background/foreground + legacy PNGs at all densities); built on two Android `activity-alias` entries (`MainLauncherDefault` / `MainLauncherAlt`) so exactly one is enabled at a time — by **Hamma**
-- **`com.stdy4u/app_icon` method channel**: `AppIconPlugin.kt` + `AppIconBridge` Dart bridge — swaps the launcher aliases at runtime, reports the active icon, and re-applies the persisted choice (`AppSettings.useAltAppIcon`, field 12) on every app start — by **Hamma**
-- **`flutter_vibrate: ^1.4.0`**: New dependency unifying device vibration & haptic feedback APIs across Android/iOS — by **Hamma**
-- **`VIBRATE` permission**: Added to `AndroidManifest.xml` for full `flutter_vibrate` functionality — by **Hamma**
-- **Collaborative Study Room**: New real-time collaborative notes page at `/collab` (entry point: groups button in the Home app bar) built on the local-first CRDT stack `crdt_lf ^4.0.0` / `crdt_lf_flutter ^0.4.0` — Fugue text algorithm merges concurrent keystrokes conflict-free; edits persist locally via Hive snapshots so the page works fully offline; LAN sync via the official `crdt_socket_sync ^0.7.0` relay mode (dumb rebroadcaster, auto-reconnect with backoff, ping/pong liveness, change dedup); peer presence bar driven by the awareness plugin; comic-styled editor with LIVE/OFFLINE status pill — by **Hamma**
-- **Collab relay server script**: `tools/collab_relay_server.dart` — run `dart run tools/collab_relay_server.dart 8787` on any machine in the LAN to host rooms; CRDT-agnostic relay keeps the backend free of merge logic — by **Hamma**
-- **P2P Live Collaboration**: Study Room upgraded to full mesh P2P — live video (grid, local PiP, remote tiles), voice (mic mute, speaker), P2P chat & file transfer via WebRTC DataChannel (16 KB chunked, fallback to relay), responsive UI (mobile tabs / desktop split), live-editing toggle; new `flutter_webrtc` + `permission_handler` + `web_socket_channel` stack with `webrtc_signaling_server` (port 8789) — by **Hamma**
-- **WebRTC signaling server**: `tools/webrtc_signaling_server.dart` — dumb JSON room broadcast for SDP/ICE/chat/file-meta on LAN — by **Hamma**
+- Telegram community link in Settings — by **Hamma**
+- First-launch Telegram prompt (one-time) — by **Hamma**
+- Home-screen widget (next class, tasks, focus, CGPA) — by **Hamma**
+- Widget pin flow in Settings — by **Hamma**
+- App icon picker (Default / Comic) — by **Hamma**
+- Haptics with `flutter_vibrate` — by **Hamma**
+- Collaborative Study Room at `/collab` (offline-first) — by **Hamma**
+- Collab relay server (`:8787`) — by **Hamma**
+- P2P calls, chat and file sharing in Study Room — by **Hamma**
+- WebRTC signaling server (`:8789`) — by **Hamma**
+- Pomodoro intro sound and play button — by **Hamma**
 
 ### Changed
-- **What's New dialog enlarged**: Update dialog now grows up to **80% of screen height** (width 92%) instead of a fixed 220px notes box — release notes get room to breathe on long changelogs — by **Hamma**
-- **Release notes readability**: Bumped markdown body text 13→15px with proper 1.45 line height (was ultra-cramped 0.8), larger headings (h1 21 / h2 19 / h3 17), block spacing and list indentation added — by **Hamma**
-- **Widget data sync**: Widget snapshot refreshes automatically on app start, on app resume, and whenever data changes (`dataRefreshProvider`) — by **Hamma**
-- **Haptics migrated to `flutter_vibrate`**: Every `HapticFeedback.*` call across 17 files replaced with typed platform haptics — `lightImpact`→`FeedbackType.light`, `mediumImpact`→`.medium`, `heavyImpact`→`.heavy`, `selectionClick`→`.selection`; unused `flutter/services.dart` imports dropped (kept in `SoundService` for `SystemSound`) — by **Hamma**
-- **Telegram prompt redesign**: First-launch dialog rebuilt — telegram-blue hero band with comic diagonal stripes and an overlapping send-badge, perk chips (Tips / Updates / Community) in a re-flowing Wrap layout, brand-blue Join CTA, "no spam" footnote, and a fade+scale entrance; fixed 360px cap makes it overflow-proof on narrow screens — by **Hamma**
-
-### Removed
-- **`build_apk.yml` workflow** ("Build APK (All Branches)") — redundant with the main Build & Release APK workflow — by **Hamma**
+- Bigger update dialog and more readable release notes — by **Hamma**
+- Widget auto-sync on start, resume and data change — by **Hamma**
+- Haptics now use `flutter_vibrate` everywhere — by **Hamma**
+- New Telegram prompt design — by **Hamma**
 
 ### Fixed
-- **"Problem loading widget" error**: `StudyWidgetProvider` view building is now guarded — if rendering ever throws, a minimal fallback RemoteViews layout (`widget_fallback.xml`) is shown instead of the launcher's broken-widget error state — by **Hamma**
-- **Stray yellow stripes on first launch**: The Telegram prompt could trigger Flutter's overflow indicators on narrower screens — new layout wraps all content (chips via `Wrap`, fixed dialog cap) so nothing can overflow anymore — by **Hamma**
-- **`flutter_vibrate` build failure** ("Inconsistent JVM Target Compatibility"): Root `build.gradle.kts` now forces Java 17 + Kotlin `jvmTarget` 17 on every Android subproject after evaluation, aligning older plugins (which pinned Java 1.8) with modern Kotlin tasks — by **Hamma**
-- **`flutter_vibrate` resource linking failure** (`AAPT: resource android:attr/lStar not found`): The same root block also pins every subproject's `compileSdk` to 36 (matching `:app`) so old plugins merge/link resources against a modern SDK — by **Hamma**
-- **Launcher icon reverting to default**: Root cause was a lost Hive write + blind `apply()` overwriting the correctly persisted native state. Fixed via: (1) `AppIconPlugin` now `commit()`s choice to `SharedPreferences` synchronously and auto-restores PM state in `onAttachedToEngine`; `isAltIcon` falls back to that pref for DEFAULT; (2) Dart `settings_view` awaits Hive before PM; (3) startup reconciles Hive *to* native (native is durable) instead of reverting the launcher — eliminates the "switch → close → revert" loop — by **Hamma**
+- Widget loading error fallback — by **Hamma**
+- Overflow stripes on first launch — by **Hamma**
+- Build failures for `flutter_vibrate` (JVM target / lStar) — by **Hamma**
+- App icon reverting after switch — by **Hamma**
+- Push notifications not firing — by **Hamma**
 
 ---
 

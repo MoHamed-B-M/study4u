@@ -5,8 +5,8 @@
     android:targetCellWidth="2"
     android:targetCellHeight="2"
     android:updatePeriodMillis="1800000"
-    android:initialLayout="@layout/widget_study"
-    android:previewLayout="@layout/widget_study"
+    android:initialLayout="@layout/widget_fallback"
+    android:previewLayout="@layout/widget_fallback"
     android:description="@string/widget_description"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />

@@ -8,6 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/sound_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/services/update_service.dart';
 import '../../../data/models/app_settings.dart';
 import '../../../data/platform/app_icon_bridge.dart';
@@ -135,6 +136,33 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             subtitle:
                                 'Next class, tasks & focus time at a glance',
                             onTap: () => _showWidgetSheet(context),
+                          ),
+                        ]),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(context, 'NOTIFICATIONS'),
+                      ComicCard(
+                        padding: EdgeInsets.zero,
+                        child: Column(children: [
+                          _buildSettingRow(
+                            context,
+                            icon: Icons.notifications_active_rounded,
+                            iconColor: ComicTheme.inkRed,
+                            title: 'Test Notification',
+                            subtitle: 'Send a test reminder now',
+                            onTap: () async {
+                              Vibrate.feedback(FeedbackType.light);
+                              final ok = await NotificationService.instance
+                                  .showTestNotification();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(ok
+                                          ? 'Test sent – check notification shade'
+                                          : 'Permission denied – enable notifications in Settings')),
+                                );
+                              }
+                            },
                           ),
                         ]),
                       ),

@@ -30,9 +30,18 @@ class StudyWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
-        val views = buildRemoteViews(context)
-        for (appWidgetId in appWidgetIds) {
-            appWidgetManager.updateAppWidget(appWidgetId, views)
+        try {
+            val views = buildRemoteViews(context)
+            for (appWidgetId in appWidgetIds) {
+                try { appWidgetManager.updateAppWidget(appWidgetId, views) } catch (_: Exception) {}
+            }
+        } catch (_: Exception) {
+            try {
+                val fallback = RemoteViews(context.packageName, R.layout.widget_fallback)
+                for (appWidgetId in appWidgetIds) {
+                    try { appWidgetManager.updateAppWidget(appWidgetId, fallback) } catch (_: Exception) {}
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -56,14 +65,18 @@ class StudyWidgetProvider : AppWidgetProvider() {
         }
 
         fun pushAll(context: Context): Boolean {
-            val manager = AppWidgetManager.getInstance(context) ?: return false
-            val ids = manager.getAppWidgetIds(ComponentName(context, StudyWidgetProvider::class.java))
-            if (ids.isEmpty()) return false
-            val views = buildRemoteViews(context)
-            for (id in ids) {
-                manager.updateAppWidget(id, views)
-            }
-            return true
+            return try {
+                val manager = AppWidgetManager.getInstance(context) ?: return false
+                val ids = manager.getAppWidgetIds(ComponentName(context, StudyWidgetProvider::class.java))
+                if (ids.isEmpty()) return false
+                val views = try { buildRemoteViews(context) } catch (_: Exception) {
+                    RemoteViews(context.packageName, R.layout.widget_fallback)
+                }
+                for (id in ids) {
+                    try { manager.updateAppWidget(id, views) } catch (_: Exception) {}
+                }
+                true
+            } catch (_: Exception) { false }
         }
 
         fun hasWidgets(context: Context): Boolean {

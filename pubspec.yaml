@@ -2,7 +2,7 @@ name: stdy4u
 description: "A production-ready student productivity tool with local persistence."
 publish_to: "none"
 
-version: 2.0.2
+version: 2.1.0
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
@@ -64,6 +64,7 @@ dependencies:
   http: ^1.2.0
   open_filex: ^4.7.0
   timezone: ^0.9.2
+  flutter_timezone: ^2.0.0
 
 dev_dependencies:
   flutter_test:

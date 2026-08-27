@@ -199,6 +199,11 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       HomeWidgetService.pushUpdate();
+      // Ensure notifications are initialized and rescheduled (handles reboot)
+      try {
+        await NotificationService.instance.init();
+        await NotificationService.instance.rescheduleAllCourses();
+      } catch (_) {}
       // Reconcile Hive with the durable native state (PM + SharedPrefs commit).
       // If they differ, the native side is the truth (it survives quick kills
       // even before Hive flushes) – sync Hive to match it instead of reverting

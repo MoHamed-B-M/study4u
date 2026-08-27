@@ -584,6 +584,27 @@ class _StatsViewState extends ConsumerState<StatsView>
                         },
                         child: const Icon(Icons.nightlight_round, size: 18),
                       ),
+                      const SizedBox(width: 8),
+                      ComicButton(
+                        isCta: true,
+                        onPressed: () async {
+                          Vibrate.feedback(FeedbackType.light);
+                          final p = AudioPlayer();
+                          try {
+                            await p.setAsset('assets/audio/autio.m4a');
+                            await p.play();
+                            p.playerStateStream.listen((s) {
+                              if (s.processingState ==
+                                  ProcessingState.completed) {
+                                p.dispose();
+                              }
+                            });
+                          } catch (_) {
+                            p.dispose();
+                          }
+                        },
+                        child: const Icon(Icons.music_note, size: 18),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
