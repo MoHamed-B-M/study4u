@@ -11,7 +11,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -68,11 +67,9 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
   final List<FileMeta> _files = [];
   final Map<String, List<int>> _fileRecvBuffers = {};
   late TabController _tabCtrl;
-  final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  final Map<String, RTCVideoRenderer> _remoteRenderers = {};
   bool _p2pJoined = false;
-  bool _isVideoEnabled = true;
   bool _isAudioEnabled = true;
+  StreamSubscription<String>? _vibrateSub;
 
   bool get _connected =>
       _status == ConnectionStatus.connected ||
@@ -85,7 +82,6 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
     _tabCtrl = TabController(length: 4, vsync: this);
     _siteId = CollabDocStorage.loadOrCreateSiteId();
     _startSession(AppConstants.collabDefaultRoom);
-    _localRenderer.initialize();
   }
 
   void _startSession(String roomId) {
@@ -190,7 +186,17 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
       final ok = await client
           .connect()
           .timeout(const Duration(seconds: 8), onTimeout: () => false);
-      if (!ok) throw Exception('Relay not reachable at $url');
+      if (!ok) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  'Working offline – relay not reachable at $url. Edits saved locally. Share QR or run: dart run tools/collab_relay_server.dart 8787'),
+              duration: const Duration(seconds: 5)));
+          setState(() => _status = ConnectionStatus.disconnected);
+        }
+        await _disconnectClient();
+        return;
+      }
       if (_p2pJoined) await _joinP2P();
     } catch (e) {
       if (mounted) {
@@ -254,35 +260,22 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
     final p2p =
         P2PService(selfId: _siteId.toString(), displayName: displayName);
     try {
-      // Request permissions – gracefully handle denial (still allow chat/files)
-      PermissionStatus camStatus = PermissionStatus.denied;
       PermissionStatus micStatus = PermissionStatus.denied;
-      try {
-        camStatus = await Permission.camera.request();
-      } catch (_) {}
       try {
         micStatus = await Permission.microphone.request();
       } catch (_) {}
-      final hasVideo = camStatus.isGranted;
       final hasAudio = micStatus.isGranted;
-      if (!hasVideo && !hasAudio) {
+      if (!hasAudio) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content:
-                  Text('Camera/mic denied – joining for chat/files only')));
+                  Text('Mic denied – joining for chat/files/vibrate only')));
         }
       }
-      final mediaOk =
-          await p2p.initLocalMedia(video: hasVideo, audio: hasAudio);
-      if (!mediaOk && (hasVideo || hasAudio) && mounted) {
+      final mediaOk = await p2p.initLocalMedia(video: false, audio: hasAudio);
+      if (!mediaOk && hasAudio && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Could not start camera/mic – check permissions')));
-      }
-      try {
-        await _localRenderer.initialize();
-      } catch (_) {}
-      if (p2p.localStream != null) {
-        _localRenderer.srcObject = p2p.localStream;
+            content: Text('Could not start mic – check permissions')));
       }
     } catch (e) {
       if (mounted) {
@@ -293,29 +286,21 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
     p2p.onPeersChanged.listen((peers) {
       if (!mounted) return;
       setState(() {});
-      // Setup remote renderers
-      for (final peer in peers) {
-        if (peer.remoteStream != null &&
-            !_remoteRenderers.containsKey(peer.id)) {
-          final r = RTCVideoRenderer();
-          r.initialize().then((_) {
-            r.srcObject = peer.remoteStream;
-            if (mounted) setState(() => _remoteRenderers[peer.id] = r);
-          });
-        }
-      }
-      // Remove left peers renderers
-      final ids = peers.map((e) => e.id).toSet();
-      for (final id in _remoteRenderers.keys.toList()) {
-        if (!ids.contains(id)) {
-          _remoteRenderers[id]?.dispose();
-          _remoteRenderers.remove(id);
-        }
-      }
     });
     p2p.onChat.listen((msg) {
       if (!mounted) return;
       setState(() => _chats.add(msg));
+    });
+    _vibrateSub = p2p.onVibrate.listen((fromId) {
+      if (!mounted) return;
+      Vibrate.feedback(FeedbackType.heavy);
+      Vibrate.vibrate();
+      final fromName = p2p.peers[fromId]?.displayName ?? 'Peer';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('$fromName sent a buzz!'),
+            duration: const Duration(seconds: 2)),
+      );
     });
     p2p.onFileMeta.listen((meta) {
       if (!mounted) return;
@@ -323,7 +308,6 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
     });
     p2p.onFileChunk.listen((data) {
       final bytes = data['data'] as Uint8List;
-      // Simple append to last file buffer (mesh needs fileId header, simplified)
       final lastId = _files.isNotEmpty ? _files.last.fileId : null;
       if (lastId != null) {
         _fileRecvBuffers[lastId] ??= [];
@@ -345,12 +329,8 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
   }
 
   Future<void> _leaveP2P() async {
-    for (final r in _remoteRenderers.values) {
-      try {
-        await r.dispose();
-      } catch (_) {}
-    }
-    _remoteRenderers.clear();
+    await _vibrateSub?.cancel();
+    _vibrateSub = null;
     try {
       await _p2p?.leave();
     } catch (_) {}
@@ -358,7 +338,6 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
       await _p2p?.dispose();
     } catch (_) {}
     _p2p = null;
-    _localRenderer.srcObject = null;
     if (mounted) setState(() => _p2pJoined = false);
   }
 
@@ -606,6 +585,7 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
     _awarenessSub?.cancel();
     _docUpdatesSub?.cancel();
     _saveDebounce?.cancel();
+    _vibrateSub?.cancel();
     try {
       _client?.disconnect();
     } catch (_) {}
@@ -619,10 +599,6 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
       _doc?.dispose();
     } catch (_) {}
     _leaveP2P();
-    _localRenderer.dispose();
-    for (final r in _remoteRenderers.values) {
-      r.dispose();
-    }
     _urlCtrl.dispose();
     _roomCtrl.dispose();
     _editorFocus.dispose();
@@ -665,7 +641,7 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
           labelStyle:
               const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
           tabs: const [
-            Tab(icon: Icon(Icons.videocam_rounded, size: 18), text: 'VIDEO'),
+            Tab(icon: Icon(Icons.call_rounded, size: 18), text: 'CALL'),
             Tab(icon: Icon(Icons.chat_bubble_rounded, size: 16), text: 'CHAT'),
             Tab(icon: Icon(Icons.edit_document, size: 16), text: 'DOC'),
             Tab(icon: Icon(Icons.folder_rounded, size: 16), text: 'FILES'),
@@ -685,7 +661,7 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
                         _buildConnectionCard(isDark),
                         _buildPresenceBar(userName, isDark),
                         const SizedBox(height: 8),
-                        Expanded(child: _buildVideoPanel(isDark)),
+                        Expanded(child: _buildCallPanel(isDark)),
                       ])),
                   const VerticalDivider(width: 1),
                   Expanded(
@@ -693,7 +669,7 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
                       child: TabBarView(
                         controller: _tabCtrl,
                         children: [
-                          _buildVideoPanel(isDark),
+                          _buildCallPanel(isDark),
                           _buildChatPanel(isDark),
                           _buildEditor(doc, isDark),
                           _buildFilesPanel(isDark),
@@ -710,7 +686,7 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
                   child: TabBarView(
                     controller: _tabCtrl,
                     children: [
-                      _buildVideoPanel(isDark),
+                      _buildCallPanel(isDark),
                       _buildChatPanel(isDark),
                       _buildEditor(doc, isDark),
                       _buildFilesPanel(isDark),
@@ -778,14 +754,11 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
             isCta: _p2pJoined,
             onPressed: _toggleP2P,
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(
-                  _p2pJoined
-                      ? Icons.call_end_rounded
-                      : Icons.video_call_rounded,
+              Icon(_p2pJoined ? Icons.call_end_rounded : Icons.call_rounded,
                   size: 16,
                   color: _p2pJoined ? Colors.white : ComicTheme.inkBlack),
               const SizedBox(width: 6),
-              Text(_p2pJoined ? 'LEAVE P2P' : 'JOIN P2P'),
+              Text(_p2pJoined ? 'LEAVE CALL' : 'JOIN CALL'),
             ]),
           )),
           const SizedBox(width: 8),
@@ -799,22 +772,6 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
                 _isAudioEnabled ? Icons.mic_rounded : Icons.mic_off_rounded,
                 size: 18),
           ),
-          IconButton(
-            tooltip: _isVideoEnabled ? 'Cam off' : 'Cam on',
-            onPressed: () async {
-              await _p2p?.toggleCam();
-              setState(() => _isVideoEnabled = _p2p?.camEnabled ?? true);
-            },
-            icon: Icon(
-                _isVideoEnabled
-                    ? Icons.videocam_rounded
-                    : Icons.videocam_off_rounded,
-                size: 18),
-          ),
-          IconButton(
-              tooltip: 'Switch cam',
-              onPressed: () => _p2p?.switchCamera(),
-              icon: const Icon(Icons.flip_camera_ios_rounded, size: 18)),
         ]),
         const SizedBox(height: 8),
         Row(children: [
@@ -895,64 +852,260 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
   int _nextPeerColor(ClientAwareness p) =>
       _peerColors[p.clientId.hashCode.abs() % _peerColors.length];
 
-  Widget _buildVideoPanel(bool isDark) {
-    final peers = _p2p?.peers.values.toList() ?? [];
-    // Responsive grid: 1 col on narrow, 2 cols on wide
-    return LayoutBuilder(builder: (context, c) {
-      final cross = c.maxWidth > 500 ? 2 : 1;
-      return Container(
-        margin: const EdgeInsets.all(12),
-        decoration: _comicBox(isDark),
-        child: peers.isEmpty && _p2p?.localStream == null
-            ? Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(Icons.videocam_off_rounded,
-                          size: 40,
-                          color: (isDark
-                                  ? ComicTheme.darkText
-                                  : ComicTheme.inkBlack)
-                              .withValues(alpha: 0.3)),
-                      const SizedBox(height: 12),
-                      Text(
-                          'No P2P peers yet\nTap JOIN P2P to start video/voice',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: (isDark
-                                      ? ComicTheme.darkText
-                                      : ComicTheme.inkBlack)
-                                  .withValues(alpha: 0.6))),
-                    ])))
-            : GridView.builder(
-                padding: const EdgeInsets.all(8),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: cross,
-                    childAspectRatio: 16 / 10,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8),
-                itemCount: 1 + peers.length,
-                itemBuilder: (context, i) {
-                  if (i == 0) {
-                    return _VideoTile(
-                        label: 'You',
-                        stream: _p2p?.localStream,
-                        renderer: _localRenderer,
-                        isLocal: true,
-                        muted: true);
-                  }
-                  final p = peers[i - 1];
-                  return _VideoTile(
-                      label: p.displayName,
-                      stream: p.remoteStream,
-                      renderer: _remoteRenderers[p.id],
-                      isLocal: false,
-                      muted: false);
-                },
+  Future<void> _sendVibrateTo(String peerId, String peerName) async {
+    if (_p2p == null || !_p2pJoined) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Join P2P to send buzz')));
+      }
+      return;
+    }
+    Vibrate.feedback(FeedbackType.heavy);
+    Vibrate.vibrate();
+    try {
+      await _p2p!.sendVibrate(to: peerId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Buzz sent to $peerName'),
+            duration: const Duration(seconds: 1)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Buzz failed: $e')));
+      }
+    }
+  }
+
+  Future<void> _buzzAll() async {
+    if (_p2p == null || !_p2pJoined) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Join P2P to buzz')));
+      }
+      return;
+    }
+    Vibrate.feedback(FeedbackType.heavy);
+    if (_peers.isEmpty && (_p2p?.peers.isEmpty ?? true)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('No peers to buzz')));
+      }
+      return;
+    }
+    for (final peer in _p2p!.peers.values) {
+      try {
+        await _p2p!.sendVibrate(to: peer.id);
+      } catch (_) {}
+    }
+    // Also vibrate via signaling broadcast to cover awareness-only peers
+    try {
+      await _p2p!.sendVibrate();
+    } catch (_) {}
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Buzz sent to all!')));
+    }
+  }
+
+  Widget _buildCallPanel(bool isDark) {
+    final p2pPeers = _p2p?.peers.values.toList() ?? [];
+    final presencePeers = _peers.values.toList();
+    final hasPeers = p2pPeers.isNotEmpty || presencePeers.isNotEmpty;
+    return Container(
+      margin: const EdgeInsets.all(12),
+      decoration: _comicBox(isDark),
+      child: Column(children: [
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(children: [
+            Row(children: [
+              Icon(_p2pJoined ? Icons.call_rounded : Icons.call_outlined,
+                  size: 18,
+                  color: _p2pJoined
+                      ? const Color(0xFF16A34A)
+                      : (isDark ? ComicTheme.darkText : ComicTheme.inkBlack)),
+              const SizedBox(width: 8),
+              Text(_p2pJoined ? 'In Call' : 'Voice Call',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color:
+                          isDark ? ComicTheme.darkText : ComicTheme.inkBlack)),
+              const Spacer(),
+              if (_p2pJoined)
+                IconButton(
+                  tooltip: _isAudioEnabled ? 'Mute' : 'Unmute',
+                  onPressed: () async {
+                    await _p2p?.toggleMic();
+                    setState(() => _isAudioEnabled = _p2p?.micEnabled ?? true);
+                  },
+                  icon: Icon(
+                      _isAudioEnabled
+                          ? Icons.mic_rounded
+                          : Icons.mic_off_rounded,
+                      size: 18),
+                ),
+            ]),
+            const SizedBox(height: 8),
+            Row(children: [
+              Expanded(
+                  child: ComicButton(
+                isCta: !_p2pJoined,
+                onPressed: _toggleP2P,
+                child: Text(_p2pJoined ? 'LEAVE CALL' : 'JOIN CALL'),
+              )),
+              const SizedBox(width: 8),
+              ComicButton(
+                isCta: false,
+                onPressed: _buzzAll,
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.vibration_rounded, size: 16),
+                  SizedBox(width: 4),
+                  Text('Buzz All'),
+                ]),
               ),
-      );
-    });
+            ]),
+            if (!_p2pJoined)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text('Join call to enable voice and buzz',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontStyle: FontStyle.italic,
+                        color:
+                            (isDark ? ComicTheme.darkText : ComicTheme.inkBlack)
+                                .withValues(alpha: 0.5))),
+              ),
+          ]),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: !hasPeers
+              ? Center(
+                  child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(Icons.people_outline_rounded,
+                            size: 36,
+                            color: (isDark
+                                    ? ComicTheme.darkText
+                                    : ComicTheme.inkBlack)
+                                .withValues(alpha: 0.3)),
+                        const SizedBox(height: 12),
+                        Text(
+                            _p2pJoined
+                                ? 'No peers yet\nShare QR or code to invite'
+                                : 'Join call to see peers',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: (isDark
+                                        ? ComicTheme.darkText
+                                        : ComicTheme.inkBlack)
+                                    .withValues(alpha: 0.6))),
+                      ])))
+              : ListView.separated(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: presencePeers.isNotEmpty
+                      ? presencePeers.length
+                      : p2pPeers.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, i) {
+                    if (presencePeers.isNotEmpty) {
+                      final peer = presencePeers[i];
+                      final name =
+                          (peer.metadata['name'] as String?)?.isNotEmpty == true
+                              ? peer.metadata['name'] as String
+                              : 'Peer';
+                      final color = Color((peer.metadata['color'] as int?) ??
+                          _nextPeerColor(peer));
+                      return ListTile(
+                        leading: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: ComicTheme.inkBlack, width: 2)),
+                          child: Center(
+                              child: Text(name.characters.first.toUpperCase(),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800))),
+                        ),
+                        title: Text(name,
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? ComicTheme.darkText
+                                    : ComicTheme.inkBlack)),
+                        subtitle: Text('Tap buzz to nudge',
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: (isDark
+                                        ? ComicTheme.darkText
+                                        : ComicTheme.inkBlack)
+                                    .withValues(alpha: 0.6))),
+                        trailing: ComicButton(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          onPressed: () => _sendVibrateTo(peer.clientId, name),
+                          child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.vibration_rounded, size: 14),
+                                SizedBox(width: 4),
+                                Text('Buzz', style: TextStyle(fontSize: 11)),
+                              ]),
+                        ),
+                      );
+                    } else {
+                      final p = p2pPeers[i];
+                      return ListTile(
+                        leading: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                              color: ComicTheme.inkRed,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: ComicTheme.inkBlack, width: 2)),
+                          child: Center(
+                              child: Text(
+                                  p.displayName.characters.first.toUpperCase(),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800))),
+                        ),
+                        title: Text(p.displayName,
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? ComicTheme.darkText
+                                    : ComicTheme.inkBlack)),
+                        trailing: ComicButton(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          onPressed: () => _sendVibrateTo(p.id, p.displayName),
+                          child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.vibration_rounded, size: 14),
+                                SizedBox(width: 4),
+                                Text('Buzz'),
+                              ]),
+                        ),
+                      );
+                    }
+                  },
+                ),
+        ),
+      ]),
+    );
   }
 
   Widget _buildChatPanel(bool isDark) {
@@ -1258,61 +1411,6 @@ class _StatusPill extends StatelessWidget {
               fontWeight: FontWeight.w800,
               letterSpacing: 0.4,
               color: color)),
-    );
-  }
-}
-
-class _VideoTile extends StatelessWidget {
-  final String label;
-  final MediaStream? stream;
-  final RTCVideoRenderer? renderer;
-  final bool isLocal;
-  final bool muted;
-  const _VideoTile(
-      {required this.label,
-      this.stream,
-      this.renderer,
-      required this.isLocal,
-      required this.muted});
-  @override
-  Widget build(BuildContext context) {
-    final hasVideo = renderer != null &&
-        stream != null &&
-        stream!.getVideoTracks().isNotEmpty &&
-        stream!.getVideoTracks().first.enabled;
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.black,
-          border: Border.all(color: ComicTheme.inkBlack, width: 2)),
-      child: Stack(children: [
-        if (hasVideo && renderer != null)
-          RTCVideoView(renderer!,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: isLocal)
-        else
-          Center(
-              child: Icon(Icons.person_rounded,
-                  size: 40, color: Colors.white.withValues(alpha: 0.7))),
-        Positioned(
-          left: 6,
-          bottom: 6,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            color: Colors.black54,
-            child: Text(label + (isLocal ? ' (You)' : ''),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700)),
-          ),
-        ),
-        if (muted && !isLocal)
-          const Positioned(
-              right: 6,
-              top: 6,
-              child:
-                  Icon(Icons.mic_off_rounded, size: 14, color: Colors.white)),
-      ]),
     );
   }
 }

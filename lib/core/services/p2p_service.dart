@@ -58,12 +58,14 @@ class P2PService {
   final _fileMetaController = StreamController<FileMeta>.broadcast();
   final _incomingFileController =
       StreamController<Map<String, dynamic>>.broadcast();
+  final _vibrateController = StreamController<String>.broadcast();
 
   Stream<List<RemotePeer>> get onPeersChanged => _peerController.stream;
   Stream<ChatMessage> get onChat => _chatController.stream;
   Stream<FileMeta> get onFileMeta => _fileMetaController.stream;
   Stream<Map<String, dynamic>> get onFileChunk =>
       _incomingFileController.stream;
+  Stream<String> get onVibrate => _vibrateController.stream;
 
   SignalingService? _signaling;
   StreamSubscription<Map<String, dynamic>>? _sigSub;
@@ -126,6 +128,9 @@ class P2PService {
         break;
       case 'ice':
         await _onIce(from, msg['candidate'] as Map<String, dynamic>);
+        break;
+      case 'vibrate':
+        _vibrateController.add(from);
         break;
       case 'chat':
         final text = msg['text'] as String? ?? '';
@@ -233,6 +238,8 @@ class P2PService {
                 text: map['text'] as String,
                 ts: DateTime.now(),
                 isMe: false));
+          } else if (t == 'vibrate') {
+            _vibrateController.add(peer.id);
           } else if (t == 'file_meta') {
             _fileMetaController.add(FileMeta(
                 fileId: map['fileId'] as String,
@@ -275,6 +282,32 @@ class P2PService {
       await peer!.pc!.addCandidate(RTCIceCandidate(cand['candidate'] as String,
           cand['sdpMid'] as String?, cand['sdpMLineIndex'] as int?));
     } catch (_) {}
+  }
+
+  Future<void> sendVibrate({String? to}) async {
+    bool sent = false;
+    for (final p in peers.values) {
+      if (to != null && p.id != to) continue;
+      if (p.dc != null &&
+          p.dc!.state == RTCDataChannelState.RTCDataChannelOpen) {
+        try {
+          await p.dc!.send(RTCDataChannelMessage(jsonEncode({'t': 'vibrate'})));
+          sent = true;
+        } catch (_) {}
+      }
+    }
+    if (!sent) {
+      // Fallback via signaling
+      try {
+        _signaling?.sendVibrate(to: to);
+      } catch (_) {}
+      // If no specific peer, broadcast via signaling
+      if (to == null) {
+        for (final p in peers.values) {
+          _vibrateController.add(p.id);
+        }
+      }
+    }
   }
 
   Future<void> sendChat(String text) async {
@@ -390,6 +423,7 @@ class P2PService {
     await _chatController.close();
     await _fileMetaController.close();
     await _incomingFileController.close();
+    await _vibrateController.close();
     _sigSub?.cancel();
   }
 

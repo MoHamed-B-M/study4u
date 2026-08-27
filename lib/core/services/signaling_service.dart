@@ -81,6 +81,13 @@ class SignalingService {
         'ts': DateTime.now().millisecondsSinceEpoch
       });
 
+  void sendVibrate({String? to}) => _send({
+        'type': 'vibrate',
+        'room': roomId,
+        'from': selfId,
+        'to': to,
+      });
+
   void sendFileMeta(String fileName, int fileSize, String fileId) => _send({
         'type': 'file_meta',
         'room': roomId,
