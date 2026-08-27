@@ -4,12 +4,17 @@ import 'dart:typed_data';
 import 'package:crdt_lf/crdt_lf.dart';
 import 'package:crdt_lf_flutter/crdt_lf_flutter.dart';
 import 'package:crdt_socket_sync/web_socket_relay_client.dart';
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/p2p_service.dart';
@@ -131,12 +136,25 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
   Future<void> _connect() async {
     Vibrate.feedback(FeedbackType.light);
     final rawUrl = _urlCtrl.text.trim();
-    if (rawUrl.isEmpty) return;
+    if (rawUrl.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Enter relay URL (e.g. ws://192.168.1.10:8787)')));
+      }
+      return;
+    }
     final url = rawUrl.startsWith('ws://') || rawUrl.startsWith('wss://')
         ? rawUrl
         : 'ws://$rawUrl';
     final room = _roomCtrl.text.trim();
-    if (room.isNotEmpty && room != _activeRoom) {
+    if (room.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Enter a room code')));
+      }
+      return;
+    }
+    if (room != _activeRoom) {
       _saveNow();
       _startSession(room);
     }
@@ -144,28 +162,45 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
     final name = ref.read(settingsProvider.select((s) => s.userName));
     final displayName = name.trim().isEmpty ? 'Guest' : name.trim();
     const myColor = _kDefaultPeerColor;
-    final awareness = ClientAwarenessPlugin(
-        initialMetadata: {'name': displayName, 'color': myColor});
-    final client = WebSocketRelayClient(
-        url: url, document: _doc!, author: _siteId, plugins: [awareness]);
-    _statusSub = client.connectionStatus.listen((status) {
-      if (!mounted) return;
-      setState(() => _status = status);
-      if (status == ConnectionStatus.connected) _mySessionId = client.sessionId;
-    });
-    _awarenessSub = awareness.awarenessStream.listen((state) {
-      if (!mounted) return;
-      final own = _mySessionId ?? client.sessionId;
-      setState(() => _peers = Map<String, ClientAwareness>.from(state.states)
-        ..remove(own));
-    });
-    _client = client;
-    _awareness = awareness;
     setState(() => _status = ConnectionStatus.connecting);
-    final ok = await client.connect();
-    if (!ok && mounted) setState(() => _status = ConnectionStatus.error);
-    // Also join P2P if enabled
-    if (_p2pJoined) await _joinP2P();
+    try {
+      final awareness = ClientAwarenessPlugin(
+          initialMetadata: {'name': displayName, 'color': myColor});
+      final client = WebSocketRelayClient(
+          url: url, document: _doc!, author: _siteId, plugins: [awareness]);
+      _statusSub = client.connectionStatus.listen((status) {
+        if (!mounted) return;
+        setState(() => _status = status);
+        if (status == ConnectionStatus.connected)
+          _mySessionId = client.sessionId;
+        if (status == ConnectionStatus.error && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content:
+                  Text('Connection error – check server at $url is running')));
+        }
+      });
+      _awarenessSub = awareness.awarenessStream.listen((state) {
+        if (!mounted) return;
+        final own = _mySessionId ?? client.sessionId;
+        setState(() => _peers = Map<String, ClientAwareness>.from(state.states)
+          ..remove(own));
+      });
+      _client = client;
+      _awareness = awareness;
+      final ok = await client
+          .connect()
+          .timeout(const Duration(seconds: 8), onTimeout: () => false);
+      if (!ok) throw Exception('Relay not reachable at $url');
+      if (_p2pJoined) await _joinP2P();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Join failed: $e'),
+            duration: const Duration(seconds: 4)));
+        setState(() => _status = ConnectionStatus.error);
+      }
+      await _disconnectClient();
+    }
   }
 
   Future<void> _disconnectClient() async {
@@ -218,14 +253,42 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
     final displayName = name.isEmpty ? 'Guest' : name;
     final p2p =
         P2PService(selfId: _siteId.toString(), displayName: displayName);
-    // Request permissions
-    final cam = await Permission.camera.request();
-    final mic = await Permission.microphone.request();
-    final hasVideo = cam.isGranted;
-    final hasAudio = mic.isGranted;
-    await p2p.initLocalMedia(video: hasVideo, audio: hasAudio);
-    if (p2p.localStream != null) {
-      _localRenderer.srcObject = p2p.localStream;
+    try {
+      // Request permissions – gracefully handle denial (still allow chat/files)
+      PermissionStatus camStatus = PermissionStatus.denied;
+      PermissionStatus micStatus = PermissionStatus.denied;
+      try {
+        camStatus = await Permission.camera.request();
+      } catch (_) {}
+      try {
+        micStatus = await Permission.microphone.request();
+      } catch (_) {}
+      final hasVideo = camStatus.isGranted;
+      final hasAudio = micStatus.isGranted;
+      if (!hasVideo && !hasAudio) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content:
+                  Text('Camera/mic denied – joining for chat/files only')));
+        }
+      }
+      final mediaOk =
+          await p2p.initLocalMedia(video: hasVideo, audio: hasAudio);
+      if (!mediaOk && (hasVideo || hasAudio) && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Could not start camera/mic – check permissions')));
+      }
+      try {
+        await _localRenderer.initialize();
+      } catch (_) {}
+      if (p2p.localStream != null) {
+        _localRenderer.srcObject = p2p.localStream;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Media init failed: $e')));
+      }
     }
     p2p.onPeersChanged.listen((peers) {
       if (!mounted) return;
@@ -267,7 +330,16 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
         _fileRecvBuffers[lastId]!.addAll(bytes);
       }
     });
-    await p2p.connectSignaling(_signalingUrl, _activeRoom);
+    try {
+      await p2p.connectSignaling(_signalingUrl, _activeRoom);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'P2P signaling failed at $_signalingUrl: $e\nCheck signaling server running (port 8789)'),
+            duration: const Duration(seconds: 4)));
+      }
+    }
     _p2p = p2p;
     setState(() => _p2pJoined = true);
   }
@@ -343,6 +415,188 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
             const SnackBar(content: Text('Join P2P to send files live')));
       }
     }
+  }
+
+  String _generateRoomCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final rnd = Random();
+    return List.generate(6, (_) => chars[rnd.nextInt(chars.length)]).join();
+  }
+
+  void _showQrDialog() {
+    final room =
+        _roomCtrl.text.trim().isEmpty ? _activeRoom : _roomCtrl.text.trim();
+    final url = _urlCtrl.text.trim();
+    final data = jsonEncode({'r': room, 'u': url});
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
+            border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+            boxShadow: const [
+              BoxShadow(
+                  color: ComicTheme.inkBlack,
+                  offset: Offset(4, 4),
+                  blurRadius: 0)
+            ],
+          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text('Share Room',
+                style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack)),
+            const SizedBox(height: 8),
+            Text('Room: $room',
+                style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: ComicTheme.inkRed)),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              color: Colors.white,
+              child: QrImageView(
+                  data: data,
+                  version: QrVersions.auto,
+                  size: 180,
+                  backgroundColor: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            Text('Ask peer to scan this QR\nor share code: $room',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 11,
+                    color: (isDark ? ComicTheme.darkText : ComicTheme.inkBlack)
+                        .withValues(alpha: 0.7))),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(
+                  child: ComicButton(
+                      isCta: false,
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Close'))),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: ComicButton(
+                      isCta: true,
+                      onPressed: () {
+                        final newCode = _generateRoomCode();
+                        _roomCtrl.text = newCode;
+                        Navigator.pop(ctx);
+                        _showQrDialog();
+                      },
+                      child: const Text('New Code'))),
+            ]),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  void _showJoinWithCodeDialog() {
+    final codeCtrl = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
+            border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+            boxShadow: const [
+              BoxShadow(
+                  color: ComicTheme.inkBlack,
+                  offset: Offset(4, 4),
+                  blurRadius: 0)
+            ],
+          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text('Join with Code',
+                style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: codeCtrl,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                  hintText: 'e.g. A7K9P2',
+                  border: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: ComicTheme.inkBlack, width: 2)),
+                  isDense: true,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 10)),
+            ),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(
+                  child: ComicButton(
+                      isCta: false,
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Cancel'))),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: ComicButton(
+                      isCta: true,
+                      onPressed: () {
+                        final code = codeCtrl.text.trim().toUpperCase();
+                        if (code.isEmpty) return;
+                        _roomCtrl.text = code;
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text('Room set to $code – tap JOIN')));
+                      },
+                      child: const Text('Set'))),
+            ]),
+            const SizedBox(height: 12),
+            ComicButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _openScanner();
+                },
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.qr_code_scanner_rounded, size: 16),
+                  SizedBox(width: 6),
+                  Text('Scan QR')
+                ])),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  void _openScanner() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => _QrScannerPage(onScanned: (raw) {
+              try {
+                final map = jsonDecode(raw) as Map<String, dynamic>;
+                final r = map['r'] as String?;
+                final u = map['u'] as String?;
+                if (r != null && r.isNotEmpty) _roomCtrl.text = r;
+                if (u != null && u.isNotEmpty) _urlCtrl.text = u;
+                if (r != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Scanned room $r – tap JOIN')));
+                }
+              } catch (_) {
+                final code = raw.trim().toUpperCase();
+                if (code.isNotEmpty) {
+                  _roomCtrl.text = code;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Scanned code $code')));
+                }
+              }
+            })));
   }
 
   @override
@@ -561,6 +815,45 @@ class _CollabScreenState extends ConsumerState<CollabScreen>
               tooltip: 'Switch cam',
               onPressed: () => _p2p?.switchCamera(),
               icon: const Icon(Icons.flip_camera_ios_rounded, size: 18)),
+        ]),
+        const SizedBox(height: 8),
+        Row(children: [
+          Expanded(
+              child: ComicButton(
+            onPressed: _showQrDialog,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.qr_code_rounded, size: 14),
+                  SizedBox(width: 4),
+                  Text('Share QR', style: TextStyle(fontSize: 11)),
+                ]),
+          )),
+          const SizedBox(width: 8),
+          Expanded(
+              child: ComicButton(
+            onPressed: _showJoinWithCodeDialog,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.vpn_key_rounded, size: 14),
+                  SizedBox(width: 4),
+                  Text('Code', style: TextStyle(fontSize: 11)),
+                ]),
+          )),
+          const SizedBox(width: 8),
+          Container(
+            decoration: BoxDecoration(
+                border: Border.all(color: ComicTheme.inkBlack, width: 2)),
+            child: IconButton(
+                tooltip: 'Scan QR',
+                onPressed: _openScanner,
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 18)),
+          ),
         ]),
       ]),
     );
@@ -1019,6 +1312,56 @@ class _VideoTile extends StatelessWidget {
               top: 6,
               child:
                   Icon(Icons.mic_off_rounded, size: 14, color: Colors.white)),
+      ]),
+    );
+  }
+}
+
+class _QrScannerPage extends StatefulWidget {
+  final void Function(String raw) onScanned;
+  const _QrScannerPage({required this.onScanned});
+  @override
+  State<_QrScannerPage> createState() => _QrScannerPageState();
+}
+
+class _QrScannerPageState extends State<_QrScannerPage> {
+  final MobileScannerController _controller = MobileScannerController();
+  bool _handled = false;
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Scan QR')),
+      body: Stack(children: [
+        MobileScanner(
+          controller: _controller,
+          onDetect: (capture) {
+            if (_handled) return;
+            final barcodes = capture.barcodes;
+            if (barcodes.isEmpty) return;
+            final raw = barcodes.first.rawValue;
+            if (raw == null || raw.isEmpty) return;
+            _handled = true;
+            widget.onScanned(raw);
+            if (mounted) Navigator.of(context).pop();
+          },
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+                color: Colors.black54, borderRadius: BorderRadius.circular(8)),
+            child: const Text('Point camera at the QR code',
+                style: TextStyle(color: Colors.white)),
+          ),
+        ),
       ]),
     );
   }
