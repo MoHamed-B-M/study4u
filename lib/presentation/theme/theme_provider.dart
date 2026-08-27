@@ -101,10 +101,10 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   void setPressSound(bool value) => _saveAndUpdate(_copy(pressSound: value));
   void setTargetCgpa(double value) => _saveAndUpdate(_copy(targetCgpa: value));
 
-  void setTelegramPromptShown(bool value) =>
+  Future<void> setTelegramPromptShown(bool value) =>
       _saveAndUpdate(_copy(telegramPromptShown: value));
 
-  void setUseAltAppIcon(bool value) =>
+  Future<void> setUseAltAppIcon(bool value) =>
       _saveAndUpdate(_copy(useAltAppIcon: value));
 }
 

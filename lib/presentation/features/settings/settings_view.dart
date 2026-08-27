@@ -618,13 +618,16 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 children: [
                   ComicButton(
                     isCta: !settings.useAltAppIcon,
-                    onPressed: () {
+                    onPressed: () async {
                       Vibrate.feedback(FeedbackType.selection);
-                      ref
+                      // Await Hive persistence before touching PackageManager
+                      // so a quick kill cannot leave Hive stale and cause a
+                      // revert on next launch (native is durable via commit).
+                      await ref
                           .read(settingsProvider.notifier)
                           .setUseAltAppIcon(false);
-                      AppIconBridge.setAlternate(false);
-                      Navigator.of(modalCtx).pop();
+                      await AppIconBridge.setAlternate(false);
+                      if (modalCtx.mounted) Navigator.of(modalCtx).pop();
                     },
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -636,13 +639,13 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   const SizedBox(width: 8),
                   ComicButton(
                     isCta: settings.useAltAppIcon,
-                    onPressed: () {
+                    onPressed: () async {
                       Vibrate.feedback(FeedbackType.selection);
-                      ref
+                      await ref
                           .read(settingsProvider.notifier)
                           .setUseAltAppIcon(true);
-                      AppIconBridge.setAlternate(true);
-                      Navigator.of(modalCtx).pop();
+                      await AppIconBridge.setAlternate(true);
+                      if (modalCtx.mounted) Navigator.of(modalCtx).pop();
                     },
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

@@ -197,11 +197,19 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       HomeWidgetService.pushUpdate();
-      // Hive is the single source of truth for the launcher icon: apply it
-      // unconditionally (idempotent natively) so nothing can revert it.
-      AppIconBridge.apply(ref.read(settingsProvider).useAltAppIcon);
+      // Reconcile Hive with the durable native state (PM + SharedPrefs commit).
+      // If they differ, the native side is the truth (it survives quick kills
+      // even before Hive flushes) – sync Hive to match it instead of reverting
+      // the launcher icon. This prevents the "switch -> close -> revert" bug.
+      try {
+        final hiveAlt = ref.read(settingsProvider).useAltAppIcon;
+        final nativeAlt = await AppIconBridge.isAlternate();
+        if (hiveAlt != nativeAlt) {
+          await ref.read(settingsProvider.notifier).setUseAltAppIcon(nativeAlt);
+        }
+      } catch (_) {}
       _startupSequence();
     });
   }
@@ -241,9 +249,6 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
     // Refresh the home-screen widget snapshot whenever the app comes back.
     if (state == AppLifecycleState.resumed) {
       HomeWidgetService.pushUpdate();
-      // Re-assert the icon choice (idempotent) — some launchers/OEMs drop
-      // component overrides on aggressive battery optimizations.
-      AppIconBridge.apply(ref.read(settingsProvider).useAltAppIcon);
     }
   }
 
