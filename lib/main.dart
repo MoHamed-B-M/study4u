@@ -226,28 +226,33 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   static const _tabRoutes = ['/', '/tracker', '/stats'];
 
-  int _currentIndex = 0;
+  bool? _lastDark;
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     final isTabRoute = _tabRoutes.contains(location);
-    if (isTabRoute) _currentIndex = _tabRoutes.indexOf(location);
+    // Pure derivation from the route — no setState, no field writes in build.
+    final currentIndex = isTabRoute ? _tabRoutes.indexOf(location) : 0;
     final enableHaptic = ref.watch(useHapticFeedbackProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarDividerColor: Colors.transparent,
-    ));
+    // Platform call only when the value actually changes, not every build.
+    if (_lastDark != isDark) {
+      _lastDark = isDark;
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+      ));
+    }
 
     return Scaffold(
       body: isTabRoute
           ? RepaintBoundary(
               child: IndexedStack(
-                index: _currentIndex,
+                index: currentIndex,
                 children: const [
                   HomeScreen(),
                   TrackerScreen(),
@@ -258,7 +263,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           : widget.child,
       bottomNavigationBar: isTabRoute
           ? MangaNavBar(
-              selectedIndex: _currentIndex,
+              selectedIndex: currentIndex,
               enableHaptic: enableHaptic,
               onTabChange: (index) {
                 context.go(_tabRoutes[index]);

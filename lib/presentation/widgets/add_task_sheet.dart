@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/utils/time_utils.dart';
 import '../../domain/entities/task.dart';
 import '../../shared/providers/logic_providers.dart';
 import '../theme/app_theme.dart';
@@ -92,7 +92,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
                 child: OutlinedButton.icon(
                   onPressed: _pickDate,
                   icon: const Icon(Icons.calendar_today, size: 18),
-                  label: Text(DateFormat('MMM dd, yyyy').format(_dueDate)),
+                  label: Text(TimeUtils.formatDate(_dueDate)),
                 ),
               ),
               const SizedBox(width: 16),

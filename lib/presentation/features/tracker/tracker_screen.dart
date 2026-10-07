@@ -295,82 +295,109 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
           )),
         ...List.generate(courses.length, (index) {
           final course = courses[index];
+          // Row extracted to _DailyScheduleRow so list items get their own
+          // element subtree (reused across rebuilds) and cache their Color.
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: ComicCard(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Color(course.colorValue).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(Icons.school, color: Color(course.colorValue)),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          course.name,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${course.startTime} - ${course.endTime}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    children: [
-                      _buildActionChip('Present', Icons.check_circle, ComicTheme.inkRed, () => _markAttendance(course.id, AttendanceStatus.present)),
-                      const SizedBox(height: 6),
-                      _buildActionChip('Late', Icons.access_time, const Color(0xFFFFB74D), () => _markAttendance(course.id, AttendanceStatus.late)),
-                    ],
-                  ),
-                ],
-              ),
+            child: _DailyScheduleRow(
+              course: course,
+              isDark: isDark,
+              onMark: _markAttendance,
             ),
           );
         }),
       ],
     );
   }
+}
 
-  Widget _buildActionChip(String label, IconData icon, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 14),
-            const SizedBox(width: 4),
-            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
-          ],
-        ),
+/// One daily-schedule row. Extracted (was an inline closure) so each row owns
+/// an element subtree that Flutter reuses across parent rebuilds, and the
+/// course [Color] is computed once per row instead of per build pass.
+class _DailyScheduleRow extends StatelessWidget {
+  final CourseEntity course;
+  final bool isDark;
+  final void Function(String courseId, AttendanceStatus status) onMark;
+
+  const _DailyScheduleRow({
+    required this.course,
+    required this.isDark,
+    required this.onMark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final base = Color(course.colorValue);
+    return ComicCard(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: base.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(Icons.school, color: base),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  course.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${course.startTime} - ${course.endTime}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            children: [
+              _trackerActionChip('Present', Icons.check_circle, ComicTheme.inkRed, () => onMark(course.id, AttendanceStatus.present)),
+              const SizedBox(height: 6),
+              _trackerActionChip('Late', Icons.access_time, const Color(0xFFFFB74D), () => onMark(course.id, AttendanceStatus.late)),
+            ],
+          ),
+        ],
       ),
     );
   }
+}
+
+Widget _trackerActionChip(String label, IconData icon, Color color, VoidCallback onTap) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(10),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+        ],
+      ),
+    ),
+  );
 }
 
 bool isSameDay2(DateTime? a, DateTime? b) {

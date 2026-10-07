@@ -9,7 +9,6 @@ import '../../../shared/providers/logic_providers.dart';
 import '../../../shared/providers/pomodoro_provider.dart';
 import '../../../shared/providers/app_usage_provider.dart';
 import '../../../domain/entities/course.dart';
-import '../../../domain/entities/pomodoro_session.dart';
 import '../../../theme/comic_theme.dart';
 import '../../../widgets/comic_card.dart';
 import '../../../widgets/comic_button.dart';
@@ -74,7 +73,9 @@ class _StatsViewState extends ConsumerState<StatsView>
   Widget build(BuildContext context) {
     final cgpa = ref.watch(cgpaResultProvider);
     final courses = ref.watch(courseListProvider);
-    final pomodoro = ref.watch(pomodoroProvider);
+    // NOTE: pomodoroProvider is intentionally NOT watched here — it ticks
+    // every second. Only _PomodoroHeroCard below subscribes to it, so the
+    // 1s tick rebuilds just that card instead of this whole screen.
     final sessions = ref.watch(pomodoroSessionsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final totalCredits =
@@ -100,8 +101,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                 children: [
                   FadeTransition(
                     opacity: _fadeCtrl1,
-                    child: _buildHeroGrid(
-                        context, cgpa, pomodoro, courses, totalCredits),
+                    child: _buildHeroGrid(context, cgpa, courses, totalCredits),
                   ),
                   const SizedBox(height: 24),
                   FadeTransition(
@@ -132,11 +132,9 @@ class _StatsViewState extends ConsumerState<StatsView>
   Widget _buildHeroGrid(
     BuildContext context,
     CgpaResult cgpa,
-    PomodoroState pomodoro,
     List<CourseEntity> courses,
     double totalCredits,
   ) {
-    final s = ref.watch(pomodoroSessionsProvider);
     return Row(
       children: [
         Expanded(
@@ -146,7 +144,7 @@ class _StatsViewState extends ConsumerState<StatsView>
         const SizedBox(width: 12),
         Expanded(
           flex: 4,
-          child: _buildPomodoroCard(context, pomodoro, s),
+          child: _PomodoroHeroCard(onOpenControls: _showPomodoroModal),
         ),
       ],
     );
@@ -230,103 +228,6 @@ class _StatsViewState extends ConsumerState<StatsView>
       ],
     );
   }
-
-  Widget _buildPomodoroCard(
-      BuildContext context, PomodoroState pomodoro,
-      List<PomodoroSessionEntity> sessions) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final label = switch (pomodoro.status) {
-      PomodoroStatus.focus => 'FOCUS',
-      PomodoroStatus.shortBreak || PomodoroStatus.longBreak => 'BREAK',
-      PomodoroStatus.idle => 'READY',
-    };
-
-    return ComicCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.15)
-                      : Colors.black.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.timer_outlined,
-                  size: 18,
-                  color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.arrow_forward_ios,
-                  color: isDark
-                      ? ComicTheme.darkText.withValues(alpha: 0.7)
-                      : ComicTheme.inkBlack.withValues(alpha: 0.7),
-                  size: 18,
-                ),
-                onPressed: _showPomodoroModal,
-                visualDensity: VisualDensity.compact,
-                tooltip: 'Open pomodoro controls',
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            pomodoro.timerString,
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-              fontFeatures: [FontFeature.tabularFigures()],
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: isDark
-                  ? ComicTheme.darkText.withValues(alpha: 0.85)
-                  : ComicTheme.inkBlack.withValues(alpha: 0.85),
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ComicButton(
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                if (pomodoro.isActive) {
-                  ref.read(pomodoroProvider.notifier).pauseTimer();
-                } else {
-                  ref.read(pomodoroProvider.notifier).startTimer();
-                }
-              },
-              child: Text(
-                pomodoro.isActive ? 'Pause' : 'Start',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
 
   void _showSetTargetDialog() {
     HapticFeedback.lightImpact();
@@ -1162,4 +1063,107 @@ String _friendlyAppName(String packageName) {
     'com.stdy4u': 'study4u',
   };
   return names[packageName] ?? packageName;
+}
+
+/// Pomodoro hero card that subscribes to the 1-second timer tick itself, so
+/// [StatsView] does not rebuild every second. Only this card rebuilds.
+class _PomodoroHeroCard extends ConsumerWidget {
+  final VoidCallback onOpenControls;
+
+  const _PomodoroHeroCard({required this.onOpenControls});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pomodoro = ref.watch(pomodoroProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final label = switch (pomodoro.status) {
+      PomodoroStatus.focus => 'FOCUS',
+      PomodoroStatus.shortBreak || PomodoroStatus.longBreak => 'BREAK',
+      PomodoroStatus.idle => 'READY',
+    };
+
+    return ComicCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : Colors.black.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.timer_outlined,
+                  size: 18,
+                  color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.arrow_forward_ios,
+                  color: isDark
+                      ? ComicTheme.darkText.withValues(alpha: 0.7)
+                      : ComicTheme.inkBlack.withValues(alpha: 0.7),
+                  size: 18,
+                ),
+                onPressed: onOpenControls,
+                visualDensity: VisualDensity.compact,
+                tooltip: 'Open pomodoro controls',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            pomodoro.timerString,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+              fontFeatures: const [FontFeature.tabularFigures()],
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: isDark
+                  ? ComicTheme.darkText.withValues(alpha: 0.85)
+                  : ComicTheme.inkBlack.withValues(alpha: 0.85),
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ComicButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                if (pomodoro.isActive) {
+                  ref.read(pomodoroProvider.notifier).pauseTimer();
+                } else {
+                  ref.read(pomodoroProvider.notifier).startTimer();
+                }
+              },
+              child: Text(
+                pomodoro.isActive ? 'Pause' : 'Start',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
