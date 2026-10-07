@@ -53,6 +53,7 @@ class _ComicButtonState extends State<ComicButton> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Color resolveBg(Color c) {
       if (c == ComicTheme.surfaceWhite && isDark) return ComicTheme.darkSurface;
@@ -99,7 +100,8 @@ class _ComicButtonState extends State<ComicButton> {
           borderRadius: BorderRadius.zero,
           boxShadow: [
             BoxShadow(
-              color: ComicTheme.inkBlack,
+              // Komi MangaShadow.button: 4/4 hard offset, zero blur.
+              color: scheme.shadow,
               offset: _isPressed ? const Offset(1, 1) : const Offset(4, 4),
               blurRadius: 0,
             ),
