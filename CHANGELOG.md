@@ -4,7 +4,7 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
-## [Unreleased]
+## [2.2.0] - 2026-10-07
 
 ### Added
 - **Komi Store manga design tokens** (`lib/theme/manga_tokens.dart`): port of Komi's `MangaPaper` (DAY/NIGHT/NORD), `MangaAccent` (MONO/CRIMSON/COBALT/SUN/FROST), sharp-corner `MangaShape` (3/2.5/2dp inked borders), zero-blur `MangaShadow` (card 6/6, button 4/4, modal 14/14), shared `MangaSpacing` scale
