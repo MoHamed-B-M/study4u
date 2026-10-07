@@ -28,25 +28,26 @@ class ComicTheme {
     accent: MangaAccent.crimson,
   );
 
-  // Legacy aliases — values now match Komi DAY/NIGHT exactly.
-  static Color get paperBg => lightManga.background; // 0xFFF1EADC
-  static Color get surfaceWhite => lightManga.surface; // 0xFFFAF5EA
-  static Color get inkBlack => lightManga.onBackground; // 0xFF1B150D
-  static Color get inkRed => lightManga.primary; // 0xFFD8202A
-  static Color get darkPulp => darkManga.background; // 0xFF0C0A07
-  static Color get darkSurface => darkManga.surface; // 0xFF16120C
-  static Color get darkText => darkManga.onSurface; // 0xFFF0E9DA
+  // Legacy names kept as `static const` so existing `const` call sites
+  // (default param values, const widgets, const BoxShadows) keep compiling.
+  // Values match Komi DAY/NIGHT exactly.
+  static const Color paperBg = Color(0xFFF1EADC);
+  static const Color surfaceWhite = Color(0xFFFAF5EA);
+  static const Color inkBlack = Color(0xFF1B150D);
+  static const Color inkRed = Color(0xFFD8202A);
+  static const Color darkPulp = Color(0xFF0C0A07);
+  static const Color darkSurface = Color(0xFF16120C);
+  static const Color darkText = Color(0xFFF0E9DA);
 
-  // Komi well / muted / shadow / error, exposed for panels & states.
-  static Color get wellLight => lightManga.surfaceVariant; // 0xFFE7DEC9
-  static Color get mutedLight => lightManga.onSurfaceVariant; // 0xFF695F50
-  static Color get wellDark => darkManga.surfaceVariant; // 0xFF211B12
-  static Color get mutedDark => darkManga.onSurfaceVariant; // 0xFF968B77
+  // Komi well / muted, exposed for panels & states.
+  static const Color wellLight = Color(0xFFE7DEC9);
+  static const Color mutedLight = Color(0xFF695F50);
+  static const Color wellDark = Color(0xFF211B12);
+  static const Color mutedDark = Color(0xFF968B77);
 
   static ThemeData _build(MangaColors m, Brightness brightness) {
     final displayFamily = GoogleFonts.anton().fontFamily;
     final bodyFamily = GoogleFonts.notoSans().fontFamily;
-    final monoFamily = GoogleFonts.jetBrainsMono().fontFamily;
 
     final scheme = ColorScheme(
       brightness: brightness,
