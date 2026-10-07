@@ -7,18 +7,16 @@ All notable changes to stdy4u will be documented in this file.
 ## [2.2.0] - 2026-10-07
 
 ### Added
-- **Komi Store manga design tokens** (`lib/theme/manga_tokens.dart`): port of Komi's `MangaPaper` (DAY/NIGHT/NORD), `MangaAccent` (MONO/CRIMSON/COBALT/SUN/FROST), sharp-corner `MangaShape` (3/2.5/2dp inked borders), zero-blur `MangaShadow` (card 6/6, button 4/4, modal 14/14), shared `MangaSpacing` scale
-- **Manga decor painters** (`lib/theme/manga_decor.dart`): grid-paper backdrop, screentone dot lattice, radial speed lines, screentone corner wash, `MangaPaperBackground` scaffold layer
-- **Manga widgets** (`lib/widgets/manga_panel.dart`): `MangaPanel` (3dp inked border + 6/6 hard shadow + optional screentone corner), `MangaHeadline` (skewed stamp marker + uppercase Anton title), `MangaChip` (uppercase W800 label, 2dp border)
+- **Warmer manga paper theme**: app background, cards and dialogs now use a warm comic-paper palette with a bolder red accent, sharp inked borders and hard offset shadows — by **Hamma**
+- **New display typography**: headings set in Anton with Noto Sans body text for a cleaner comic-print look — by **Hamma**
 
 ### Changed
-- **ComicTheme rebuilt on Komi manga spec**: DAY paper `F1EADC` / panel `FAF5EA` / ink `1B150D` with CRIMSON `D8202A` primary, NIGHT dark mode (`0C0A07`/`16120C`/`F0E9DA`), Material 3 enabled, Anton display / Noto Sans body / JetBrains Mono type scale
-- **ComicCard/ComicButton**: card shadow corrected to 6/6 hard offset, shadows now resolve from `ColorScheme.shadow` so Day/Night ink is correct
-- **CI release flow** (`.github/workflows/build.yaml`): single signed universal `assembleRelease` APK instead of per-ABI splits; push to `beta` publishes a versioned pre-release (`v<release>-beta.N`) and auto-deletes older beta pre-releases; push to `main` publishes a stable release on rolling tag `v<version>`; beta version follows the latest stable release with a monotonically higher build number; signing secrets are now required (fail fast instead of silent unsigned build)
-- **Removed duplicate CI workflow**: deleted `build_apk.yml` ("Build APK (All Branches)") so a beta push triggers exactly one build
+- **Dark mode refined**: deeper blacks with warm paper-toned text for better contrast — by **Hamma**
+- **Beta updates improved**: beta versions now track the latest stable release (e.g. `v2.1.0-beta.N`) with a higher build number, so they install cleanly over stable, and old beta releases are removed automatically — by **Hamma**
+- **One build per push**: removed the duplicate workflow so each beta push produces exactly one signed release APK — by **Hamma**
 
 ### Fixed
-- `MangaShadow` private constructor was named `MangaShape._()` — broke `dart analyze`
+- Release build failure from the theme rework that broke Beta APK publishing — by **Hamma**
 
 ---
 
