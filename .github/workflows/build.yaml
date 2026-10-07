@@ -80,12 +80,39 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
 
-      - name: Extract version from pubspec (beta / main)
-        if: env.IS_BETA == 'true' || env.IS_MAIN == 'true'
+      - name: Extract version from pubspec (main)
+        if: env.IS_MAIN == 'true'
         run: |
           VERSION=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "pubspec version: $VERSION"
+
+      # Beta follows the latest stable release version (its own pubspec lags
+      # behind main), so beta tags read v<release>-beta.N.
+      # Build number stays github.run_number: it is monotonic per workflow
+      # file, so any beta built after a stable automatically carries a
+      # higher versionCode than that stable.
+      - name: Extract version for beta (follow latest stable release)
+        if: env.IS_BETA == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          STABLE_TAG=$(gh release list --exclude-drafts --limit 20 --json tagName,isPrerelease \
+            --jq '[.[] | select(.isPrerelease == false) | .tagName][0] // empty')
+          if [ -n "$STABLE_TAG" ]; then
+            VERSION=$(echo "$STABLE_TAG" | sed 's/^v//' | sed 's/[-+].*//')
+            echo "Latest stable release: $STABLE_TAG -> version $VERSION"
+          else
+            echo "No stable release found — falling back to origin/main pubspec"
+            git fetch origin main --quiet || true
+            VERSION=$(git show origin/main:pubspec.yaml 2>/dev/null | grep '^version: ' | sed 's/version: //' | sed 's/+.*//' || true)
+          fi
+          if [ -z "$VERSION" ]; then
+            echo "Fallback to local pubspec"
+            VERSION=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "beta version: $VERSION (build ${{ github.run_number }})"
 
       - name: Extract version from tag
         if: env.IS_RELEASE == 'true'
