@@ -47,8 +47,6 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
-        // Enable R8 full mode for better optimization
-        minSdkPreview = "VANILLA_ICE_CREAM"
     }
 
     signingConfigs {
