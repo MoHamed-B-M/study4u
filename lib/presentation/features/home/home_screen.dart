@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/entities/task.dart';
@@ -306,8 +306,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                DateFormat('MMM dd, hh:mm a')
-                                    .format(task.dueDate),
+                                TimeUtils.formatDateTime(task.dueDate),
                                 style: TextStyle(
                                     fontSize: 11,
                                     color: isDark

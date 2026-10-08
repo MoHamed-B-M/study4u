@@ -46,3 +46,7 @@ app.*.map.json
 
 
 Animated-Bubble-Navigation-Bar
+
+# Agent skills & config
+.agents/
+.agents.claude.continue.opencode

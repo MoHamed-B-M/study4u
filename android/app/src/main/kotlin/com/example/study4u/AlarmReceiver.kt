@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.os.Build
 import androidx.core.app.NotificationCompat
 
@@ -17,28 +18,24 @@ class AlarmReceiver : BroadcastReceiver() {
         val channelId = "stdy4u_alarm_channel"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // On Android 13+ check POST_NOTIFICATIONS – system will drop silently if not granted
-        if (Build.VERSION.SDK_INT >= 33) {
-            if (!notificationManager.areNotificationsEnabled()) return
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+
             val channel = NotificationChannel(
-                channelId, "Class & Task Reminders",
+                channelId,
+                "Class & Task Reminders",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Reminders for upcoming classes and tasks"
+                // Use system default alarm sound
+                setSound(android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI, audioAttributes)
                 enableVibration(true)
-                setShowBadge(true)
+                vibrationPattern = longArrayOf(0, 500, 200, 500)
             }
             notificationManager.createNotificationChannel(channel)
-        }
-
-        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        val contentIntent = launchIntent?.let {
-            android.app.PendingIntent.getActivity(context, id, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
@@ -47,8 +44,9 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-            .setContentIntent(contentIntent)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setSound(android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI)
             .build()
 
         notificationManager.notify(id, notification)

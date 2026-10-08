@@ -10,7 +10,7 @@
 # Hive
 -keep class * extends hive.Object { *; }
 -keep class * extends hive.HiveObject { *; }
--keep class com.study4u.** { *; }
+-keep class com.example.study4u.** { *; }
 
 # Keep JSON serialization classes
 -keepclassmembers class * {
@@ -38,4 +38,31 @@
 -keep,allowobfuscation,allowshrinking class * {
     @keep <fields>;
     @keep <methods>;
+}
+
+# Remove unused resource classes
+-dontwarn android.support.v4.**
+-dontwarn androidx.**
+
+# Optimize: remove unused methods/fields
+-optimizationpasses 5
+-allowaccessmodification
+-mergeinterfacesaggressively
+-overloadaggressively
+
+# Remove logging in release
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+
+# Keep reflection for Riverpod code generation
+-keep class * extends dev.flutter.* { *; }
+-keep class * implements flutter_riverpod.** { *; }
+
+# Keep annotation processor generated code
+-keep class * {
+    @flutter_riverpod.** <fields>;
+    @flutter_riverpod.** <methods>;
 }

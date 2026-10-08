@@ -29,6 +29,7 @@ class ComicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: width,
@@ -36,14 +37,15 @@ class ComicCard extends StatelessWidget {
       margin: margin,
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        // Komi MangaSurface: panel fill, 3dp inked border, 6/6 hard shadow.
         color: isDark ? ComicTheme.darkSurface : backgroundColor,
         border: Border.all(color: borderColor, width: borderWidth),
         borderRadius: borderRadius ?? BorderRadius.zero,
         boxShadow: customShadow ??
             [
               BoxShadow(
-                color: ComicTheme.inkBlack,
-                offset: const Offset(4, 4),
+                color: scheme.shadow,
+                offset: const Offset(6, 6),
                 blurRadius: 0,
               ),
             ],

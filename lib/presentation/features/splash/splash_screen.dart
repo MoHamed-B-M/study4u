@@ -30,10 +30,9 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    _fadeCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
-    _scaleCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
-    _glowCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
-    _borderCtrl = AnimationController(vsync: this)..addListener(_onUpdate);
+    _fadeCtrl = AnimationController(vsync: this);
+    _scaleCtrl = AnimationController(vsync: this);
+    _glowCtrl = AnimationController(vsync: this);
 
     M3ESpring.animate(
       _fadeCtrl,
@@ -71,10 +70,6 @@ class _SplashScreenState extends State<SplashScreen>
     Timer(const Duration(milliseconds: 3200), _navigateToApp);
   }
 
-  void _onUpdate() {
-    if (mounted) setState(() {});
-  }
-
   void _navigateToApp() {
     if (!mounted || _navigated) return;
     _navigated = true;
@@ -101,19 +96,22 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-
     final reduced = M3ESpring.isReducedMotion(context);
-    final fVal = reduced ? 1.0 : _fadeCtrl.value;
-    final sVal = reduced ? 1.0 : _scaleCtrl.value;
-    final gVal = reduced ? 1.0 : _glowCtrl.value;
-    final bVal = reduced ? 1.0 : _borderCtrl.value;
 
     return Scaffold(
       backgroundColor: _bgColor,
       body: Stack(
         children: [
-          Opacity(
-            opacity: gVal,
+          AnimatedBuilder(
+            animation: _glowCtrl,
+            builder: (context, child) {
+              final gVal = reduced ? 1.0 : _glowCtrl.value;
+              // FadeTransition avoids Opacity's saveLayer on every frame.
+              return FadeTransition(
+                opacity: AlwaysStoppedAnimation(gVal),
+                child: child,
+              );
+            },
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
@@ -134,68 +132,57 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
           Center(
-            child: Transform.scale(
-              scale: sVal,
-              child: Opacity(
-                opacity: fVal,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AnimatedBuilder(
-                      animation: _borderCtrl,
-                      builder: (context, _) {
-                        final borderWidth = 1.5 + (bVal * 1.5);
-                        final shadowOffset = 3.0 + (bVal * 3.0);
-                        return Container(
-                          width: 120,
-                          height: 120,
-                          padding: const EdgeInsets.all(22),
-                          decoration: BoxDecoration(
-                            color: _bgColor,
-                            border: Border.all(
-                              color: ComicTheme.surfaceWhite,
-                              width: borderWidth,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: ComicTheme.inkRed.withAlpha((80 * bVal).toInt()),
-                                offset: Offset(shadowOffset, shadowOffset),
-                                blurRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: SvgPicture.asset(
-                            'assets/icons/book.svg',
-                            colorFilter: ColorFilter.mode(
-                              ComicTheme.inkRed,
-                              BlendMode.srcIn,
-                            ),
-                            fit: BoxFit.contain,
-                          ),
-                        );
-                      },
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_fadeCtrl, _scaleCtrl]),
+              builder: (context, child) {
+                final fVal = reduced ? 1.0 : _fadeCtrl.value;
+                final sVal = reduced ? 1.0 : _scaleCtrl.value;
+                return Transform.scale(
+                  scale: sVal,
+                  child: FadeTransition(
+                    opacity: AlwaysStoppedAnimation(fVal),
+                    child: child,
+                  ),
+                );
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(15),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 32),
-                    Text(
-                      'stdy4u',
-                      style: GoogleFonts.luckiestGuy(
-                        fontSize: 42,
-                        color: ComicTheme.surfaceWhite,
-                        height: 1,
-                      ),
+                    child: const Icon(
+                      Icons.menu_book_rounded,
+                      size: 52,
+                      color: Colors.white,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'STUDY SMARTER',
-                      style: GoogleFonts.luckiestGuy(
-                        fontSize: 13,
-                        color: ComicTheme.surfaceWhite.withAlpha(140),
-                        letterSpacing: 3,
-                        height: 1,
-                      ),
+                  ),
+                  const SizedBox(height: 28),
+                  const Text(
+                    'stdy4u',
+                    style: TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: -1.2,
+                      height: 1,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'STUDY SMARTER',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withAlpha(115),
+                      letterSpacing: 3.5,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

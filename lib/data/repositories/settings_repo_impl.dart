@@ -27,6 +27,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       themeMode: s.themeMode,
       notificationEnabled: s.notificationEnabled,
       userName: s.userName,
+      onboardingComplete: s.onboardingComplete,
+      useFloatingNavBar: s.useFloatingNavBar,
+      hapticFeedback: s.hapticFeedback,
+      showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }
@@ -40,6 +45,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       themeMode: mode,
       notificationEnabled: s.notificationEnabled,
       userName: s.userName,
+      onboardingComplete: s.onboardingComplete,
+      useFloatingNavBar: s.useFloatingNavBar,
+      hapticFeedback: s.hapticFeedback,
+      showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }
@@ -53,6 +63,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       themeMode: s.themeMode,
       notificationEnabled: enabled,
       userName: s.userName,
+      onboardingComplete: s.onboardingComplete,
+      useFloatingNavBar: s.useFloatingNavBar,
+      hapticFeedback: s.hapticFeedback,
+      showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }
@@ -66,6 +81,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       themeMode: s.themeMode,
       notificationEnabled: s.notificationEnabled,
       userName: name,
+      onboardingComplete: s.onboardingComplete,
+      useFloatingNavBar: s.useFloatingNavBar,
+      hapticFeedback: s.hapticFeedback,
+      showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }

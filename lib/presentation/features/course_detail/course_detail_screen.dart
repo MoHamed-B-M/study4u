@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
@@ -12,6 +11,7 @@ import '../../../domain/entities/course.dart';
 import '../../../domain/entities/task.dart';
 import '../../../domain/entities/course_material.dart';
 import '../../../domain/entities/attendance_record.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../theme/comic_theme.dart';
@@ -468,7 +468,7 @@ class _MaterialTile extends StatelessWidget {
         final path = uri?.path ?? m.content;
         return path.split('/').last;
       default:
-        return DateFormat('MMM dd').format(m.createdAt);
+        return TimeUtils.formatDateShort(m.createdAt);
     }
   }
 
@@ -892,7 +892,7 @@ class _NoteTile extends StatelessWidget {
                   ],
                   const SizedBox(height: 6),
                   Text(
-                    DateFormat('MMM dd, yyyy').format(note.dueDate),
+                    TimeUtils.formatDate(note.dueDate),
                     style:
                         TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
                   ),
@@ -1101,7 +1101,7 @@ class _TaskTile extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    DateFormat('MMM dd, hh:mm a').format(task.dueDate),
+                    TimeUtils.formatDateTime(task.dueDate),
                     style: TextStyle(
                       fontSize: 12,
                       color: task.urgency == TaskUrgency.urgent

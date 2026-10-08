@@ -23,13 +23,7 @@ class AppSettings extends HiveObject {
   @HiveField(8)
   final bool showNavLabels;
   @HiveField(9)
-  final bool pressSound;
-  @HiveField(10)
-  final double targetCgpa;
-  @HiveField(11)
-  final bool telegramPromptShown;
-  @HiveField(12)
-  final bool useAltAppIcon;
+  final bool betaUpdates;
 
   AppSettings({
     this.id = 'default',
@@ -41,9 +35,6 @@ class AppSettings extends HiveObject {
     this.useFloatingNavBar = false,
     this.hapticFeedback = true,
     this.showNavLabels = true,
-    this.pressSound = true,
-    this.targetCgpa = -1,
-    this.telegramPromptShown = false,
-    this.useAltAppIcon = false,
+    this.betaUpdates = false,
   });
 }

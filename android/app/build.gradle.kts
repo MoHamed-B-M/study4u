@@ -65,6 +65,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -72,6 +73,19 @@ android {
             signingConfig = signingConfigs.findByName("release")?.takeIf {
                 (it.storeFile?.exists() == true)
             } ?: signingConfigs.getByName("debug")
+        }
+    }
+
+    // Bundle configuration for Play Store (modern replacement for splits)
+    bundle {
+        language {
+            enableSplit = true
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
         }
     }
 

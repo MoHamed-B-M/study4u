@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:flutter/services.dart';
 import 'package:open_filex/open_filex.dart';
 import '../../core/services/update_service.dart';
 import '../../theme/comic_theme.dart';
@@ -40,40 +38,11 @@ class _UpdateDialogContent extends StatefulWidget {
 
 class _UpdateDialogContentState extends State<_UpdateDialogContent> {
   final _service = UpdateService();
-  bool _showProgress = false;
-  double _downloadProgress = 0.0;
+  double? _downloadProgress;
   String? _error;
-  bool _isPaused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkSavedState();
-  }
-
-  void _checkSavedState() {
-    try {
-      final f = File('${Directory.systemTemp.path}/dl_state.json');
-      if (f.existsSync()) {
-        final data = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-        if (data['url'] == widget.update.downloadUrl) {
-          final bytes = data['bytes'] as int;
-          if (bytes > 0) {
-            _showProgress = true;
-            _isPaused = true;
-          }
-        }
-      }
-    } catch (_) {}
-  }
 
   Future<void> _startDownload() async {
-    setState(() {
-      _showProgress = true;
-      _isPaused = false;
-      _downloadProgress = 0.0;
-      _error = null;
-    });
+    setState(() => _downloadProgress = 0.0);
     try {
       final path = await _service.downloadApk(
         url: widget.update.downloadUrl,
@@ -83,10 +52,6 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
       );
       await OpenFilex.open(path);
       if (mounted) Navigator.of(context).pop();
-    } on PauseException {
-      if (mounted) setState(() => _isPaused = true);
-    } on CancelException {
-      if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
         setState(() => _error = e.toString());
@@ -94,32 +59,13 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
     }
   }
 
-  void _pause() {
-    _service.pauseDownload();
-    setState(() => _isPaused = true);
-  }
-
-  void _resume() {
-    setState(() => _isPaused = false);
-    _startDownload();
-  }
-
-  void _cancel() async {
-    _service.cancelDownload();
-    if (mounted) Navigator.of(context).pop();
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: screenWidth * 0.92,
-        maxHeight: screenHeight * 0.80,
-      ),
+      constraints: BoxConstraints(maxWidth: screenWidth * 0.88),
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
@@ -132,11 +78,9 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
             ),
           ],
         ),
-        child: _error != null
-            ? _buildError(isDark)
-            : _showProgress
-                ? _buildProgress(isDark)
-                : _buildInfo(isDark),
+        child: _downloadProgress == null && _error == null
+            ? _buildInfo(isDark)
+            : _buildProgressOrError(isDark),
       ),
     );
   }
@@ -144,155 +88,122 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
   Widget _buildInfo(bool isDark) {
     final hasNotes = widget.update.releaseNotes != null &&
         widget.update.releaseNotes!.trim().isNotEmpty;
+    final isBeta = widget.update.isPreRelease;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 28),
+        const SizedBox(height: 32),
+        Stack(
+          alignment: Alignment.topRight,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+              ),
+              child: Icon(
+                Icons.download_rounded,
+                color: ComicTheme.inkRed,
+                size: 28,
+              ),
+            ),
+            if (isBeta)
+              Container(
+                margin: const EdgeInsets.all(4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: ComicTheme.inkRed,
+                  border: Border.all(color: ComicTheme.inkBlack, width: 1.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'BETA',
+                  style: TextStyle(
+                    color: ComicTheme.surfaceWhite,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'UPDATE\nAVAILABLE',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+            height: 1.1,
+          ),
+        ),
+        const SizedBox(height: 6),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color:
-                    isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
-                border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
-              ),
-              child: const Icon(
-                Icons.download_rounded,
+            Text(
+              'v${widget.update.latestVersion}',
+              style: TextStyle(
                 color: ComicTheme.inkRed,
-                size: 24,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(width: 14),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'WHAT\'S NEW',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                    height: 1.1,
-                  ),
+            if (isBeta) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: ComicTheme.inkRed.withValues(alpha: 0.15),
+                  border: Border.all(color: ComicTheme.inkRed, width: 1.5),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                Text(
-                  'Version ${widget.update.latestVersion}',
-                  style: const TextStyle(
+                child: Text(
+                  'PRE-RELEASE',
+                  style: TextStyle(
                     color: ComicTheme.inkRed,
-                    fontSize: 13,
+                    fontSize: 9,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ],
         ),
         if (hasNotes) ...[
-          const SizedBox(height: 20),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color:
-                      isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
-                  border: Border.all(color: ComicTheme.inkBlack, width: 2),
-                ),
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.all(18),
-                  child: MarkdownBody(
-                    data: widget.update.releaseNotes!,
-                    selectable: true,
-                    shrinkWrap: true,
-                    styleSheet: MarkdownStyleSheet(
-                      p: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontSize: 15,
-                        height: 1.45,
-                      ),
-                      h1: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontSize: 21,
-                        fontWeight: FontWeight.w800,
-                        height: 1.25,
-                      ),
-                      h2: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                        height: 1.3,
-                      ),
-                      h3: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        height: 1.35,
-                      ),
-                      h4: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        height: 1.4,
-                      ),
-                      code: TextStyle(
-                        color: ComicTheme.inkRed,
-                        fontSize: 13,
-                        backgroundColor: Colors.transparent,
-                      ),
-                      codeblockDecoration: BoxDecoration(
-                        color:
-                            isDark ? ComicTheme.darkPulp : ComicTheme.paperBg,
-                        border:
-                            Border.all(color: ComicTheme.inkBlack, width: 1),
-                      ),
-                      codeblockPadding: const EdgeInsets.all(12),
-                      horizontalRuleDecoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: ComicTheme.inkBlack, width: 1),
-                        ),
-                      ),
-                      listBullet: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontSize: 15,
-                        height: 1.45,
-                      ),
-                      listIndent: 22,
-                      blockSpacing: 10,
-                      strong: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      em: TextStyle(
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      a: TextStyle(
-                        color: ComicTheme.inkRed,
-                      ),
-                    ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 220),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? ComicTheme.darkSurface
+                    : ComicTheme.surfaceWhite,
+                border: Border.all(color: ComicTheme.inkBlack, width: 2),
+              ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  widget.update.releaseNotes!,
+                  style: TextStyle(
+                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                    fontSize: 13,
+                    height: 1.5,
                   ),
                 ),
               ),
             ),
           ),
         ],
+        const SizedBox(height: 24),
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Row(
             children: [
               Expanded(
@@ -319,9 +230,10 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
     );
   }
 
-  Widget _buildProgress(bool isDark) {
-    final progress = _downloadProgress.clamp(0.0, 1.0);
+  Widget _buildProgressOrError(bool isDark) {
+    final progress = (_downloadProgress ?? 0.0).clamp(0.0, 1.0);
     final percent = (progress * 100).toInt();
+    final isError = _error != null;
 
     return Padding(
       padding: const EdgeInsets.all(32),
@@ -332,36 +244,54 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+              color: isError
+                  ? ComicTheme.inkRed.withValues(alpha: 0.2)
+                  : (isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite),
               border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
             ),
             child: Icon(
-              _isPaused ? Icons.pause_rounded : Icons.download_rounded,
-              color: ComicTheme.inkRed,
+              isError ? Icons.error_outline : Icons.download_rounded,
+              color: isError ? ComicTheme.inkRed : ComicTheme.inkRed,
               size: 28,
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            _isPaused ? 'Download Paused' : 'Downloading...',
+            isError ? 'Download Failed' : 'Downloading...',
             style: TextStyle(
               color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            '$percent%',
-            style: TextStyle(
-              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
+          if (isError) ...[
+            const SizedBox(height: 12),
+            Text(
+              _error!,
+              style: TextStyle(
+                color: ComicTheme.inkRed.withValues(alpha: 0.8),
+                fontSize: 13,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 12),
-          ClipRect(
-            child: Container(
+            const SizedBox(height: 24),
+            _ComicDialogButton(
+              label: 'Close',
+              isCta: false,
+              onTap: () => Navigator.of(context).pop(),
+            ),
+          ] else ...[
+            const SizedBox(height: 24),
+            Text(
+              '$percent%',
+              style: TextStyle(
+                color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
               height: 12,
               decoration: BoxDecoration(
                 color: isDark ? ComicTheme.darkSurface : ComicTheme.paperBg,
@@ -372,102 +302,12 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
                 widthFactor: progress,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: _isPaused
-                        ? ComicTheme.inkBlack.withValues(alpha: 0.4)
-                        : ComicTheme.inkRed,
+                    color: ComicTheme.inkRed,
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              if (_isPaused) ...[
-                Expanded(
-                  child: _ComicDialogButton(
-                    label: 'Cancel',
-                    isCta: false,
-                    onTap: _cancel,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ComicDialogButton(
-                    label: 'Resume',
-                    isCta: true,
-                    icon: Icons.play_arrow_rounded,
-                    onTap: _resume,
-                  ),
-                ),
-              ] else ...[
-                Expanded(
-                  child: _ComicDialogButton(
-                    label: 'Cancel',
-                    isCta: false,
-                    onTap: _cancel,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ComicDialogButton(
-                    label: 'Pause',
-                    isCta: true,
-                    icon: Icons.pause_rounded,
-                    onTap: _pause,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: ComicTheme.inkRed.withValues(alpha: 0.2),
-              border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
-            ),
-            child: const Icon(
-              Icons.error_outline,
-              color: ComicTheme.inkRed,
-              size: 28,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Download Failed',
-            style: TextStyle(
-              color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _error!,
-            style: TextStyle(
-              color: ComicTheme.inkRed.withValues(alpha: 0.8),
-              fontSize: 13,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          _ComicDialogButton(
-            label: 'Close',
-            isCta: false,
-            onTap: () => Navigator.of(context).pop(),
-          ),
+          ],
         ],
       ),
     );
@@ -503,9 +343,7 @@ class _ComicDialogButtonState extends State<_ComicDialogButton> {
         : (isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite);
     final pressedBg = widget.isCta
         ? ComicTheme.inkRed.withValues(alpha: 0.7)
-        : (isDark
-            ? ComicTheme.darkText.withValues(alpha: 0.2)
-            : ComicTheme.inkBlack.withValues(alpha: 0.1));
+        : (isDark ? ComicTheme.darkText.withValues(alpha: 0.2) : ComicTheme.inkBlack.withValues(alpha: 0.1));
     final textColor = widget.isCta
         ? ComicTheme.surfaceWhite
         : (isDark ? ComicTheme.darkText : ComicTheme.inkBlack);
@@ -514,7 +352,7 @@ class _ComicDialogButtonState extends State<_ComicDialogButton> {
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) {
         setState(() => _pressed = false);
-        Vibrate.feedback(FeedbackType.light);
+        HapticFeedback.lightImpact();
         widget.onTap();
       },
       onTapCancel: () => setState(() => _pressed = false),

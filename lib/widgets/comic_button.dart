@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:flutter/services.dart';
 import '../theme/comic_theme.dart';
-import '../core/services/sound_service.dart';
 
 class ComicButton extends StatefulWidget {
   final Widget child;
@@ -14,7 +13,6 @@ class ComicButton extends StatefulWidget {
   final double? width;
   final double? height;
   final bool isCta;
-  final bool enableSound;
   final bool enableHaptic;
 
   const ComicButton({
@@ -29,7 +27,6 @@ class ComicButton extends StatefulWidget {
     this.width,
     this.height,
     this.isCta = false,
-    this.enableSound = true,
     this.enableHaptic = true,
   });
 
@@ -53,6 +50,7 @@ class _ComicButtonState extends State<ComicButton> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Color resolveBg(Color c) {
       if (c == ComicTheme.surfaceWhite && isDark) return ComicTheme.darkSurface;
@@ -73,10 +71,7 @@ class _ComicButtonState extends State<ComicButton> {
       onTapUp: widget.onPressed != null
           ? (_) {
               if (widget.enableHaptic) {
-                Vibrate.feedback(FeedbackType.light);
-              }
-              if (widget.enableSound) {
-                SoundService.instance.playClick();
+                HapticFeedback.lightImpact();
               }
               widget.onPressed?.call();
               setState(() => _isPressed = false);
@@ -99,7 +94,8 @@ class _ComicButtonState extends State<ComicButton> {
           borderRadius: BorderRadius.zero,
           boxShadow: [
             BoxShadow(
-              color: ComicTheme.inkBlack,
+              // Komi MangaShadow.button: 4/4 hard offset, zero blur.
+              color: scheme.shadow,
               offset: _isPressed ? const Offset(1, 1) : const Offset(4, 4),
               blurRadius: 0,
             ),

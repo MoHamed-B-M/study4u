@@ -1,29 +1,27 @@
 <div align="center">
-
-# stdy4u
-
-**Study smarter** — a local-first student productivity companion built with Flutter.
-
-[![Version](https://img.shields.io/badge/version-2.1.0-green.svg)](pubspec.yaml)
-[![Flutter](https://img.shields.io/badge/Flutter-3.27%2B-02569B.svg?logo=flutter)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-%3E%3D3.6.0-0175C2.svg?logo=dart)](https://dart.dev)
-[![CI](https://github.com/MoHamed-B-M/study4u/actions/workflows/build.yaml/badge.svg)](https://github.com/MoHamed-B-M/study4u/actions/workflows/build.yaml)
-[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](#getting-started)
-[![Downloads](https://img.shields.io/github/downloads/MoHamed-B-M/study4u/total.svg)](https://github.com/MoHamed-B-M/study4u/releases)
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
-[![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FMoHamed-B-M%2Fstudy4u&label=Visitors&countColor=%23263759&style=flat)](https://visitorbadge.io)
-
+  <br>
+  <h1>📚 stdy4u</h1>
+  <h3><em>STUDY SMARTER</em></h3>
+  <p><strong>v2.0.0-beta.1</strong> — Comic-Print Manga Design System</p>
+  <br>
 </div>
 
 ---
 
 ## Overview
 
-stdy4u helps students manage courses, attendance, tasks, grades, and focus time in one offline-first app. All data is stored locally on the device — no account required. The interface uses a distinctive comic-print design system with high-contrast ink styling.
+<p align="center">
+  <img src="screenshot/intro.png" width="180" alt="Onboarding">
+  <img src="screenshot/home.jpg" width="180" alt="Home Dashboard">
+  <img src="screenshot/tasks.jpg" width="180" alt="Tasks">
+  <img src="screenshot/stats.jpg" width="180" alt="Statistics">
+</p>
 
-## Features
+---
 
-### Course Management
+## ✨ Features
+
+### 🎓 Course Management
 - Add courses with name, code, professor, room, schedule, and color coding
 - Track grades, target GPA, and credit hours per course; target CGPA persists across sessions
 - Edit or delete courses through a long-press context menu
@@ -53,10 +51,11 @@ stdy4u helps students manage courses, attendance, tasks, grades, and focus time 
 - Optional music playback during focus sessions
 - Weekly focus analytics dashboard
 
-### Screen Time Insights
-- Reads device usage statistics through a native `UsageStatsManager` bridge (`app_usage`)
-- Per-app daily usage entries stored locally in Hive
-- Expandable screen time panel on the Stats screen
+### 🎨 Theming & Personalization
+- Light, Dark, and System Default modes
+- **Comic-Print Manga Design System** — Luckiest Guy typography, sharp 2.5px ink borders, hard offset shadows, ink red (`#E63946`) accents
+- Haptic feedback toggle with mechanical keyboard click sound
+- Press sound toggle for button interaction audio
 
 ### Statistics & Analytics
 - CGPA calculation with letter grade conversion (A-F)
@@ -154,9 +153,9 @@ dart run build_runner build --delete-conflicting-outputs
 # Static analysis - must report zero errors before committing
 flutter analyze --no-pub
 
-# Release build used by CI
-flutter build apk --release --split-per-abi
-```
+- Open **Settings** to switch between Light, Dark, or System theme
+- Toggle **Haptic Feedback** and **Press Sound** for interaction feedback
+- Enable or disable notifications for class reminders
 
 ## User Guide
 
@@ -218,19 +217,16 @@ GoRouter with a `ShellRoute` hosts the three tab routes (`/`, `/tracker`, `/stat
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Flutter (Dart >= 3.6.0) |
-| State management | Riverpod (`flutter_riverpod`) |
-| Navigation | GoRouter with ShellRoute |
-| Local storage | Hive + hive_flutter (generated adapters) |
-| Calendar UI | table_calendar |
-| Icons / SVG | solar_icons, flutter_svg |
-| Notifications | flutter_local_notifications + timezone |
-| Audio | just_audio |
-| Files | file_picker, open_filex |
-| Usage stats | app_usage (native bridge) |
-| Markdown | flutter_markdown |
-| Code generation | build_runner, hive_generator, riverpod_generator |
-| CI/CD | GitHub Actions (build + release APK) |
+| **Framework** | Flutter 3.44 + Dart |
+| **State Management** | Riverpod (`flutter_riverpod`) |
+| **Navigation** | GoRouter with ShellRoute + IndexedStack |
+| **Local Storage** | Hive (`hive_flutter`) |
+| **Calendar** | table_calendar |
+| **Notifications** | flutter_local_notifications |
+| **Audio** | just_audio |
+| **File Picker** | file_picker |
+| **Code Generation** | build_runner + hive_generator + riverpod_generator |
+| **CI/CD** | GitHub Actions (build + release APK) |
 
 Charts are hand-painted with `CustomPaint`; no chart library dependency.
 
@@ -297,8 +293,21 @@ Battery-optimization exemption is requested at runtime so reminders fire reliabl
 ## Building for Release
 
 ```bash
-# Increment version in pubspec.yaml first
-flutter build apk --release --split-per-abi --build-number=$YOUR_BUILD_NUMBER
+# Clone the repository
+git clone https://github.com/MoHamed-B-M/study4u.git
+cd study4u
+
+# Install dependencies
+flutter pub get
+
+# Generate Hive adapters & Riverpod providers
+dart run build_runner build --delete-conflicting-outputs
+
+# Run in debug mode
+flutter run
+
+# Build release APK (split per ABI)
+flutter build apk --release --split-per-abi
 ```
 
 Pushing a tag matching `v*.*.*` triggers the GitHub Actions release workflow, which builds signed APKs and attaches them to a GitHub Release.
@@ -309,9 +318,13 @@ Pushing a tag matching `v*.*.*` triggers the GitHub Actions release workflow, wh
 - Quick actions / app shortcuts: start focus timer, open flashcards, create a study session
 - Flashcards feature
 
-See [CHANGELOG.md](CHANGELOG.md) for shipped changes.
+```bash
+# Increment version in pubspec.yaml, then:
+flutter build apk --release --split-per-abi --build-number=$YOUR_BUILD_NUMBER
 
-## Acknowledgments
+# Or with signing env vars (CI):
+flutter build apk --release --split-per-abi --build-number=$CI_PIPELINE_ID
+```
 
 Developed as a school project for Madame Basma.
 

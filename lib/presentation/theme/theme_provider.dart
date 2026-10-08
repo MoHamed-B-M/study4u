@@ -47,10 +47,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     bool? useFloatingNavBar,
     bool? hapticFeedback,
     bool? showNavLabels,
-    bool? pressSound,
-    double? targetCgpa,
-    bool? telegramPromptShown,
-    bool? useAltAppIcon,
+    bool? betaUpdates,
   }) {
     return AppSettings(
       id: state.id,
@@ -62,21 +59,14 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       useFloatingNavBar: useFloatingNavBar ?? state.useFloatingNavBar,
       hapticFeedback: hapticFeedback ?? state.hapticFeedback,
       showNavLabels: showNavLabels ?? state.showNavLabels,
-      pressSound: pressSound ?? state.pressSound,
-      targetCgpa: targetCgpa ?? state.targetCgpa,
-      telegramPromptShown: telegramPromptShown ?? state.telegramPromptShown,
-      useAltAppIcon: useAltAppIcon ?? state.useAltAppIcon,
+      betaUpdates: betaUpdates ?? state.betaUpdates,
     );
   }
 
-  Future<void> _saveAndUpdate(AppSettings updated) async {
+  void _saveAndUpdate(AppSettings updated) {
     try {
-      // Awaited so a quick app close right after a change cannot lose the
-      // write (Hive batches are flushed when the future completes).
-      await LocalStorage.appSettingsBox.put('default', updated);
-    } catch (e) {
-      debugPrint('settings persist failed: $e');
-    }
+      LocalStorage.appSettingsBox.put('default', updated);
+    } catch (_) {}
     state = updated;
   }
 
@@ -98,14 +88,8 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       _saveAndUpdate(_copy(hapticFeedback: value));
   void setShowNavLabels(bool value) =>
       _saveAndUpdate(_copy(showNavLabels: value));
-  void setPressSound(bool value) => _saveAndUpdate(_copy(pressSound: value));
-  void setTargetCgpa(double value) => _saveAndUpdate(_copy(targetCgpa: value));
-
-  Future<void> setTelegramPromptShown(bool value) =>
-      _saveAndUpdate(_copy(telegramPromptShown: value));
-
-  Future<void> setUseAltAppIcon(bool value) =>
-      _saveAndUpdate(_copy(useAltAppIcon: value));
+  void setBetaUpdates(bool value) =>
+      _saveAndUpdate(_copy(betaUpdates: value));
 }
 
 final useFloatingNavBarProvider = Provider<bool>((ref) {
@@ -118,4 +102,8 @@ final useHapticFeedbackProvider = Provider<bool>((ref) {
 
 final showNavLabelsProvider = Provider<bool>((ref) {
   return ref.watch(settingsProvider.select((s) => s.showNavLabels));
+});
+
+final betaUpdatesProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider.select((s) => s.betaUpdates));
 });

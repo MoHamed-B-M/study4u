@@ -3,10 +3,19 @@ import 'package:intl/intl.dart';
 class TimeUtils {
   TimeUtils._();
 
-  static String formatTime(DateTime dt) => DateFormat('hh:mm a').format(dt);
-  static String formatDate(DateTime dt) => DateFormat('MMM dd, yyyy').format(dt);
-  static String formatDateShort(DateTime dt) => DateFormat('MMM dd').format(dt);
-  static String formatDay(DateTime dt) => DateFormat('EEEE').format(dt);
+  // Cached: DateFormat construction loads locale data and is expensive,
+  // so never instantiate one inside build().
+  static final _time = DateFormat('hh:mm a');
+  static final _date = DateFormat('MMM dd, yyyy');
+  static final _dateShort = DateFormat('MMM dd');
+  static final _day = DateFormat('EEEE');
+  static final _dateTime = DateFormat('MMM dd, hh:mm a');
+
+  static String formatTime(DateTime dt) => _time.format(dt);
+  static String formatDate(DateTime dt) => _date.format(dt);
+  static String formatDateShort(DateTime dt) => _dateShort.format(dt);
+  static String formatDay(DateTime dt) => _day.format(dt);
+  static String formatDateTime(DateTime dt) => _dateTime.format(dt);
 
   static String timeAgo(DateTime dt) {
     final now = DateTime.now();

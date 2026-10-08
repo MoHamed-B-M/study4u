@@ -37,7 +37,9 @@ public class AlarmPlugin: NSObject, FlutterPlugin {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
-        content.sound = .default
+        content.sound = UNNotificationSound.default
+        content.categoryIdentifier = "ALARM_CATEGORY"
+        content.interruptionLevel = .timeSensitive
 
         let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerAt)
         let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)

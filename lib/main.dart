@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
-import 'core/services/home_widget_service.dart';
 import 'data/datasources/local_storage.dart';
-import 'data/platform/app_icon_bridge.dart';
 import 'theme/comic_theme.dart';
 import 'presentation/theme/theme_provider.dart';
 import 'presentation/features/home/home_screen.dart';
@@ -14,38 +12,28 @@ import 'presentation/features/tracker/tracker_screen.dart';
 import 'presentation/features/statistics/statistics_screen.dart';
 import 'presentation/features/settings/settings_screen.dart';
 import 'presentation/features/course_detail/course_detail_screen.dart';
-import 'presentation/features/collab/collab_screen.dart';
 import 'presentation/features/splash/splash_screen.dart';
 import 'presentation/features/feature_preview/feature_preview_screen.dart';
 import 'presentation/widgets/update_dialog.dart';
-import 'presentation/widgets/telegram_prompt_dialog.dart';
 import 'widgets/manga_nav_bar.dart';
 import 'core/animation/page_scale.dart';
 import 'data/models/app_settings.dart';
-import 'shared/providers/logic_providers.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-  ));
+  NotificationService.instance.init(
+    onNotificationTap: (payload) {
+      if (payload != 'app_update') return;
+      final update = UpdateService.lastKnownUpdate;
+      if (update == null) return;
+      final ctx = rootNavigatorKey.currentContext;
+      if (ctx == null) return;
+      UpdateDialog.show(context: ctx, update: update);
+    },
+  );
   LocalStorage.init();
   runApp(const StartupApp());
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    NotificationService.instance.init(
-      onNotificationTap: (payload) {
-        if (payload != 'app_update') return;
-        final update = UpdateService.lastKnownUpdate;
-        if (update == null) return;
-        final ctx = rootNavigatorKey.currentContext;
-        if (ctx == null) return;
-        UpdateDialog.show(context: ctx, update: update);
-      },
-    );
-  });
 }
 
 class StartupApp extends StatefulWidget {
@@ -161,13 +149,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/settings',
           builder: (context, state) => const SettingsScreen()),
       GoRoute(
-          path: '/collab', builder: (context, state) => const CollabScreen()),
-      GoRoute(
         path: '/course/:id',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: CourseDetailScreen(courseId: state.pathParameters['id']!),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          transitionsBuilder:
+              (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position: Tween<Offset>(
                 begin: const Offset(1, 0),
@@ -191,75 +178,17 @@ class Stdy4uApp extends ConsumerStatefulWidget {
   ConsumerState<Stdy4uApp> createState() => _Stdy4uAppState();
 }
 
-class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
-    with WidgetsBindingObserver {
+class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      HomeWidgetService.pushUpdate();
-      // Ensure notifications are initialized and rescheduled (handles reboot)
-      try {
-        await NotificationService.instance.init();
-        await NotificationService.instance.rescheduleAllCourses();
-      } catch (_) {}
-      // Reconcile Hive with the durable native state (PM + SharedPrefs commit).
-      // If they differ, the native side is the truth (it survives quick kills
-      // even before Hive flushes) – sync Hive to match it instead of reverting
-      // the launcher icon. This prevents the "switch -> close -> revert" bug.
-      try {
-        final hiveAlt = ref.read(settingsProvider).useAltAppIcon;
-        final nativeAlt = await AppIconBridge.isAlternate();
-        if (hiveAlt != nativeAlt) {
-          await ref.read(settingsProvider.notifier).setUseAltAppIcon(nativeAlt);
-        }
-      } catch (_) {}
-      _startupSequence();
-    });
-  }
-
-  /// Runs once per app start: update check first, then the one-time
-  /// Telegram join prompt (so the two dialogs never stack).
-  Future<void> _startupSequence() async {
-    await _checkUpdate();
-    if (!mounted) return;
-    _maybeShowTelegramPrompt();
-  }
-
-  void _maybeShowTelegramPrompt() {
-    bool alreadyShown = false;
-    try {
-      final s = LocalStorage.appSettingsBox.get('default');
-      alreadyShown = s?.telegramPromptShown ?? false;
-    } catch (_) {}
-    if (alreadyShown) return;
-
-    TelegramPromptDialog.show(context).then((_) {
-      // Mark as shown no matter how the dialog was closed.
-      try {
-        ref.read(settingsProvider.notifier).setTelegramPromptShown(true);
-      } catch (_) {}
-    });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Refresh the home-screen widget snapshot whenever the app comes back.
-    if (state == AppLifecycleState.resumed) {
-      HomeWidgetService.pushUpdate();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdate());
   }
 
   Future<void> _checkUpdate() async {
     final service = UpdateService();
-    final update = await service.checkForUpdate();
+    final settings = ref.read(settingsProvider);
+    final update = await service.checkForUpdate(includePreRelease: settings.betaUpdates);
     if (!mounted || update == null || !update.isNewer) return;
     UpdateService.lastKnownUpdate = update;
     NotificationService.instance
@@ -273,11 +202,6 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp>
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
-
-    // Keep the home-screen widget in sync when data changes.
-    ref.listen<int>(dataRefreshProvider, (_, __) {
-      HomeWidgetService.pushUpdate();
-    });
 
     return MaterialApp.router(
       title: 'stdy4u',
@@ -301,29 +225,33 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   static const _tabRoutes = ['/', '/tracker', '/stats'];
 
-  int _currentIndex = 0;
+  bool? _lastDark;
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     final isTabRoute = _tabRoutes.contains(location);
-    if (isTabRoute) _currentIndex = _tabRoutes.indexOf(location);
+    // Pure derivation from the route — no setState, no field writes in build.
+    final currentIndex = isTabRoute ? _tabRoutes.indexOf(location) : 0;
     final enableHaptic = ref.watch(useHapticFeedbackProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarDividerColor: Colors.transparent,
-    ));
+    // Platform call only when the value actually changes, not every build.
+    if (_lastDark != isDark) {
+      _lastDark = isDark;
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+      ));
+    }
 
     return Scaffold(
       body: isTabRoute
           ? RepaintBoundary(
               child: IndexedStack(
-                index: _currentIndex,
+                index: currentIndex,
                 children: const [
                   HomeScreen(),
                   TrackerScreen(),
@@ -334,7 +262,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           : widget.child,
       bottomNavigationBar: isTabRoute
           ? MangaNavBar(
-              selectedIndex: _currentIndex,
+              selectedIndex: currentIndex,
               enableHaptic: enableHaptic,
               onTabChange: (index) {
                 context.go(_tabRoutes[index]);

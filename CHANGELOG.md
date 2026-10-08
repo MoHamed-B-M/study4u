@@ -4,7 +4,34 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
-## [Unreleased]
+## [2.2.0] - 2026-10-08
+
+### Added
+- **Warmer manga paper theme**: app background, cards and dialogs now use a warm comic-paper palette with a bolder red accent, sharp inked borders and hard offset shadows — by **Hamma**
+- **New display typography**: headings set in Anton with Noto Sans body text for a cleaner comic-print look — by **Hamma**
+- **Beta updates opt-in**: new toggle in Settings to include pre-releases in update checks, with a PRE-RELEASE badge in the update dialog — by **Hamma**
+- **Stronger class and alarm notifications**: system alarm sound with vibration pattern, exact alarms and full-screen intent on Android; critical and time-sensitive alerts on iOS; 3 channels (general, class reminders, alarms) — by **Hamma**
+
+### Changed
+- **Dark mode refined**: deeper blacks with warm paper-toned text for better contrast — by **Hamma**
+- **Faster UI with scoped rebuilds**: Stats pomodoro hero subscribes to the timer tick instead of the whole screen, Splash uses AnimatedBuilder, date formats cached, Tracker rows extracted — by **Hamma**
+- **Smaller app**: removed 10+ unused M3E packages plus animations/dynamic_color/just_audio, aggressive R8/ProGuard, ABI splits, no bundled audio — by **Hamma**
+- **Beta updates improved**: beta versions now track the latest stable release (e.g. `v2.1.0-beta.N`) with a higher build number, so they install cleanly over stable, and old beta releases are removed automatically — by **Hamma**
+- **One build per push**: removed the duplicate workflow so each beta push produces exactly one signed release APK — by **Hamma**
+- **ComicTheme const fix**: colors kept static const so const call sites compile — by **Hamma**
+
+### Fixed
+- Release build failure from the theme rework that broke Beta APK publishing — by **Hamma**
+- Notification service const issues (vibration pattern, Darwin interruption level) and stale just_audio references — by **Hamma**
+- Removed unsupported minSdkPreview VANILLA_ICE_CREAM — by **Hamma**
+- Removed deprecated Gradle properties (isZipAlignEnabled, splits.abi) — by **Hamma**
+
+### Removed
+- Press-sound click feature (SoundService, audio asset, setting, just_audio dependency) — by **Hamma**
+- Collaborative Study Room with CRDT sync, WebRTC calls, chat, file sharing, relay and signaling servers — by **Hamma**
+- Telegram community link and first-launch prompt — by **Hamma**
+- Home-screen widget with pin flow, and app icon picker — by **Hamma**
+- Heavy unused dependencies (flutter_vibrate, disable_battery_optimization, solar_icons, flutter_svg, flutter_markdown, permission_handler, QR/scanner, WebRTC/CRDT stack) and ComicLoader widget — by **Hamma**
 
 ---
 
