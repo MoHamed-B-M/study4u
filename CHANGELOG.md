@@ -4,22 +4,117 @@ All notable changes to stdy4u will be documented in this file.
 
 ---
 
-## [2.2.0] - 2026-10-07
+## [2.2.0] - 2026-10-08
 
 ### Added
 - **Warmer manga paper theme**: app background, cards and dialogs now use a warm comic-paper palette with a bolder red accent, sharp inked borders and hard offset shadows — by **Hamma**
 - **New display typography**: headings set in Anton with Noto Sans body text for a cleaner comic-print look — by **Hamma**
+- **Beta updates opt-in**: new toggle in Settings to include pre-releases in update checks, with a PRE-RELEASE badge in the update dialog — by **Hamma**
+- **Stronger class and alarm notifications**: system alarm sound with vibration pattern, exact alarms and full-screen intent on Android; critical and time-sensitive alerts on iOS; 3 channels (general, class reminders, alarms) — by **Hamma**
 
 ### Changed
 - **Dark mode refined**: deeper blacks with warm paper-toned text for better contrast — by **Hamma**
+- **Faster UI with scoped rebuilds**: Stats pomodoro hero subscribes to the timer tick instead of the whole screen, Splash uses AnimatedBuilder, date formats cached, Tracker rows extracted — by **Hamma**
+- **Smaller app**: removed 10+ unused M3E packages plus animations/dynamic_color/just_audio, aggressive R8/ProGuard, ABI splits, no bundled audio — by **Hamma**
 - **Beta updates improved**: beta versions now track the latest stable release (e.g. `v2.1.0-beta.N`) with a higher build number, so they install cleanly over stable, and old beta releases are removed automatically — by **Hamma**
 - **One build per push**: removed the duplicate workflow so each beta push produces exactly one signed release APK — by **Hamma**
+- **ComicTheme const fix**: colors kept static const so const call sites compile — by **Hamma**
 
 ### Fixed
 - Release build failure from the theme rework that broke Beta APK publishing — by **Hamma**
+- Notification service const issues (vibration pattern, Darwin interruption level) and stale just_audio references — by **Hamma**
+- Removed unsupported minSdkPreview VANILLA_ICE_CREAM — by **Hamma**
+- Removed deprecated Gradle properties (isZipAlignEnabled, splits.abi) — by **Hamma**
+
+### Removed
+- Press-sound click feature (SoundService, audio asset, setting, just_audio dependency) — by **Hamma**
+- Collaborative Study Room with CRDT sync, WebRTC calls, chat, file sharing, relay and signaling servers — by **Hamma**
+- Telegram community link and first-launch prompt — by **Hamma**
+- Home-screen widget with pin flow, and app icon picker — by **Hamma**
+- Heavy unused dependencies (flutter_vibrate, disable_battery_optimization, solar_icons, flutter_svg, flutter_markdown, permission_handler, QR/scanner, WebRTC/CRDT stack) and ComicLoader widget — by **Hamma**
 
 ---
 
+## [2.1.0] - 2026-08-27
+
+### Added
+- Telegram community link in Settings — by **Hamma**
+- First-launch Telegram prompt (one-time) — by **Hamma**
+- Home-screen widget (next class, tasks, focus, CGPA) — by **Hamma**
+- Widget pin flow in Settings — by **Hamma**
+- App icon picker (Default / Comic) — by **Hamma**
+- Haptics with `flutter_vibrate` — by **Hamma**
+- Collaborative Study Room at `/collab` (offline-first) — by **Hamma**
+- Collab relay server (`:8787`) — by **Hamma**
+- P2P calls, chat and file sharing in Study Room — by **Hamma**
+- WebRTC signaling server (`:8789`) — by **Hamma**
+- Pomodoro intro sound and play button — by **Hamma**
+
+### Changed
+- Bigger update dialog and more readable release notes — by **Hamma**
+- Widget auto-sync on start, resume and data change — by **Hamma**
+- Haptics now use `flutter_vibrate` everywhere — by **Hamma**
+- New Telegram prompt design — by **Hamma**
+
+### Fixed
+- Widget loading error fallback — by **Hamma**
+- Overflow stripes on first launch — by **Hamma**
+- Build failures for `flutter_vibrate` (JVM target / lStar) — by **Hamma**
+- App icon reverting after switch — by **Hamma**
+- Push notifications not firing — by **Hamma**
+
+---
+
+## [2.0.2] - 2026-08-25
+
+### Added
+- **AGPL-3.0 license**: Added full GNU Affero General Public License v3.0 — the project is now officially open-source licensed — by **Hamma**
+
+### Changed
+- **README overhaul**: Complete documentation rewrite — streamlined Overview section, updated feature list, shields.io badge row (Flutter, Dart, CI, platform, downloads, license, visitors), simplified Tech Stack and Project Structure sections, and a rewritten Theming section documenting the Neo-Brutalist manga design system — by **Hamma**
+
+---
+
+## [2.0.1] - 2026-07-06
+
+### Added
+- **Battery Optimization Onboarding**: Replaced "Usage Access" onboarding page with proper `DisableBatteryOptimization` API calls — auto-start dialog, manufacturer battery optimization dialog with step-by-step instructions — by **Hamma**
+- **`disable_battery_optimization: ^1.1.2`**: New dependency for requesting battery optimization, auto-start, and manufacturer-specific power settings — by **Hamma**
+- **`ComicLoader` widget**: Animated SVG loading indicator — pulsates the thunder-struck icon with smooth scale + color shift (`inkRed` ↔ `surfaceWhite`), configurable size and colors — by **Hamma**
+- **`flutter_markdown`**: New dependency for live markdown rendering in update release notes — by **Hamma**
+- **`solar_icons`**: New dependency replacing `cupertino_icons` — 7000+ icons in Bold/Outline/Broken styles — by **Hamma**
+- **CGPA target persistence**: Target CGPA now stored in Hive via `AppSettings.targetCgpa` (field 10) — survives navigation and app restarts — by **Hamma**
+- **Download pause/resume/cancel**: Download dialog now shows Pause/Resume/Cancel buttons; progress saved to `dl_state.json` on pause, resumes via HTTP `Range` header, partial file deleted on cancel — by **Hamma**
+
+### Changed
+- **Update check loading UI**: Full-screen dimmed overlay with centered `ComicLoader` (size increased to 56) replaces tiny spinner inside button — minimum 1s display to complete pulse cycle — by **Hamma**
+- **Release notes rendering**: Replaced plain-text markdown stripping with live `flutter_markdown` `MarkdownBody` widget — renders headings, lists, code blocks, links, bold/italic; styled with comic theme colors — by **Hamma**
+- **Icons migrated to SolarIcons**: All 29 `CupertinoIcons.*` replaced with `SolarIconsBold.*` across 5 files (bottom nav, tracker, settings, dashboard, stats) — by **Hamma**
+- **Edge-to-edge rendering**: Transparent `statusBarColor` and `systemNavigationBarColor` set at startup and maintained on tab screens — by **Hamma**
+- **Compacted release notes line spacing**: Paragraph `height` reduced from 1.5 to 0.8 — ultra-tight comic-style layout — by **Hamma**
+- **SoundService simplification**: Replaced `just_audio` + `AudioPlayer` (6 MB native libs) with `SystemSound.play(SystemSoundType.click)` + `HapticFeedback.lightImpact()` — instant play, no preloading, no init delay — by **Hamma**
+- **Dependency cleanup**: Removed 14 unused packages — `m3e_design`, `m3e_buttons`, `icon_button_m3e`, `fab_m3e`, `toolbar_m3e`, `app_bar_m3e`, `expressive_loading_indicator`, `button_group_m3e`, `m3e_card_list`, `material_color_utilities`, `flutter_animate`, `percent_indicator`, `animations`, `dynamic_color` — reduces APK size — by **Hamma**
+- **Removed link underlines**: Link (`a`) style in release notes markdown no longer has `TextDecoration.underline` — cleaner comic aesthetic — by **Hamma**
+- **ComicLoader**: Increased default size from 24 to 32, overlay size from 48 to 56 — by **Hamma**
+- **Deferred notification init**: `NotificationService.instance.init()` moved to `addPostFrameCallback` — timezone initialization no longer blocks first frame — by **Hamma**
+
+### Fixed
+- **CGPA target not persisting**: Target CGPA was stored in local widget state only — reset on navigation/tab switch. Now persisted via Hive `AppSettings.targetCgpa` field 10 — by **Hamma**
+- **Notification ID overflow**: `remainder(1 << 31)` could produce negative Android notification IDs — replaced with `% 100000).abs()` for always-positive IDs — by **Hamma**
+- **APK download not following redirects**: Set `request.followRedirects = true` in `HttpClient` download — GitHub asset URLs redirect to CDN — by **Hamma**
+- **Materials open button not working**: Replaced `launchUrl(Uri.file(...))` with `OpenFilex.open()` for file materials (external apps can't access internal storage paths); added try-catch error handling for link launching — by **Hamma**
+- **Update dialog parenthesis bug**: Missing closing parens for `Container`/`Padding` and invalid `li:` parameter in `MarkdownStyleSheet` — fixed build errors — by **Hamma**
+- **Usage access removed from onboarding**: Usage Access page (page 4) removed from `FeaturePreviewScreen` — battery optimization pages now use the actual `DisableBatteryOptimization` plugin instead of just opening Settings — by **Hamma**
+
+### Removed
+- `cupertino_icons` — replaced by `solar_icons`
+- `_stripMarkdown()` — replaced by `flutter_markdown` live render
+- `just_audio` SoundService dependency — click sound now uses `SystemSound` + `HapticFeedback` (saves ~6 MB native libs)
+- `assets/audio/mechanical_click.wav` — no longer needed
+- Beta/Stable update channel toggle — single-channel release check
+- `UpdateChannel` enum — removed
+
+---
 ## [2.0.0] - 2026-07-01
 
 ### Added
