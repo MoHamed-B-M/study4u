@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
-import 'package:solar_icons/solar_icons.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
@@ -23,7 +23,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
   DateTime? _selectedDay;
 
   void _markAttendance(String courseId, AttendanceStatus status) {
-    Vibrate.feedback(FeedbackType.medium);
+    HapticFeedback.mediumImpact();
     final day = _selectedDay ?? DateTime.now();
     final id =
         '${courseId}_${day.year}${day.month.toString().padLeft(2, '0')}${day.day.toString().padLeft(2, '0')}';
@@ -87,7 +87,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                SolarIconsBold.diploma,
+                CupertinoIcons.checkmark_seal,
                 size: 32,
                 color: Color(0xFF64B5F6),
               ),
@@ -226,7 +226,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
           });
-          Vibrate.feedback(FeedbackType.selection);
+          HapticFeedback.selectionClick();
         },
         calendarStyle: CalendarStyle(
           todayDecoration: BoxDecoration(
@@ -257,12 +257,12 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
             color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
           ),
           leftChevronIcon: Icon(
-            SolarIconsBold.arrowLeft,
+            CupertinoIcons.chevron_left,
             size: 18,
             color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
           ),
           rightChevronIcon: Icon(
-            SolarIconsBold.arrowRight,
+            CupertinoIcons.chevron_right,
             size: 18,
             color: isDark ? ComicTheme.darkText.withValues(alpha: 0.6) : ComicTheme.inkBlack.withValues(alpha: 0.6),
           ),
@@ -314,7 +314,7 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        SolarIconsBold.book,
+                        CupertinoIcons.book,
                         color: Color(course.colorValue),
                         size: 20,
                       ),
@@ -347,14 +347,14 @@ class _TrackerViewState extends ConsumerState<TrackerView> {
                       children: [
                         _buildMarkButton(
                             'P',
-                            SolarIconsBold.checkCircle,
+                            CupertinoIcons.checkmark,
                             const Color(0xFF66BB6A),
                             () => _markAttendance(
                                 course.id, AttendanceStatus.present)),
                         const SizedBox(height: 6),
                         _buildMarkButton(
                             'L',
-                            SolarIconsBold.clockCircle,
+                            CupertinoIcons.clock,
                             const Color(0xFFFFB74D),
                             () => _markAttendance(
                                 course.id, AttendanceStatus.late)),

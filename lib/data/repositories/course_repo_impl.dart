@@ -38,23 +38,6 @@ class CourseRepositoryImpl implements CourseRepository {
     return LocalStorage.coursesBox.watch().map((_) => getCourses());
   }
 
-  List<String> _parseWeekDays(String json) {
-    try {
-      final trimmed = json.trim();
-      if (trimmed.isEmpty || trimmed == '[]') return [];
-      // Handles "[Mon, Tue]" or JSON array format
-      final cleaned = trimmed.replaceAll('[', '').replaceAll(']', '').trim();
-      if (cleaned.isEmpty) return [];
-      return cleaned
-          .split(',')
-          .map((e) => e.trim().replaceAll('"', '').replaceAll("'", ''))
-          .where((e) => e.isNotEmpty)
-          .toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
   CourseEntity _toEntity(shared_models.Course m) {
     return CourseEntity(
       id: m.id,
@@ -69,7 +52,6 @@ class CourseRepositoryImpl implements CourseRepository {
       currentGrade: m.currentGrade,
       creditHours: m.creditHours,
       scheduleJson: m.scheduleJson,
-      weekDays: _parseWeekDays(m.scheduleJson),
     );
   }
 

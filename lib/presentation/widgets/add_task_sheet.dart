@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/utils/time_utils.dart';
@@ -57,7 +58,6 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
                   style: Theme.of(context).textTheme.titleLarge)),
           const SizedBox(height: 20),
           TextField(
-            enableSuggestions: false,
             controller: _titleController,
             decoration: const InputDecoration(
               labelText: 'What needs to be done?',
@@ -161,7 +161,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
       dueDate: _dueDate,
     ));
     ref.read(dataRefreshProvider.notifier).state++;
-    Vibrate.feedback(FeedbackType.light);
+    HapticFeedback.lightImpact();
     Navigator.of(context).pop();
   }
 }

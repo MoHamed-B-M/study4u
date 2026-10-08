@@ -1,9 +1,10 @@
-// BATTERY_OPT: import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:parallax_onboarding/parallax_onboarding.dart';
+import '../../../data/platform/settings_bridge.dart';
 import '../../../theme/comic_theme.dart';
 import '../../theme/theme_provider.dart';
 import '../../../main.dart';
@@ -71,7 +72,7 @@ class FeaturePreviewScreen extends ConsumerWidget {
 
     void finish() {
       ref.read(settingsProvider.notifier).setOnboardingComplete(true);
-      Vibrate.feedback(FeedbackType.medium);
+      HapticFeedback.mediumImpact();
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
@@ -82,33 +83,6 @@ class FeaturePreviewScreen extends ConsumerWidget {
         ),
       );
     }
-
-    // BATTERY_OPT: void _showBatteryHelp(BuildContext ctx, bool dark) {
-    //   showDialog(
-    //     context: ctx,
-    //     builder: (dCtx) => AlertDialog(
-    //       backgroundColor: dark ? ComicTheme.darkPulp : ComicTheme.paperBg,
-    //       title: Text('Battery Settings',
-    //         style: TextStyle(
-    //           color: dark ? ComicTheme.darkText : ComicTheme.inkBlack,
-    //           fontWeight: FontWeight.w700,
-    //         ),
-    //       ),
-    //       content: Text(
-    //         'Please go to Settings → Apps → study4u → Battery and disable battery optimization manually.',
-    //         style: TextStyle(
-    //           color: dark ? ComicTheme.darkText : ComicTheme.inkBlack,
-    //         ),
-    //       ),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () => Navigator.pop(dCtx),
-    //           child: const Text('OK'),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    // }
 
     Widget _foregroundIcon(IconData icon) {
       return Container(
@@ -174,138 +148,150 @@ class FeaturePreviewScreen extends ConsumerWidget {
           foregroundFactor: 0.1,
           foregroundAlignment: Alignment(0, -0.6),
         ),
-        // BATTERY_OPT: OnboardingPage(
-        // BATTERY_OPT:   background: ColoredBox(color: bgColor),
-        // BATTERY_OPT:   backgroundFactor: -0.4,
-        // BATTERY_OPT:   content: _comicContent(
-        // BATTERY_OPT:     'Battery Optimization',
-        // BATTERY_OPT:     'Disable battery optimization for\nreliable notifications & focus sessions',
-        // BATTERY_OPT:     action: _PermissionButton(
-        // BATTERY_OPT:       label: 'Auto Start',
-        // BATTERY_OPT:       onTap: () async {
-        // BATTERY_OPT:         try {
-        // BATTERY_OPT:           await DisableBatteryOptimization.showEnableAutoStartSettings(
-        // BATTERY_OPT:             'Enable Auto Start',
-        // BATTERY_OPT:             'Follow the steps and enable the auto start of this app',
-        // BATTERY_OPT:           );
-        // BATTERY_OPT:         } catch (e) {
-        // BATTERY_OPT:           if (context.mounted) _showBatteryHelp(context, isDark);
-        // BATTERY_OPT:         }
-        // BATTERY_OPT:       },
-        // BATTERY_OPT:     ),
-        // BATTERY_OPT:   ),
-        // BATTERY_OPT:   foreground: Padding(
-        // BATTERY_OPT:     padding: const EdgeInsets.all(32),
-        // BATTERY_OPT:     child: _foregroundIcon(Icons.power_settings_new),
-        // BATTERY_OPT:   ),
-        // BATTERY_OPT:   foregroundFactor: -0.1,
-        // BATTERY_OPT:   foregroundAlignment: Alignment(0, -0.6),
-        // BATTERY_OPT: ),
-        // BATTERY_OPT: OnboardingPage(
-        // BATTERY_OPT:   background: ColoredBox(color: bgColor),
-        // BATTERY_OPT:   backgroundFactor: -0.4,
-        // BATTERY_OPT:   content: _comicContent(
-        // BATTERY_OPT:     'Battery Saver',
-        // BATTERY_OPT:     'Disable manufacturer battery optimization\nfor smooth background operation',
-        // BATTERY_OPT:     action: _PermissionButton(
-        // BATTERY_OPT:       label: 'Disable Optimization',
-        // BATTERY_OPT:       onTap: () async {
-        // BATTERY_OPT:         try {
-        // BATTERY_OPT:           final isDisabled = await DisableBatteryOptimization
-        // BATTERY_OPT:               .isManufacturerBatteryOptimizationDisabled;
-        // BATTERY_OPT:           if (isDisabled != true) {
-        // BATTERY_OPT:             await DisableBatteryOptimization
-        // BATTERY_OPT:                 .showDisableManufacturerBatteryOptimizationSettings(
-        // BATTERY_OPT:               'Your device has additional battery optimization',
-        // BATTERY_OPT:               'Follow the steps and disable the optimizations to allow smooth functioning of this app',
-        // BATTERY_OPT:             );
-        // BATTERY_OPT:           }
-        // BATTERY_OPT:         } catch (e) {
-        // BATTERY_OPT:           if (context.mounted) _showBatteryHelp(context, isDark);
-        // BATTERY_OPT:         }
-        // BATTERY_OPT:       },
-        // BATTERY_OPT:     ),
-        // BATTERY_OPT:   ),
-        // BATTERY_OPT:   foreground: Padding(
-        // BATTERY_OPT:     padding: const EdgeInsets.all(32),
-        // BATTERY_OPT:     child: _foregroundIcon(Icons.battery_charging_full),
-        // BATTERY_OPT:   ),
-        // BATTERY_OPT:   foregroundFactor: -0.1,
-        // BATTERY_OPT:   foregroundAlignment: Alignment(0, -0.6),
-        // BATTERY_OPT: ),
+        OnboardingPage(
+          background: ColoredBox(color: bgColor),
+          backgroundFactor: -0.3,
+          content: _comicContent(
+            'Usage Access',
+            'Allow study4u to view your usage\nstatistics for insightful analytics',
+            action: _PermissionButton(
+              label: 'Open Settings',
+              onTap: () async {
+                try {
+                  final info = await PackageInfo.fromPlatform();
+                  final opened = await SettingsBridge.openAppSettings(packageName: info.packageName);
+                  if (!opened && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Please open Settings manually'),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: ComicTheme.inkRed,
+                      ),
+                    );
+                  }
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Please open Settings manually'),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: ComicTheme.inkRed,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+          ),
+          foreground: Padding(
+            padding: const EdgeInsets.all(32),
+            child: _foregroundIcon(Icons.analytics_outlined),
+          ),
+          foregroundFactor: -0.1,
+          foregroundAlignment: Alignment(0, -0.6),
+        ),
+        OnboardingPage(
+          background: ColoredBox(color: bgColor),
+          backgroundFactor: -0.4,
+          content: _comicContent(
+            'Battery Optimization',
+            'Disable battery optimization for\nreliable notifications & focus sessions',
+            action: _PermissionButton(
+              label: 'Open Settings',
+              onTap: () async {
+                try {
+                  final info = await PackageInfo.fromPlatform();
+                  final opened = await SettingsBridge.openAppSettings(packageName: info.packageName);
+                  if (!opened && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Please open Settings manually'),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: ComicTheme.inkRed,
+                      ),
+                    );
+                  }
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Please open Settings manually'),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: ComicTheme.inkRed,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+          ),
+          foreground: Padding(
+            padding: const EdgeInsets.all(32),
+            child: _foregroundIcon(Icons.battery_charging_full),
+          ),
+          foregroundFactor: -0.1,
+          foregroundAlignment: Alignment(0, -0.6),
+        ),
       ],
     );
   }
 }
 
-// BATTERY_OPT: class _PermissionButton extends StatefulWidget {
-// BATTERY_OPT:   final String label;
-// BATTERY_OPT:   final Future<void> Function() onTap;
-// BATTERY_OPT: 
-// BATTERY_OPT:   const _PermissionButton({
-// BATTERY_OPT:     required this.label,
-// BATTERY_OPT:     required this.onTap,
-// BATTERY_OPT:   });
-// BATTERY_OPT: 
-// BATTERY_OPT:   @override
-// BATTERY_OPT:   State<_PermissionButton> createState() => _PermissionButtonState();
-// BATTERY_OPT: }
-// BATTERY_OPT: 
-// BATTERY_OPT: class _PermissionButtonState extends State<_PermissionButton> {
-// BATTERY_OPT:   bool _loading = false;
-// BATTERY_OPT: 
-// BATTERY_OPT:   @override
-// BATTERY_OPT:   Widget build(BuildContext context) {
-// BATTERY_OPT:     final isDark = Theme.of(context).brightness == Brightness.dark;
-// BATTERY_OPT:     return GestureDetector(
-// BATTERY_OPT:       onTap: _loading
-// BATTERY_OPT:           ? null
-// BATTERY_OPT:           : () async {
-// BATTERY_OPT:               setState(() => _loading = true);
-// BATTERY_OPT:               try {
-// BATTERY_OPT:                 await widget.onTap();
-// BATTERY_OPT:               } finally {
-// BATTERY_OPT:                 if (mounted) setState(() => _loading = false);
-// BATTERY_OPT:               }
-// BATTERY_OPT:             },
-// BATTERY_OPT:       child: AnimatedContainer(
-// BATTERY_OPT:         duration: const Duration(milliseconds: 100),
-// BATTERY_OPT:         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-// BATTERY_OPT:         decoration: BoxDecoration(
-// BATTERY_OPT:           color: _loading
-// BATTERY_OPT:               ? (isDark ? ComicTheme.darkText : ComicTheme.surfaceWhite)
-// BATTERY_OPT:               : ComicTheme.inkRed,
-// BATTERY_OPT:           border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
-// BATTERY_OPT:           boxShadow: _loading
-// BATTERY_OPT:               ? []
-// BATTERY_OPT:               : [
-// BATTERY_OPT:                   BoxShadow(
-// BATTERY_OPT:                     color: ComicTheme.inkBlack,
-// BATTERY_OPT:                     offset: const Offset(4, 4),
-// BATTERY_OPT:                     blurRadius: 0,
-// BATTERY_OPT:                   ),
-// BATTERY_OPT:                 ],
-// BATTERY_OPT:         ),
-// BATTERY_OPT:         child: _loading
-// BATTERY_OPT:             ? SizedBox(
-// BATTERY_OPT:                 width: 16,
-// BATTERY_OPT:                 height: 16,
-// BATTERY_OPT:                 child: CircularProgressIndicator(
-// BATTERY_OPT:                   strokeWidth: 2,
-// BATTERY_OPT:                   valueColor: AlwaysStoppedAnimation<Color>(
-// BATTERY_OPT:                     isDark ? ComicTheme.darkPulp : ComicTheme.inkBlack,
-// BATTERY_OPT:                   ),
-// BATTERY_OPT:                 ),
-// BATTERY_OPT:               )
-// BATTERY_OPT:             : Text(
-// BATTERY_OPT:                 widget.label,
-// BATTERY_OPT:                 style: TextStyle(
-// BATTERY_OPT:                   fontSize: 14,
-// BATTERY_OPT:                   fontWeight: FontWeight.w700,
-// BATTERY_OPT:                   color: ComicTheme.surfaceWhite,
-// BATTERY_OPT:                 ),
-// BATTERY_OPT:               ),
-// BATTERY_OPT:       ),
-// BATTERY_OPT:     );
-// BATTERY_OPT:   }
-// BATTERY_OPT: }
+class _PermissionButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _PermissionButton({
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  State<_PermissionButton> createState() => _PermissionButtonState();
+}
+
+class _PermissionButtonState extends State<_PermissionButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: _pressed
+              ? (isDark ? ComicTheme.darkText : ComicTheme.surfaceWhite)
+              : ComicTheme.inkRed,
+          border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+          boxShadow: _pressed
+              ? []
+              : [
+                  BoxShadow(
+                    color: ComicTheme.inkBlack,
+                    offset: const Offset(4, 4),
+                    blurRadius: 0,
+                  ),
+                ],
+        ),
+        child: Text(
+          widget.label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: _pressed
+                ? (isDark ? ComicTheme.darkPulp : ComicTheme.inkBlack)
+                : ComicTheme.surfaceWhite,
+          ),
+        ),
+      ),
+    );
+  }
+}

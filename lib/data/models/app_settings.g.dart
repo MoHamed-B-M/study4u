@@ -17,26 +17,22 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return AppSettings(
-      id: fields[0] as String? ?? 'default',
-      primaryColorValue: fields[1] as int? ?? 0xFF4ADE80,
-      themeMode: fields[2] as String? ?? 'system',
-      notificationEnabled: fields[3] as bool? ?? true,
-      userName: fields[4] as String? ?? '',
-      onboardingComplete: fields[5] as bool? ?? false,
-      useFloatingNavBar: fields[6] as bool? ?? false,
-      hapticFeedback: fields[7] as bool? ?? true,
-      showNavLabels: fields[8] as bool? ?? true,
-      pressSound: fields[9] as bool? ?? true,
-      targetCgpa: (fields[10] as num?)?.toDouble() ?? -1,
-      telegramPromptShown: fields[11] as bool? ?? false,
-      useAltAppIcon: fields[12] as bool? ?? false,
+      id: fields[0] as String,
+      primaryColorValue: fields[1] as int,
+      themeMode: fields[2] as String,
+      notificationEnabled: fields[3] as bool,
+      userName: fields[4] as String,
+      onboardingComplete: fields[5] as bool,
+      useFloatingNavBar: fields[6] as bool,
+      hapticFeedback: fields[7] as bool,
+      showNavLabels: fields[8] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -54,15 +50,7 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(7)
       ..write(obj.hapticFeedback)
       ..writeByte(8)
-      ..write(obj.showNavLabels)
-      ..writeByte(9)
-      ..write(obj.pressSound)
-      ..writeByte(10)
-      ..write(obj.targetCgpa)
-      ..writeByte(11)
-      ..write(obj.telegramPromptShown)
-      ..writeByte(12)
-      ..write(obj.useAltAppIcon);
+      ..write(obj.showNavLabels);
   }
 
   @override

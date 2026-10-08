@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../theme/comic_theme.dart';
 import '../../../core/animation/m3e_spring.dart';
 
@@ -22,7 +20,6 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _fadeCtrl;
   late final AnimationController _scaleCtrl;
   late final AnimationController _glowCtrl;
-  late final AnimationController _borderCtrl;
 
   bool _navigated = false;
 
@@ -58,16 +55,7 @@ class _SplashScreenState extends State<SplashScreen>
       );
     });
 
-    Timer(const Duration(milliseconds: 600), () {
-      if (!mounted) return;
-      M3ESpring.animate(
-        _borderCtrl,
-        to: 1,
-        spring: M3ESpring.spatial(stiffness: 400, damping: 22),
-      );
-    });
-
-    Timer(const Duration(milliseconds: 3200), _navigateToApp);
+    Timer(const Duration(milliseconds: 2800), _navigateToApp);
   }
 
   void _navigateToApp() {
@@ -89,7 +77,6 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeCtrl.dispose();
     _scaleCtrl.dispose();
     _glowCtrl.dispose();
-    _borderCtrl.dispose();
     super.dispose();
   }
 

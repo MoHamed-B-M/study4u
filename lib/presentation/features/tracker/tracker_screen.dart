@@ -1,7 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../shared/providers/logic_providers.dart';
 import '../../../domain/entities/course.dart';
@@ -22,7 +22,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
   DateTime? _selectedDay;
 
   void _markAttendance(String courseId, AttendanceStatus status) {
-    Vibrate.feedback(FeedbackType.medium);
+    HapticFeedback.mediumImpact();
     final day = _selectedDay ?? DateTime.now();
     final id = '${courseId}_${day.year}${day.month.toString().padLeft(2, '0')}${day.day.toString().padLeft(2, '0')}';
     ref.read(attendanceRepositoryProvider).markAttendance(
@@ -123,32 +123,26 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          SizedBox(
-            width: 144,
-            height: 144,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CustomPaint(
-                  size: const Size(144, 144),
-                  painter: _CircleProgressPainter(
-                    percent: analytics.percentage / 100,
-                    progressColor: ComicTheme.inkRed,
-                    backgroundColor: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  ),
-                ),
-                Text(
-                  '${analytics.percentage.toInt()}%',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
-                  ),
-                ),
-              ],
+          CircularPercentIndicator(
+            radius: 72,
+            lineWidth: 12,
+            percent: analytics.percentage / 100,
+            center: Text(
+              '${analytics.percentage.toInt()}%',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+              ),
             ),
+            progressColor: analytics.isBelowThreshold
+                ? ComicTheme.inkRed
+                : ComicTheme.inkRed,
+            backgroundColor: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            circularStrokeCap: CircularStrokeCap.round,
+            animation: true,
           ),
           const SizedBox(height: 16),
           Text(
@@ -233,7 +227,7 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
           });
-          Vibrate.feedback(FeedbackType.selection);
+          HapticFeedback.selectionClick();
         },
         calendarStyle: CalendarStyle(
           todayDecoration: BoxDecoration(

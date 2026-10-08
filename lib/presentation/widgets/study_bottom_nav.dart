@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
-import 'package:solar_icons/solar_icons.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import '../theme/design_tokens.dart';
 
 class StudyBottomNav extends StatelessWidget {
@@ -36,15 +35,15 @@ class StudyBottomNav extends StatelessWidget {
           child: Row(
             children: [
               _NavItem(
-                icon: SolarIconsBold.home,
-                activeIcon: SolarIconsBold.home,
+                icon: CupertinoIcons.house,
+                activeIcon: CupertinoIcons.house_fill,
                 label: 'Home',
                 isActive: currentIndex == 0,
                 onTap: () => onDestinationSelected(0),
               ),
               _NavItem(
-                icon: SolarIconsBold.chartSquare,
-                activeIcon: SolarIconsBold.chartSquare,
+                icon: CupertinoIcons.chart_bar,
+                activeIcon: CupertinoIcons.chart_bar_fill,
                 label: 'Stats',
                 isActive: currentIndex == 1,
                 onTap: () => onDestinationSelected(1),
@@ -52,7 +51,7 @@ class StudyBottomNav extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                 onTap: () {
-                  Vibrate.feedback(FeedbackType.light);
+                  HapticFeedback.lightImpact();
                   onAddPressed?.call();
                 },
                 child: Container(
@@ -76,7 +75,7 @@ class StudyBottomNav extends StatelessWidget {
                     ],
                   ),
                   child: const Icon(
-                    SolarIconsBold.addCircle,
+                    CupertinoIcons.add,
                     color: DesignTokens.textWhite,
                     size: 24,
                   ),
@@ -84,15 +83,15 @@ class StudyBottomNav extends StatelessWidget {
               ),
               const Spacer(),
               _NavItem(
-                icon: SolarIconsBold.calendar,
-                activeIcon: SolarIconsBold.calendar,
+                icon: CupertinoIcons.calendar,
+                activeIcon: CupertinoIcons.calendar_circle_fill,
                 label: 'Tracker',
                 isActive: currentIndex == 2,
                 onTap: () => onDestinationSelected(2),
               ),
               _NavItem(
-                icon: SolarIconsBold.settings,
-                activeIcon: SolarIconsBold.settings,
+                icon: CupertinoIcons.gear,
+                activeIcon: CupertinoIcons.gear_solid,
                 label: 'Settings',
                 isActive: currentIndex == 3,
                 onTap: () => onDestinationSelected(3),
@@ -125,7 +124,7 @@ class _NavItem extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          Vibrate.feedback(FeedbackType.selection);
+          HapticFeedback.selectionClick();
           onTap();
         },
         child: Column(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/time_utils.dart';
@@ -47,32 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           GestureDetector(
             onTap: () {
-              Vibrate.feedback(FeedbackType.light);
-              GoRouter.of(context).push('/collab');
-            },
-            child: Container(
-              width: 36,
-              height: 36,
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color:
-                    isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
-                border: Border.all(color: ComicTheme.inkBlack, width: 2),
-                boxShadow: const [
-                  BoxShadow(
-                    color: ComicTheme.inkBlack,
-                    offset: Offset(2, 2),
-                    blurRadius: 0,
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.groups_rounded,
-                  size: 18, color: ComicTheme.inkBlack),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Vibrate.feedback(FeedbackType.light);
+              HapticFeedback.lightImpact();
               GoRouter.of(context).push('/settings');
             },
             child: Container(
@@ -80,8 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 36,
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color:
-                    isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
                 border: Border.all(color: ComicTheme.inkBlack, width: 2),
                 boxShadow: const [
                   BoxShadow(
@@ -91,8 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.settings,
-                  size: 18, color: ComicTheme.inkBlack),
+              child: const Icon(Icons.settings, size: 18, color: ComicTheme.inkBlack),
             ),
           ),
         ],
@@ -256,7 +229,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Vibrate.feedback(FeedbackType.selection);
+                            HapticFeedback.selectionClick();
                             ref
                                 .read(taskRepositoryProvider)
                                 .toggleTask(task.id);
@@ -544,11 +517,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             )),
         if (action != null)
           ComicButton(
-            onPressed: () => Vibrate.feedback(FeedbackType.light),
+            onPressed: () => HapticFeedback.lightImpact(),
             padding: EdgeInsets.zero,
             child: Text(action,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 13)),
           ),
       ],
     );
@@ -560,7 +533,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       key: upNextKey,
       child: GestureDetector(
         onTap: () {
-          Vibrate.feedback(FeedbackType.light);
+          HapticFeedback.lightImpact();
           final renderBox =
               upNextKey.currentContext?.findRenderObject() as RenderBox?;
           if (renderBox != null && renderBox.hasSize) {
@@ -596,8 +569,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       color: ComicTheme.inkBlack.withValues(alpha: 0.15),
                     ),
@@ -678,21 +651,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           final isDark = Theme.of(context).brightness == Brightness.dark;
           return GestureDetector(
             onTap: () {
-              Vibrate.feedback(FeedbackType.light);
+              HapticFeedback.lightImpact();
               GoRouter.of(context).push('/course/${course.id}');
             },
             child: Container(
               width: 150,
               margin: const EdgeInsets.only(right: 14),
               child: ComicCard(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 child: Column(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Color(course.colorValue).withValues(alpha: 0.15),
+                        color:
+                            Color(course.colorValue).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -707,8 +680,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
-                        color:
-                            isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                        color: isDark
+                            ? ComicTheme.darkText
+                            : ComicTheme.inkBlack,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -763,7 +737,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final sheetBg = isDark ? ComicTheme.darkPulp : ComicTheme.surfaceWhite;
     return FloatingActionButton(
       onPressed: () {
-        Vibrate.feedback(FeedbackType.light);
+        HapticFeedback.lightImpact();
         showModalBottomSheet(
           context: context,
           backgroundColor: sheetBg,
@@ -778,7 +752,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     isCta: true,
                     onPressed: () {
                       Navigator.pop(context);
-                      Vibrate.feedback(FeedbackType.light);
+                      HapticFeedback.lightImpact();
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -794,7 +768,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     isCta: true,
                     onPressed: () {
                       Navigator.pop(context);
-                      Vibrate.feedback(FeedbackType.light);
+                      HapticFeedback.lightImpact();
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,

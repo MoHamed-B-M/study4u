@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/course.dart';
 import '../../shared/providers/logic_providers.dart';
@@ -100,7 +100,7 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
   }
 
   void _save() {
-    Vibrate.feedback(FeedbackType.medium);
+    HapticFeedback.mediumImpact();
     final id = widget.course?.id ?? const Uuid().v4();
     final weekDays = _weekDays.map((d) => _days[d]).toList();
     final course = CourseEntity(
@@ -167,27 +167,25 @@ class _AddCourseSheetState extends ConsumerState<AddCourseSheet> {
             Center(child: Text('Course Details', style: Theme.of(context).textTheme.titleLarge)),
             const SizedBox(height: 24),
             TextField(
-              enableSuggestions: false,
               controller: _nameCtrl,
               decoration: InputDecoration(labelText: 'Course Name', filled: true),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: TextField(enableSuggestions: false, controller: _codeCtrl, decoration: InputDecoration(labelText: 'Course Code', filled: true))),
+                Expanded(child: TextField(controller: _codeCtrl, decoration: InputDecoration(labelText: 'Course Code', filled: true))),
                 const SizedBox(width: 12),
-                Expanded(child: TextField(enableSuggestions: false, controller: _profCtrl, decoration: InputDecoration(labelText: 'Professor', filled: true))),
+                Expanded(child: TextField(controller: _profCtrl, decoration: InputDecoration(labelText: 'Professor', filled: true))),
               ],
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: TextField(enableSuggestions: false, controller: _roomCtrl, decoration: InputDecoration(labelText: 'Room', filled: true))),
+                Expanded(child: TextField(controller: _roomCtrl, decoration: InputDecoration(labelText: 'Room', filled: true))),
                 const SizedBox(width: 12),
                 SizedBox(
                   width: 100,
                   child: TextField(
-                    enableSuggestions: false,
                     readOnly: true,
                     controller: TextEditingController(text: '${_creditHours.toInt()}'),
                     decoration: InputDecoration(

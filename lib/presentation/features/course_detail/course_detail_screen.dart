@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/course.dart';
@@ -487,57 +486,32 @@ class _MaterialTile extends StatelessWidget {
     }
   }
 
-  Future<void> _open(BuildContext context) async {
+  void _open(BuildContext context) {
     switch (material.type) {
       case 'link':
         final uri = Uri.tryParse(material.content);
         if (uri != null && uri.isAbsolute) {
-          try {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-          } catch (_) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Could not open link'),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: ComicTheme.inkRed,
-                ),
-              );
-            }
-          }
+          launchUrl(uri, mode: LaunchMode.externalApplication);
         }
         break;
       case 'file':
         final file = File(material.content);
         if (file.existsSync()) {
-          try {
-            await OpenFilex.open(material.content);
-          } catch (_) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Could not open file'),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: ComicTheme.inkRed,
-                ),
-              );
-            }
-          }
+          launchUrl(Uri.file(material.content),
+              mode: LaunchMode.externalApplication);
         } else {
-          if (context.mounted) {
-            showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: const Text('File Not Found'),
-                content: const Text('File may have been moved.'),
-                actions: [
-                  ComicButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('OK'))
-                ],
-              ),
-            );
-          }
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('File Not Found'),
+              content: const Text('File may have been moved.'),
+              actions: [
+                ComicButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('OK'))
+              ],
+            ),
+          );
         }
         break;
     }
@@ -699,7 +673,6 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
           ),
           const SizedBox(height: 20),
           TextField(
-            enableSuggestions: false,
             controller: _titleController,
             decoration: InputDecoration(
               labelText: 'Title',
@@ -710,7 +683,6 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
           const SizedBox(height: 16),
           if (_type == 'link')
             TextField(
-              enableSuggestions: false,
               controller: _urlController,
               decoration: InputDecoration(
                 labelText: 'URL',
@@ -720,7 +692,6 @@ class _AddMaterialSheetState extends ConsumerState<_AddMaterialSheet> {
             ),
           if (_type == 'note')
             TextField(
-              enableSuggestions: false,
               controller: _noteController,
               decoration: InputDecoration(
                 labelText: 'Write your note...',
@@ -947,13 +918,11 @@ class _AddNoteSheetState extends ConsumerState<_AddNoteSheet> {
                   style: Theme.of(context).textTheme.titleLarge)),
           const SizedBox(height: 20),
           TextField(
-            enableSuggestions: false,
             controller: _titleController,
             decoration: const InputDecoration(labelText: 'Title', filled: true),
           ),
           const SizedBox(height: 16),
           TextField(
-            enableSuggestions: false,
             controller: _contentController,
             decoration: const InputDecoration(
                 labelText: 'Write your note...', filled: true),
@@ -1060,7 +1029,7 @@ class _TaskTile extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () {
-                Vibrate.feedback(FeedbackType.selection);
+                HapticFeedback.selectionClick();
                 ref.read(taskRepositoryProvider).toggleTask(task.id);
                 ref.read(dataRefreshProvider.notifier).state++;
               },

@@ -33,41 +33,19 @@ class LocalStorage {
       Hive.registerAdapter(AppSettingsAdapter());
       Hive.registerAdapter(CourseMaterialAdapter());
 
-      // Open non-critical boxes in parallel
       await Future.wait([
         Hive.openBox<Course>('courses'),
         Hive.openBox<StudyTask>('tasks'),
         Hive.openBox<AttendanceRecord>('attendance'),
         Hive.openBox<PomodoroSettings>('settings'),
         Hive.openBox<ScreenTimeLog>('screenTime'),
+        Hive.openBox<AppSettings>('appSettings'),
         Hive.openBox<String>('pomodoroSessions'),
         Hive.openBox<CourseMaterial>('materials'),
-        Hive.openBox<String>('collabDocs'),
       ]);
 
-      // AppSettings needs recovery – old installs may have a corrupted
-      // entry from the writeByte(12) bug or missing fields (null cast).
-      Box<AppSettings> settingsBox;
-      try {
-        settingsBox = await Hive.openBox<AppSettings>('appSettings');
-      } catch (_) {
-        await Hive.deleteBoxFromDisk('appSettings');
-        settingsBox = await Hive.openBox<AppSettings>('appSettings');
-      }
-
-      // Validate the single entry; if its binary is still unreadable
-      // (e.g. truncated by the previous bug) clear and recreate.
-      try {
-        if (settingsBox.isEmpty) {
-          settingsBox.put('default', AppSettings());
-        } else {
-          // Trigger adapter read – will throw if corrupted
-          final test = settingsBox.get('default');
-          // Touch a bool field to ensure null-cast would surface here
-          test?.hapticFeedback;
-        }
-      } catch (_) {
-        await settingsBox.clear();
+      final settingsBox = Hive.box<AppSettings>('appSettings');
+      if (settingsBox.isEmpty) {
         settingsBox.put('default', AppSettings());
       }
 
@@ -92,17 +70,10 @@ class LocalStorage {
 
   static Box<Course> get coursesBox => Hive.box<Course>('courses');
   static Box<StudyTask> get tasksBox => Hive.box<StudyTask>('tasks');
-  static Box<AttendanceRecord> get attendanceBox =>
-      Hive.box<AttendanceRecord>('attendance');
-  static Box<PomodoroSettings> get pomodoroBox =>
-      Hive.box<PomodoroSettings>('settings');
-  static Box<ScreenTimeLog> get screenTimeBox =>
-      Hive.box<ScreenTimeLog>('screenTime');
-  static Box<AppSettings> get appSettingsBox =>
-      Hive.box<AppSettings>('appSettings');
-  static Box<CourseMaterial> get materialsBox =>
-      Hive.box<CourseMaterial>('materials');
-  static Box<String> get pomodoroSessionsBox =>
-      Hive.box<String>('pomodoroSessions');
-  static Box<String> get collabDocsBox => Hive.box<String>('collabDocs');
+  static Box<AttendanceRecord> get attendanceBox => Hive.box<AttendanceRecord>('attendance');
+  static Box<PomodoroSettings> get pomodoroBox => Hive.box<PomodoroSettings>('settings');
+  static Box<ScreenTimeLog> get screenTimeBox => Hive.box<ScreenTimeLog>('screenTime');
+  static Box<AppSettings> get appSettingsBox => Hive.box<AppSettings>('appSettings');
+  static Box<CourseMaterial> get materialsBox => Hive.box<CourseMaterial>('materials');
+  static Box<String> get pomodoroSessionsBox => Hive.box<String>('pomodoroSessions');
 }

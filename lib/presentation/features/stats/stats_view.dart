@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
-import 'package:just_audio/just_audio.dart';
 import '../../../core/animation/m3e_spring.dart';
 import '../../../core/utils/grade_calculator.dart';
 import '../../../domain/usecases/cgpa_calculator.dart';
@@ -11,7 +10,6 @@ import '../../../shared/providers/pomodoro_provider.dart';
 import '../../../shared/providers/app_usage_provider.dart';
 import '../../../domain/entities/course.dart';
 import '../../../theme/comic_theme.dart';
-import '../../theme/theme_provider.dart';
 import '../../../widgets/comic_card.dart';
 import '../../../widgets/comic_button.dart';
 
@@ -31,11 +29,7 @@ class _StatsViewState extends ConsumerState<StatsView>
   late final AnimationController _screenTimeCtrl;
   bool _cgpaTargetExpanded = true;
   bool _screenTimeExpanded = false;
-
-  double? get _targetCgpa {
-    final val = ref.read(settingsProvider).targetCgpa;
-    return val >= 0 ? val : null;
-  }
+  double? _targetCgpa;
 
   @override
   void initState() {
@@ -54,16 +48,13 @@ class _StatsViewState extends ConsumerState<StatsView>
     } else {
       M3ESpring.animate(_fadeCtrl1, to: 1, spring: M3ESpring.effects());
       Timer(const Duration(milliseconds: 120), () {
-        if (mounted)
-          M3ESpring.animate(_fadeCtrl2, to: 1, spring: M3ESpring.effects());
+        if (mounted) M3ESpring.animate(_fadeCtrl2, to: 1, spring: M3ESpring.effects());
       });
       Timer(const Duration(milliseconds: 240), () {
-        if (mounted)
-          M3ESpring.animate(_fadeCtrl3, to: 1, spring: M3ESpring.effects());
+        if (mounted) M3ESpring.animate(_fadeCtrl3, to: 1, spring: M3ESpring.effects());
       });
       Timer(const Duration(milliseconds: 360), () {
-        if (mounted)
-          M3ESpring.animate(_fadeCtrl4, to: 1, spring: M3ESpring.effects());
+        if (mounted) M3ESpring.animate(_fadeCtrl4, to: 1, spring: M3ESpring.effects());
       });
     }
   }
@@ -239,7 +230,7 @@ class _StatsViewState extends ConsumerState<StatsView>
   }
 
   void _showSetTargetDialog() {
-    Vibrate.feedback(FeedbackType.light);
+    HapticFeedback.lightImpact();
     final ctrl = TextEditingController(
       text: _targetCgpa?.toStringAsFixed(2) ?? '',
     );
@@ -279,15 +270,12 @@ class _StatsViewState extends ConsumerState<StatsView>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color:
-                        dk ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                    color: dk ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
                     border: Border.all(color: ComicTheme.inkBlack, width: 2),
                   ),
                   child: TextField(
-                    enableSuggestions: false,
                     controller: ctrl,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     style: TextStyle(
                       color: dk ? ComicTheme.darkText : ComicTheme.inkBlack,
                       fontWeight: FontWeight.w600,
@@ -296,9 +284,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                       hintText: 'e.g. 3.50',
                       border: InputBorder.none,
                       hintStyle: TextStyle(
-                        color: dk
-                            ? ComicTheme.darkText.withValues(alpha: 0.4)
-                            : ComicTheme.inkBlack.withValues(alpha: 0.4),
+                        color: dk ? ComicTheme.darkText.withValues(alpha: 0.4) : ComicTheme.inkBlack.withValues(alpha: 0.4),
                       ),
                     ),
                   ),
@@ -306,12 +292,11 @@ class _StatsViewState extends ConsumerState<StatsView>
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Vibrate.feedback(FeedbackType.light);
+                    HapticFeedback.lightImpact();
                     final text = ctrl.text.trim();
                     final val = double.tryParse(text);
                     if (val != null && val >= 0 && val <= 4) {
-                      ref.read(settingsProvider.notifier).setTargetCgpa(val);
-                      setState(() {});
+                      setState(() => _targetCgpa = val);
                       Navigator.pop(ctx);
                     }
                   },
@@ -319,8 +304,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: ComicTheme.inkRed,
-                      border:
-                          Border.all(color: ComicTheme.inkBlack, width: 2.5),
+                      border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
                       boxShadow: const [
                         BoxShadow(
                           color: ComicTheme.inkBlack,
@@ -350,18 +334,12 @@ class _StatsViewState extends ConsumerState<StatsView>
   }
 
   void _showPomodoroModal() {
-    Vibrate.feedback(FeedbackType.light);
-    // Play intro audio when opening pomodoro
-    final introPlayer = AudioPlayer();
-    introPlayer.setAsset('assets/audio/autio.m4a').then((_) {
-      introPlayer.play().catchError((_) {});
-    }).catchError((_) {});
+    HapticFeedback.lightImpact();
     final pomodoro = ref.read(pomodoroProvider);
     final sessions = ref.read(pomodoroSessionsProvider);
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black54,
       builder: (ctx) {
         final dk = Theme.of(ctx).brightness == Brightness.dark;
         final label = switch (pomodoro.status) {
@@ -418,11 +396,9 @@ class _StatsViewState extends ConsumerState<StatsView>
                           height: 32,
                           decoration: BoxDecoration(
                             color: ComicTheme.inkRed,
-                            border: Border.all(
-                                color: ComicTheme.inkBlack, width: 2),
+                            border: Border.all(color: ComicTheme.inkBlack, width: 2),
                           ),
-                          child: const Icon(Icons.close,
-                              size: 16, color: ComicTheme.surfaceWhite),
+                          child: const Icon(Icons.close, size: 16, color: ComicTheme.surfaceWhite),
                         ),
                       ),
                     ],
@@ -455,7 +431,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                       ComicButton(
                         isCta: true,
                         onPressed: () {
-                          Vibrate.feedback(FeedbackType.medium);
+                          HapticFeedback.mediumImpact();
                           if (pomodoro.isActive) {
                             ref.read(pomodoroProvider.notifier).pauseTimer();
                           } else {
@@ -472,7 +448,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                       ComicButton(
                         isCta: true,
                         onPressed: () {
-                          Vibrate.feedback(FeedbackType.medium);
+                          HapticFeedback.mediumImpact();
                           ref.read(pomodoroProvider.notifier).resetTimer();
                           Navigator.pop(ctx);
                         },
@@ -482,32 +458,11 @@ class _StatsViewState extends ConsumerState<StatsView>
                       ComicButton(
                         isCta: true,
                         onPressed: () {
-                          Vibrate.feedback(FeedbackType.medium);
+                          HapticFeedback.mediumImpact();
                           ref.read(pomodoroProvider.notifier).skipSession();
                           Navigator.pop(ctx);
                         },
                         child: const Icon(Icons.nightlight_round, size: 18),
-                      ),
-                      const SizedBox(width: 8),
-                      ComicButton(
-                        isCta: true,
-                        onPressed: () async {
-                          Vibrate.feedback(FeedbackType.light);
-                          final p = AudioPlayer();
-                          try {
-                            await p.setAsset('assets/audio/autio.m4a');
-                            await p.play();
-                            p.playerStateStream.listen((s) {
-                              if (s.processingState ==
-                                  ProcessingState.completed) {
-                                p.dispose();
-                              }
-                            });
-                          } catch (_) {
-                            p.dispose();
-                          }
-                        },
-                        child: const Icon(Icons.music_note, size: 18),
                       ),
                     ],
                   ),
@@ -529,23 +484,16 @@ class _StatsViewState extends ConsumerState<StatsView>
                             final dur = s.durationSeconds;
                             final dh = dur ~/ 3600;
                             final dm = (dur % 3600) ~/ 60;
-                            final date =
-                                '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
+                            final date = '${s.timestamp.day}/${s.timestamp.month}/${s.timestamp.year}';
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(date,
-                                      style: TextStyle(
-                                          fontSize: 11, color: secondary)),
+                                  Text(date, style: TextStyle(fontSize: 11, color: secondary)),
                                   Text(
                                     dh > 0 ? '${dh}h ${dm}m' : '${dm}m',
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: primary),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primary),
                                   ),
                                 ],
                               ),
@@ -560,10 +508,7 @@ class _StatsViewState extends ConsumerState<StatsView>
           ),
         );
       },
-    ).then((_) {
-      introPlayer.stop().catchError((_) {});
-      introPlayer.dispose();
-    });
+    );
   }
 
   Widget _buildCgpaTargetCard(BuildContext context, bool isDark) {
@@ -580,35 +525,33 @@ class _StatsViewState extends ConsumerState<StatsView>
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'CGPA Target',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                  children: [
+                    Text(
+                      'CGPA Target',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? ComicTheme.darkText : ComicTheme.inkBlack,
+                      ),
                     ),
-                  ),
-                  Icon(
-                    _cgpaTargetExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: isDark
-                        ? ComicTheme.darkText.withValues(alpha: 0.7)
-                        : ComicTheme.inkBlack.withValues(alpha: 0.7),
-                    size: 24,
-                  ),
+                    Icon(
+                      _cgpaTargetExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: isDark
+                          ? ComicTheme.darkText.withValues(alpha: 0.7)
+                          : ComicTheme.inkBlack.withValues(alpha: 0.7),
+                      size: 24,
+                    ),
                 ],
               ),
             ),
           ),
-          if (_cgpaTargetExpanded) ...[
+            if (_cgpaTargetExpanded) ...[
             const SizedBox(height: 16),
             Center(
               child: Text(
-                _targetCgpa != null
-                    ? 'Target: ${_targetCgpa!.toStringAsFixed(2)}'
-                    : 'No Target CGPA Set',
+                _targetCgpa != null ? 'Target: ${_targetCgpa!.toStringAsFixed(2)}' : 'No Target CGPA Set',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -626,7 +569,8 @@ class _StatsViewState extends ConsumerState<StatsView>
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   color: ComicTheme.inkRed,
-                  border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+                  border: Border.all(
+                      color: ComicTheme.inkBlack, width: 2.5),
                   boxShadow: const [
                     BoxShadow(
                       color: ComicTheme.inkBlack,
@@ -637,9 +581,7 @@ class _StatsViewState extends ConsumerState<StatsView>
                 ),
                 child: Center(
                   child: Text(
-                    _targetCgpa != null
-                        ? 'Change Target'
-                        : 'Set Target (e.g. 3.50)',
+                    _targetCgpa != null ? 'Change Target' : 'Set Target (e.g. 3.50)',
                     style: const TextStyle(
                       color: ComicTheme.surfaceWhite,
                       fontWeight: FontWeight.w700,
@@ -753,7 +695,8 @@ class _StatsViewState extends ConsumerState<StatsView>
     );
   }
 
-  Widget _buildScreenTimeExpanded(BuildContext context, AppUsageState usage) {
+  Widget _buildScreenTimeExpanded(
+      BuildContext context, AppUsageState usage) {
     final cs = Theme.of(context).colorScheme;
 
     if (usage.error != null) {
@@ -770,10 +713,12 @@ class _StatsViewState extends ConsumerState<StatsView>
 
     final now = DateTime.now();
     final today = usage.todayTotal;
-    final todayStr = '${today.inHours}h ${today.inMinutes.remainder(60)}m';
+    final todayStr =
+        '${today.inHours}h ${today.inMinutes.remainder(60)}m';
 
     final topApps = usage.todayUsage.take(6).toList();
-    final maxUsage = topApps.isNotEmpty ? topApps.first.usage.inMinutes : 1;
+    final maxUsage =
+        topApps.isNotEmpty ? topApps.first.usage.inMinutes : 1;
 
     final hourly = List.generate(
       24,
@@ -807,7 +752,8 @@ class _StatsViewState extends ConsumerState<StatsView>
             ),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: const Color(0xFF4ADE80).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
@@ -831,7 +777,9 @@ class _StatsViewState extends ConsumerState<StatsView>
             children: List.generate(24, (i) {
               final value = hourly[i];
               final isMax = value == maxHourly && value > 0;
-              final barHeight = maxHourly > 0 ? (value / maxHourly) * 90 : 0.0;
+              final barHeight = maxHourly > 0
+                  ? (value / maxHourly) * 90
+                  : 0.0;
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1),
@@ -843,9 +791,10 @@ class _StatsViewState extends ConsumerState<StatsView>
                         decoration: BoxDecoration(
                           color: isMax
                               ? const Color(0xFF4ADE80)
-                              : const Color(0xFF4ADE80).withValues(alpha: 0.3),
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(2)),
+                              : const Color(0xFF4ADE80)
+                                  .withValues(alpha: 0.3),
+                          borderRadius:
+                              const BorderRadius.vertical(top: Radius.circular(2)),
                         ),
                       ),
                     ],
@@ -872,7 +821,8 @@ class _StatsViewState extends ConsumerState<StatsView>
           final hrs = info.usage.inHours;
           final mins = info.usage.inMinutes.remainder(60);
           final timeStr = hrs > 0 ? '${hrs}h ${mins}m' : '${mins}m';
-          final progress = maxUsage > 0 ? minutes / maxUsage : 0.0;
+          final progress =
+              maxUsage > 0 ? minutes / maxUsage : 0.0;
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Row(
@@ -934,7 +884,7 @@ class _StatsViewState extends ConsumerState<StatsView>
   }
 
   void _toggleScreenTime() {
-    Vibrate.feedback(FeedbackType.light);
+    HapticFeedback.lightImpact();
     setState(() => _screenTimeExpanded = !_screenTimeExpanded);
     final reduced = M3ESpring.isReducedMotion(context);
     if (reduced) {
@@ -1069,6 +1019,7 @@ class _StatsViewState extends ConsumerState<StatsView>
     );
   }
 }
+
 
 String _friendlyAppName(String packageName) {
   const names = <String, String>{
