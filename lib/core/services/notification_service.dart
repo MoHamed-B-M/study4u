@@ -6,6 +6,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+// Static vibration patterns (non-const because Int64List.fromList is not const)
+final _vibrationPatternReminder = Int64List.fromList([0, 500, 200, 500]);
+final _vibrationPatternAlarm = Int64List.fromList([0, 1000, 500, 1000]);
+
 class NotificationService {
   static final NotificationService instance = NotificationService._();
   NotificationService._();
@@ -70,7 +74,7 @@ class NotificationService {
 
     // Class reminders channel - high priority with alarm-like behavior
     await androidPlugin.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         'class_reminders',
         'Class Reminders',
         description: 'Reminders for upcoming classes',
@@ -79,13 +83,13 @@ class NotificationService {
         enableVibration: true,
         enableLights: true,
         sound: RawResourceAndroidNotificationSound('notification_default'),
-        vibrationPattern: const Int64List.fromList([0, 500, 200, 500]),
+        vibrationPattern: _vibrationPatternReminder,
       ),
     );
 
     // Alarm channel for critical reminders - full screen intent
     await androidPlugin.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         'alarms',
         'Alarms',
         description: 'Critical alarms and time-sensitive reminders',
@@ -94,7 +98,7 @@ class NotificationService {
         enableVibration: true,
         enableLights: true,
         sound: RawResourceAndroidNotificationSound('notification_default'),
-        vibrationPattern: const Int64List.fromList([0, 1000, 500, 1000]),
+        vibrationPattern: _vibrationPatternAlarm,
       ),
     );
 
@@ -251,7 +255,7 @@ class NotificationService {
         enableVibration: true,
         enableLights: true,
         sound: const RawResourceAndroidNotificationSound('notification_default'),
-        vibrationPattern: const Int64List.fromList([0, 500, 200, 500]),
+        vibrationPattern: _vibrationPatternReminder,
         category: AndroidNotificationCategory.reminder,
         visibility: NotificationVisibility.public,
       );
@@ -299,7 +303,7 @@ class NotificationService {
       fullScreenIntent: true,
       category: AndroidNotificationCategory.alarm,
       visibility: NotificationVisibility.public,
-      vibrationPattern: const Int64List.fromList([0, 1000, 500, 1000]),
+      vibrationPattern: _vibrationPatternAlarm,
       timeoutAfter: 60000, // Auto-dismiss after 1 minute
     );
     const iosDetails = DarwinNotificationDetails(
