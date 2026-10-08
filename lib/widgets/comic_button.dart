@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/comic_theme.dart';
-import '../core/services/sound_service.dart';
 
 class ComicButton extends StatefulWidget {
   final Widget child;
@@ -14,7 +13,6 @@ class ComicButton extends StatefulWidget {
   final double? width;
   final double? height;
   final bool isCta;
-  final bool enableSound;
   final bool enableHaptic;
 
   const ComicButton({
@@ -29,7 +27,6 @@ class ComicButton extends StatefulWidget {
     this.width,
     this.height,
     this.isCta = false,
-    this.enableSound = true,
     this.enableHaptic = true,
   });
 
@@ -75,9 +72,6 @@ class _ComicButtonState extends State<ComicButton> {
           ? (_) {
               if (widget.enableHaptic) {
                 HapticFeedback.lightImpact();
-              }
-              if (widget.enableSound) {
-                SoundService.instance.playClick();
               }
               widget.onPressed?.call();
               setState(() => _isPressed = false);

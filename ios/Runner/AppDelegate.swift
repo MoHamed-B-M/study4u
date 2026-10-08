@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -17,7 +18,16 @@ import UIKit
     let alarmRegistrar = self.registrar(forPlugin: "AlarmPlugin")!
     AlarmPlugin.register(with: alarmRegistrar)
 
-    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in }
+    // Register alarm notification category for proper alarm behavior
+    let alarmCategory = UNNotificationCategory(
+      identifier: "ALARM_CATEGORY",
+      actions: [],
+      intentIdentifiers: [],
+      options: [.customDismissAction]
+    )
+    UNUserNotificationCenter.current().setNotificationCategories([alarmCategory])
+
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge, .criticalAlert]) { granted, error in }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

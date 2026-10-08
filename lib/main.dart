@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/update_service.dart';
-import 'core/services/sound_service.dart';
 import 'data/datasources/local_storage.dart';
 import 'theme/comic_theme.dart';
 import 'presentation/theme/theme_provider.dart';
@@ -34,7 +33,6 @@ void main() {
     },
   );
   LocalStorage.init();
-  SoundService.instance.init();
   runApp(const StartupApp());
 }
 

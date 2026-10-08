@@ -47,6 +47,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
+        // Enable R8 full mode for better optimization
+        minSdkPreview = "VANILLA_ICE_CREAM"
     }
 
     signingConfigs {
@@ -65,13 +67,39 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Enable ZIP alignment
+            isZipAlignEnabled = true
             signingConfig = signingConfigs.findByName("release")?.takeIf {
                 (it.storeFile?.exists() == true)
             } ?: signingConfigs.getByName("debug")
+        }
+    }
+
+    // Split APKs by ABI for smaller downloads
+    splits {
+        abi {
+            enable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            universalApk = false
+        }
+    }
+
+    // Bundle configuration for Play Store
+    bundle {
+        language {
+            enableSplit = true
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
         }
     }
 

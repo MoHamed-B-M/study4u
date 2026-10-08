@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/services/sound_service.dart';
 import '../../../core/services/update_service.dart';
 import '../../../data/models/app_settings.dart';
 import '../../../theme/comic_theme.dart';
@@ -77,21 +76,6 @@ class SettingsView extends ConsumerWidget {
                           ref
                               .read(settingsProvider.notifier)
                               .setNotificationEnabled(v);
-                        },
-                      ),
-                      _buildSwitchRow(
-                        context,
-                        icon: CupertinoIcons.music_note,
-                        iconColor: ComicTheme.inkRed,
-                        title: 'Press Sound',
-                        subtitle: 'Play click sound on button press',
-                        value: settings.pressSound,
-                        onChanged: (v) {
-                          HapticFeedback.selectionClick();
-                          SoundService.pressSoundEnabled = v;
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setPressSound(v);
                         },
                       ),
                     ]),

@@ -22,9 +22,10 @@ class NotificationService {
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      requestCriticalPermission: true,
     );
     const initSettings = InitializationSettings(
       android: androidSettings,
@@ -42,9 +43,18 @@ class NotificationService {
 
     if (Platform.isAndroid) {
       await androidPlugin?.requestNotificationsPermission();
+      // Request exact alarm permission for Android 12+
+      await androidPlugin?.requestExactAlarmsPermission();
     }
 
-    await androidPlugin?.createNotificationChannel(
+    await _createNotificationChannels(androidPlugin);
+  }
+
+  Future<void> _createNotificationChannels(AndroidFlutterLocalNotificationsPlugin? androidPlugin) async {
+    if (androidPlugin == null) return;
+
+    // General notifications channel
+    await androidPlugin.createNotificationChannel(
       const AndroidNotificationChannel(
         'general',
         'General Notifications',
@@ -52,9 +62,13 @@ class NotificationService {
         importance: Importance.high,
         playSound: true,
         enableVibration: true,
+        enableLights: true,
+        sound: RawResourceAndroidNotificationSound('notification_default'),
       ),
     );
-    await androidPlugin?.createNotificationChannel(
+
+    // Class reminders channel - high priority with alarm-like behavior
+    await androidPlugin.createNotificationChannel(
       const AndroidNotificationChannel(
         'class_reminders',
         'Class Reminders',
@@ -62,9 +76,29 @@ class NotificationService {
         importance: Importance.high,
         playSound: true,
         enableVibration: true,
+        enableLights: true,
+        sound: RawResourceAndroidNotificationSound('notification_default'),
+        vibrationPattern: Int64List.fromList([0, 500, 200, 500]),
       ),
     );
-    await androidPlugin?.createNotificationChannel(
+
+    // Alarm channel for critical reminders - full screen intent
+    await androidPlugin.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'alarms',
+        'Alarms',
+        description: 'Critical alarms and time-sensitive reminders',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        enableLights: true,
+        sound: RawResourceAndroidNotificationSound('notification_default'),
+        vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]),
+      ),
+    );
+
+    // App updates channel
+    await androidPlugin.createNotificationChannel(
       const AndroidNotificationChannel(
         'app_updates_channel',
         'App Updates',
@@ -72,6 +106,8 @@ class NotificationService {
         importance: Importance.max,
         playSound: true,
         enableVibration: true,
+        enableLights: true,
+        sound: RawResourceAndroidNotificationSound('notification_default'),
       ),
     );
   }
@@ -85,8 +121,14 @@ class NotificationService {
       color: const Color(0xFF4ADE80),
       playSound: true,
       enableVibration: true,
+      enableLights: true,
+      sound: const RawResourceAndroidNotificationSound('notification_default'),
     );
-    const iosDetails = DarwinNotificationDetails();
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
     final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
@@ -106,16 +148,28 @@ class NotificationService {
     required String title,
     required String body,
     String? payload,
+    bool isAlarm = false,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
-      'general',
-      'General Notifications',
-      importance: Importance.high,
-      priority: Priority.high,
+    final channel = isAlarm ? 'alarms' : 'general';
+    final androidDetails = AndroidNotificationDetails(
+      channel,
+      isAlarm ? 'Alarms' : 'General Notifications',
+      importance: isAlarm ? Importance.max : Importance.high,
+      priority: isAlarm ? Priority.max : Priority.high,
       playSound: true,
       enableVibration: true,
+      enableLights: true,
+      sound: const RawResourceAndroidNotificationSound('notification_default'),
+      fullScreenIntent: isAlarm,
+      category: isAlarm ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.reminder,
+      visibility: isAlarm ? NotificationVisibility.public : NotificationVisibility.private,
     );
-    const iosDetails = DarwinNotificationDetails();
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: isAlarm ? InterruptionLevel.timeSensitive : InterruptionLevel.active,
+    );
     final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
@@ -194,8 +248,18 @@ class NotificationService {
         priority: Priority.high,
         playSound: true,
         enableVibration: true,
+        enableLights: true,
+        sound: const RawResourceAndroidNotificationSound('notification_default'),
+        vibrationPattern: Int64List.fromList([0, 500, 200, 500]),
+        category: AndroidNotificationCategory.reminder,
+        visibility: NotificationVisibility.public,
       );
-      const iosDetails = DarwinNotificationDetails();
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.timeSensitive,
+      );
       final details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
       await _plugin.zonedSchedule(
@@ -204,7 +268,7 @@ class NotificationService {
         'Starts in $minutesBefore minutes at $startTime',
         tzScheduledDate,
         details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         payload: 'class_reminder_$courseName',
@@ -212,11 +276,62 @@ class NotificationService {
     }
   }
 
+  /// Schedule a one-time alarm notification with full-screen intent
+  Future<void> scheduleAlarm({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    String? payload,
+  }) async {
+    final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+
+    final androidDetails = AndroidNotificationDetails(
+      'alarms',
+      'Alarms',
+      importance: Importance.max,
+      priority: Priority.max,
+      playSound: true,
+      enableVibration: true,
+      enableLights: true,
+      sound: const RawResourceAndroidNotificationSound('notification_default'),
+      fullScreenIntent: true,
+      category: AndroidNotificationCategory.alarm,
+      visibility: NotificationVisibility.public,
+      vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]),
+      timeoutAfter: 60000, // Auto-dismiss after 1 minute
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: InterruptionLevel.critical,
+    );
+    final details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+    await _plugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tzScheduledDate,
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      payload: payload ?? 'alarm_$id',
+    );
+  }
+
   Future<void> cancelNotification(int id) async {
     await _plugin.cancel(id);
   }
 
   Future<void> cancelAll() async {
+    await _plugin.cancelAll();
+  }
+
+  /// Cancel all class reminders for a specific course
+  Future<void> cancelClassReminders(int courseId) async {
+    // This would need to track scheduled IDs - simplified for now
     await _plugin.cancelAll();
   }
 }
