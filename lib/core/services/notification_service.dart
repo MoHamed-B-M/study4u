@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:typed_data' show Int64List;
 import 'dart:ui' show Color;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -78,7 +79,7 @@ class NotificationService {
         enableVibration: true,
         enableLights: true,
         sound: RawResourceAndroidNotificationSound('notification_default'),
-        vibrationPattern: Int64List.fromList([0, 500, 200, 500]),
+        vibrationPattern: const Int64List.fromList([0, 500, 200, 500]),
       ),
     );
 
@@ -93,7 +94,7 @@ class NotificationService {
         enableVibration: true,
         enableLights: true,
         sound: RawResourceAndroidNotificationSound('notification_default'),
-        vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]),
+        vibrationPattern: const Int64List.fromList([0, 1000, 500, 1000]),
       ),
     );
 
@@ -164,7 +165,7 @@ class NotificationService {
       category: isAlarm ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.reminder,
       visibility: isAlarm ? NotificationVisibility.public : NotificationVisibility.private,
     );
-    const iosDetails = DarwinNotificationDetails(
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
@@ -250,7 +251,7 @@ class NotificationService {
         enableVibration: true,
         enableLights: true,
         sound: const RawResourceAndroidNotificationSound('notification_default'),
-        vibrationPattern: Int64List.fromList([0, 500, 200, 500]),
+        vibrationPattern: const Int64List.fromList([0, 500, 200, 500]),
         category: AndroidNotificationCategory.reminder,
         visibility: NotificationVisibility.public,
       );
@@ -298,7 +299,7 @@ class NotificationService {
       fullScreenIntent: true,
       category: AndroidNotificationCategory.alarm,
       visibility: NotificationVisibility.public,
-      vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]),
+      vibrationPattern: const Int64List.fromList([0, 1000, 500, 1000]),
       timeoutAfter: 60000, // Auto-dismiss after 1 minute
     );
     const iosDetails = DarwinNotificationDetails(

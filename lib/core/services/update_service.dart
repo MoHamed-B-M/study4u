@@ -10,26 +10,35 @@ class UpdateInfo {
   final String downloadUrl;
   final String? releaseNotes;
   final bool isNewer;
+  final bool isPreRelease;
 
   UpdateInfo({
     required this.latestVersion,
     required this.downloadUrl,
     this.releaseNotes,
     required this.isNewer,
+    this.isPreRelease = false,
   });
 }
 
 class UpdateService {
   static UpdateInfo? lastKnownUpdate;
-  static const _apiUrl = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases/latest';
+  static const _apiUrlStable = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases/latest';
+  static const _apiUrlBeta = 'https://api.github.com/repos/MoHamed-B-M/study4u/releases';
 
-  Future<UpdateInfo?> checkForUpdate() async {
+  /// Check for updates
+  /// [includePreRelease] - If true, checks the latest release including pre-releases (beta).
+  ///                       If false (default), checks only the latest stable release.
+  Future<UpdateInfo?> checkForUpdate({bool includePreRelease = false}) async {
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version;
 
+      // Use the appropriate API endpoint
+      final apiUrl = includePreRelease ? _apiUrlBeta : _apiUrlStable;
+
       final response = await http.get(
-        Uri.parse(_apiUrl),
+        Uri.parse(apiUrl),
         headers: {
           'Accept': 'application/vnd.github.v3+json',
           'User-Agent': 'stdy4u/2.0',
@@ -40,33 +49,59 @@ class UpdateService {
         return null;
       }
 
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final tagName = data['tag_name'] as String? ?? '';
-      final body = data['body'] as String?;
-      final assets = data['assets'] as List<dynamic>? ?? [];
+      if (includePreRelease) {
+        // For beta, we get a list of releases, find the first non-draft (could be pre-release)
+        final releases = jsonDecode(response.body) as List<dynamic>;
+        if (releases.isEmpty) return null;
 
-      String? downloadUrl;
-      for (final asset in assets) {
-        final name = asset['name'] as String? ?? '';
-        if (name.endsWith('.apk')) {
-          downloadUrl = asset['browser_download_url'] as String?;
-          break;
-        }
+        // Sort by published date descending and take the first one
+        releases.sort((a, b) {
+          final aDate = DateTime.tryParse(a['published_at'] as String? ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bDate = DateTime.tryParse(b['published_at'] as String? ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return bDate.compareTo(aDate);
+        });
+
+        final release = releases.first as Map<String, dynamic>;
+        return _parseRelease(release, currentVersion);
+      } else {
+        // For stable, the 'latest' endpoint already returns the latest non-pre-release
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return _parseRelease(data, currentVersion);
       }
-
-      final cleanTag = tagName.replaceAll(RegExp(r'^v'), '');
-      final isNewer = _isVersionNewer(cleanTag, currentVersion);
-
-      return UpdateInfo(
-        latestVersion: cleanTag,
-        downloadUrl: downloadUrl ?? '',
-        releaseNotes: body,
-        isNewer: isNewer,
-      );
     } catch (e, stack) {
       debugPrint('UpdateService.checkForUpdate error: $e\n$stack');
       return null;
     }
+  }
+
+  UpdateInfo? _parseRelease(Map<String, dynamic> data, String currentVersion) {
+    final tagName = data['tag_name'] as String? ?? '';
+    final body = data['body'] as String?;
+    final assets = data['assets'] as List<dynamic>? ?? [];
+    final isPreRelease = data['prerelease'] as bool? ?? false;
+    final isDraft = data['draft'] as bool? ?? false;
+
+    if (isDraft) return null;
+
+    String? downloadUrl;
+    for (final asset in assets) {
+      final name = asset['name'] as String? ?? '';
+      if (name.endsWith('.apk')) {
+        downloadUrl = asset['browser_download_url'] as String?;
+        break;
+      }
+    }
+
+    final cleanTag = tagName.replaceAll(RegExp(r'^v'), '');
+    final isNewer = _isVersionNewer(cleanTag, currentVersion);
+
+    return UpdateInfo(
+      latestVersion: cleanTag,
+      downloadUrl: downloadUrl ?? '',
+      releaseNotes: body,
+      isNewer: isNewer,
+      isPreRelease: isPreRelease,
+    );
   }
 
   bool _isVersionNewer(String latest, String current) {

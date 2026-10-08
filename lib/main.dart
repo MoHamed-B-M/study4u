@@ -187,7 +187,8 @@ class _Stdy4uAppState extends ConsumerState<Stdy4uApp> {
 
   Future<void> _checkUpdate() async {
     final service = UpdateService();
-    final update = await service.checkForUpdate();
+    final settings = ref.read(settingsProvider);
+    final update = await service.checkForUpdate(includePreRelease: settings.betaUpdates);
     if (!mounted || update == null || !update.isNewer) return;
     UpdateService.lastKnownUpdate = update;
     NotificationService.instance

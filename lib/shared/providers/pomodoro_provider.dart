@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
@@ -19,8 +18,6 @@ class PomodoroState {
   final int focusMinutes;
   final int shortBreakMinutes;
   final int longBreakMinutes;
-  final String? musicFilePath;
-  final bool isMusicPlaying;
 
   PomodoroState({
     required this.remainingSeconds,
@@ -31,8 +28,6 @@ class PomodoroState {
     this.focusMinutes = AppConstants.pomodoroFocusMinutes,
     this.shortBreakMinutes = AppConstants.pomodoroShortBreakMinutes,
     this.longBreakMinutes = AppConstants.pomodoroLongBreakMinutes,
-    this.musicFilePath,
-    this.isMusicPlaying = false,
   });
 
   PomodoroState copyWith({
@@ -44,8 +39,6 @@ class PomodoroState {
     int? focusMinutes,
     int? shortBreakMinutes,
     int? longBreakMinutes,
-    String? musicFilePath,
-    bool? isMusicPlaying,
   }) {
     return PomodoroState(
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
@@ -56,8 +49,6 @@ class PomodoroState {
       focusMinutes: focusMinutes ?? this.focusMinutes,
       shortBreakMinutes: shortBreakMinutes ?? this.shortBreakMinutes,
       longBreakMinutes: longBreakMinutes ?? this.longBreakMinutes,
-      musicFilePath: musicFilePath ?? this.musicFilePath,
-      isMusicPlaying: isMusicPlaying ?? this.isMusicPlaying,
     );
   }
 
@@ -71,7 +62,6 @@ class PomodoroState {
 class PomodoroNotifier extends StateNotifier<PomodoroState> {
   final PomodoroRepositoryImpl _repository;
   Timer? _timer;
-  final AudioPlayer _audioPlayer = AudioPlayer();
 
   PomodoroNotifier(this._repository)
       : super(PomodoroState(
@@ -82,14 +72,10 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
   void startTimer({String? courseId}) {
     if (state.isActive) return;
     HapticFeedback.mediumImpact();
-    if (state.musicFilePath != null) {
-      _audioPlayer.play();
-    }
     state = state.copyWith(
       isActive: true,
       status: state.status == PomodoroStatus.idle ? PomodoroStatus.focus : state.status,
       courseId: courseId ?? state.courseId,
-      isMusicPlaying: state.musicFilePath != null,
     );
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (state.remainingSeconds > 0) {
@@ -102,14 +88,12 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
 
   void pauseTimer() {
     _timer?.cancel();
-    _audioPlayer.pause();
     HapticFeedback.mediumImpact();
-    state = state.copyWith(isActive: false, isMusicPlaying: false);
+    state = state.copyWith(isActive: false);
   }
 
   void resetTimer() {
     pauseTimer();
-    _audioPlayer.stop();
     state = PomodoroState(
       remainingSeconds: state.focusMinutes * 60,
       status: PomodoroStatus.idle,
@@ -146,22 +130,6 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
         remainingSeconds: newRemaining,
       );
     }
-  }
-
-  void setMusicFile(String? path) {
-    if (path != null) {
-      _audioPlayer.setFilePath(path);
-    }
-    state = state.copyWith(musicFilePath: path, isMusicPlaying: false);
-  }
-
-  void toggleMusic() {
-    if (state.isMusicPlaying) {
-      _audioPlayer.pause();
-    } else if (state.musicFilePath != null) {
-      _audioPlayer.play();
-    }
-    state = state.copyWith(isMusicPlaying: !state.isMusicPlaying);
   }
 
   void _handleSessionComplete() {
@@ -208,7 +176,6 @@ class PomodoroNotifier extends StateNotifier<PomodoroState> {
   @override
   void dispose() {
     _timer?.cancel();
-    _audioPlayer.dispose();
     super.dispose();
   }
 }

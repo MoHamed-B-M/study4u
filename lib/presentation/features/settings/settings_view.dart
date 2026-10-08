@@ -78,6 +78,20 @@ class SettingsView extends ConsumerWidget {
                               .setNotificationEnabled(v);
                         },
                       ),
+                      _buildSwitchRow(
+                        context,
+                        icon: CupertinoIcons.arrow_up_circle,
+                        iconColor: ComicTheme.inkRed,
+                        title: 'Beta Updates',
+                        subtitle: 'Check for pre-release (beta) versions',
+                        value: settings.betaUpdates,
+                        onChanged: (v) {
+                          HapticFeedback.selectionClick();
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setBetaUpdates(v);
+                        },
+                      ),
                     ]),
                   ),
                   const SizedBox(height: 24),
@@ -111,7 +125,7 @@ class SettingsView extends ConsumerWidget {
                         iconColor: ComicTheme.inkRed,
                         title: 'Check for Updates',
                         subtitle: 'Download the latest version',
-                        onTap: () => _checkForUpdate(context),
+                        onTap: () => _checkForUpdate(context, ref),
                       ),
                       _buildSettingRow(
                         context,
@@ -314,9 +328,10 @@ class SettingsView extends ConsumerWidget {
     }
   }
 
-  Future<void> _checkForUpdate(BuildContext context) async {
+  Future<void> _checkForUpdate(BuildContext context, WidgetRef ref) async {
     final service = UpdateService();
-    final update = await service.checkForUpdate();
+    final settings = ref.read(settingsProvider);
+    final update = await service.checkForUpdate(includePreRelease: settings.betaUpdates);
     if (!context.mounted) return;
 
     if (update == null || !update.isNewer) {

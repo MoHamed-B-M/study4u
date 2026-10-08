@@ -88,23 +88,47 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
   Widget _buildInfo(bool isDark) {
     final hasNotes = widget.update.releaseNotes != null &&
         widget.update.releaseNotes!.trim().isNotEmpty;
+    final isBeta = widget.update.isPreRelease;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: 32),
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
-            border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
-          ),
-          child: Icon(
-            Icons.download_rounded,
-            color: ComicTheme.inkRed,
-            size: 28,
-          ),
+        Stack(
+          alignment: Alignment.topRight,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: isDark ? ComicTheme.darkSurface : ComicTheme.surfaceWhite,
+                border: Border.all(color: ComicTheme.inkBlack, width: 2.5),
+              ),
+              child: Icon(
+                Icons.download_rounded,
+                color: ComicTheme.inkRed,
+                size: 28,
+              ),
+            ),
+            if (isBeta)
+              Container(
+                margin: const EdgeInsets.all(4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: ComicTheme.inkRed,
+                  border: Border.all(color: ComicTheme.inkBlack, width: 1.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'BETA',
+                  style: TextStyle(
+                    color: ComicTheme.surfaceWhite,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 20),
         Text(
@@ -118,13 +142,37 @@ class _UpdateDialogContentState extends State<_UpdateDialogContent> {
           ),
         ),
         const SizedBox(height: 6),
-        Text(
-          'v${widget.update.latestVersion}',
-          style: TextStyle(
-            color: ComicTheme.inkRed,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'v${widget.update.latestVersion}',
+              style: TextStyle(
+                color: ComicTheme.inkRed,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (isBeta) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: ComicTheme.inkRed.withValues(alpha: 0.15),
+                  border: Border.all(color: ComicTheme.inkRed, width: 1.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'PRE-RELEASE',
+                  style: TextStyle(
+                    color: ComicTheme.inkRed,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         if (hasNotes) ...[
           const SizedBox(height: 24),

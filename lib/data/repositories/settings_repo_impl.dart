@@ -31,6 +31,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       useFloatingNavBar: s.useFloatingNavBar,
       hapticFeedback: s.hapticFeedback,
       showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }
@@ -48,6 +49,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       useFloatingNavBar: s.useFloatingNavBar,
       hapticFeedback: s.hapticFeedback,
       showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }
@@ -65,6 +67,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       useFloatingNavBar: s.useFloatingNavBar,
       hapticFeedback: s.hapticFeedback,
       showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }
@@ -82,6 +85,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       useFloatingNavBar: s.useFloatingNavBar,
       hapticFeedback: s.hapticFeedback,
       showNavLabels: s.showNavLabels,
+      betaUpdates: s.betaUpdates,
     );
     LocalStorage.appSettingsBox.put('default', updated);
   }
