@@ -72,25 +72,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Enable ZIP alignment
-            isZipAlignEnabled = true
             signingConfig = signingConfigs.findByName("release")?.takeIf {
                 (it.storeFile?.exists() == true)
             } ?: signingConfigs.getByName("debug")
         }
     }
 
-    // Split APKs by ABI for smaller downloads
-    splits {
-        abi {
-            enable = true
-            reset()
-            include("arm64-v8a", "armeabi-v7a", "x86_64")
-            universalApk = false
-        }
-    }
-
-    // Bundle configuration for Play Store
+    // Bundle configuration for Play Store (modern replacement for splits)
     bundle {
         language {
             enableSplit = true
