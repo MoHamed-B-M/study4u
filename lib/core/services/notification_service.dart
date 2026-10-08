@@ -6,9 +6,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-// Static const vibration patterns for use in const constructors
-const _vibrationPatternReminder = Int64List.fromList([0, 500, 200, 500]);
-const _vibrationPatternAlarm = Int64List.fromList([0, 1000, 500, 1000]);
+// Static vibration patterns (non-const because Int64List.fromList is not const)
+final _vibrationPatternReminder = Int64List.fromList([0, 500, 200, 500]);
+final _vibrationPatternAlarm = Int64List.fromList([0, 1000, 500, 1000]);
 
 class NotificationService {
   static final NotificationService instance = NotificationService._();
@@ -74,7 +74,7 @@ class NotificationService {
 
     // Class reminders channel - high priority with alarm-like behavior
     await androidPlugin.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         'class_reminders',
         'Class Reminders',
         description: 'Reminders for upcoming classes',
@@ -89,7 +89,7 @@ class NotificationService {
 
     // Alarm channel for critical reminders - full screen intent
     await androidPlugin.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         'alarms',
         'Alarms',
         description: 'Critical alarms and time-sensitive reminders',
