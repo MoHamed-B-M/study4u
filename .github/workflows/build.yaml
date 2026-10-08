@@ -123,23 +123,37 @@ jobs:
         run: |
           sed -i "s/version: .*/version: $VERSION+${{ github.run_number }}/" pubspec.yaml
 
-      # Single signed universal APK == Gradle assembleRelease.
+      # Signed per-ABI split APKs (arm64-v8a, armeabi-v7a, x86_64) plus a
+      # universal APK, like previous releases. All builds are signed
       # (flutter build apk --release invokes assembleRelease with the
-      #  release signingConfig from android/key.properties above.)
-      - name: Build signed release APK (assembleRelease)
+      #  release signingConfig from android/key.properties above).
+      - name: Build signed split APKs (per-ABI)
+        run: |
+          flutter build apk --release \
+            --split-per-abi \
+            --build-number=${{ github.run_number }} \
+            --split-debug-info=build/debug-info
+          ls -lh build/app/outputs/flutter-apk/
+
+      - name: Build signed universal APK
         run: |
           flutter build apk --release \
             --build-number=${{ github.run_number }} \
             --split-debug-info=build/debug-info
           ls -lh build/app/outputs/flutter-apk/
           test -f build/app/outputs/flutter-apk/app-release.apk
+          test -f build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          test -f build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
 
       - name: Verify APK signature (best-effort)
         if: env.IS_RELEASE == 'true' || env.IS_BETA == 'true' || env.IS_MAIN == 'true'
         run: |
           APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | head -n 1)
           if [ -n "$APKSIGNER" ]; then
-            "$APKSIGNER" verify --print-certs build/app/outputs/flutter-apk/app-release.apk | head -n 5
+            for APK in app-release.apk app-arm64-v8a-release.apk app-armeabi-v7a-release.apk; do
+              echo "== $APK =="
+              "$APKSIGNER" verify --print-certs "build/app/outputs/flutter-apk/$APK" | head -n 5
+            done
           else
             echo "apksigner not found — skipping signature printout"
           fi
@@ -148,7 +162,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: stdy4u-apk-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
           retention-days: 30
 
       - name: Upload debug symbols
@@ -162,14 +179,17 @@ jobs:
       - name: Extract release notes from CHANGELOG
         if: env.IS_RELEASE == 'true' || env.IS_BETA == 'true' || env.IS_MAIN == 'true'
         run: |
-          awk '
-            /^## \['"$VERSION"'\]/ { found=1; print; next }
-            found { print }
-            /^## \[/ && found { exit }
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; print; next }
+            /^## \[/ { if (found) exit }
+            found
           ' CHANGELOG.md > release_notes.md
           if [ ! -s release_notes.md ]; then
             echo "No CHANGELOG entry found for version $VERSION — using auto-generated notes."
             echo "" > release_notes.md
+          else
+            echo "--- release notes preview ---"
+            head -n 40 release_notes.md
           fi
 
       # ---- tag push vX.Y.Z -> versioned stable release (unchanged behaviour) ----
@@ -184,6 +204,8 @@ jobs:
           make_latest: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
 
       # ---- beta branch -> signed pre-release, unique tag per run ----
       - name: Create GitHub Pre-release (beta)
@@ -196,6 +218,8 @@ jobs:
           prerelease: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
 
       # Auto-delete older beta pre-releases so only the latest beta survives.
       # Runs AFTER the new pre-release is created, keeping the current tag.
@@ -242,3 +266,5 @@ jobs:
           make_latest: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
